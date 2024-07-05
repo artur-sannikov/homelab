@@ -1,0 +1,251 @@
+- name: Podman user management
+  block:
+  - name: Create Podman group
+    ansible.builtin.group:
+      name: "{{ podman_group }}"
+      state: present
+
+  - name: Create Podman user
+    ansible.builtin.user:
+      name: "{{ podman_user }}"
+      group: "{{ podman_group }}"
+      create_home: true
+      state: present
+    register: __user_info
+
+  - name: Check if Podman user is lingering
+    ansible.builtin.stat:
+      path: "/var/lib/systemd/linger/{{ podman_user }}"
+    register: __user_lingering
+
+  - name: Enable lingering for Podman user
+    ansible.builtin.command: "loginctl enable-linger {{ podman_user }}"
+    when: not __user_lingering.stat.exists
+
+- name: Create folders for container config files
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: '0755'
+  loop:
+    - paperless-ngx/redis
+    - paperless-ngx/postgres
+    - paperless-ngx/data
+    - paperless-ngx/media
+    - paperless-ngx/export
+    - paperless-ngx/consume
+    - stirling-pdf/logs
+    - readeck/data
+    - freshrss/data
+
+- name: Create folder for Podman containers
+  ansible.builtin.file:
+    path: "{{ quadlet_dir }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+
+- name: Copy Podman environment files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ quadlet_dir }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+  loop:
+    - paperless-ngx-redis.env
+    - paperless-ngx-postgres.env
+    - paperless-ngx.env
+    - freshrss.env
+
+- block:
+  - name: Create paperless database password
+    containers.podman.podman_secret:
+      state: present
+      name: paperless_db_paperless_passwd
+      data: "{{ paperless_db_paperless_passwd }}"
+    become_user: "{{ podman_user }}"
+
+  - name: Create paperless secret paperless_secret_key
+    containers.podman.podman_secret:
+      state: present
+      name: paperless_secret_key
+      data: "{{ paperless_secret_key }}"
+    become_user: "{{ podman_user }}"
+
+  - name: Create paperless-ngx network
+    containers.podman.podman_network:
+      name: paperless-ngx
+      quadlet_filename: paperless-ngx
+      quadlet_dir: "{{ quadlet_dir }}"
+      disable_dns: false
+    become_user: "{{ podman_user }}"
+
+  - name: Create paperless-ngx-redis Quadlet
+    containers.podman.podman_container:
+      name: paperless-ngx-redis
+      image: docker.io/redis:7.2.5-alpine
+      state: quadlet
+      quadlet_filename: paperless-ngx-redis
+      quadlet_dir: "{{ quadlet_dir }}"
+      volumes:
+        - "{{ podman_appdata_dir }}/paperless-ngx/redis:/data:Z"
+      env_file:
+        - paperless-ngx-redis.env
+      network:
+        - paperless-ngx
+      quadlet_options:
+        - "NoNewPrivileges=true"
+        - |
+          [Service]
+          Restart=always
+        - |
+          [Install]
+          WantedBy=default.target
+
+  - name: Create paperless-ngx-postgres Quadlet
+    containers.podman.podman_container:
+      name: paperless-ngx-postgres
+      image: docker.io/postgres:16.3-alpine
+      state: quadlet
+      quadlet_filename: paperless-ngx-postgres
+      quadlet_dir: "{{ quadlet_dir }}"
+      volumes:
+        - "{{ podman_appdata_dir }}/paperless-ngx/postgres:/var/lib/postgresql/data:Z"
+      env_file:
+        - paperless-ngx-postgres.env
+      network:
+        - paperless-ngx
+      secrets:
+        - paperless_db_paperless_passwd
+      quadlet_options:
+        - "NoNewPrivileges=true"
+        - |
+          [Service]
+          Restart=always
+        - |
+          [Install]
+          WantedBy=default.target
+
+  - name: Create paperless-ngx Quadlet
+    containers.podman.podman_container:
+      name: paperless-ngx
+      image: ghcr.io/paperless-ngx/paperless-ngx:latest
+      state: quadlet
+      quadlet_filename: paperless-ngx
+      quadlet_dir: "{{ quadlet_dir }}"
+      ports:
+        - "8001:8000"
+      volumes:
+        - "{{ podman_appdata_dir }}/paperless-ngx/data:/usr/src/paperless/data:Z"
+        - "{{ podman_appdata_dir }}/paperless-ngx/media:/usr/src/paperless/media:Z"
+        - "{{ podman_appdata_dir }}/paperless-ngx/export:/usr/src/paperless/export:Z"
+        - "{{ podman_appdata_dir }}/paperless-ngx/consume:/usr/src/paperless/consume:Z"
+      env_file:
+        - paperless-ngx.env
+      network:
+        - paperless-ngx
+      secrets:
+        - paperless_secret_key
+        - paperless_db_paperless_passwd
+      quadlet_options:
+        - "AutoUpdate=registry"
+        - "NoNewPrivileges=true"
+        - |
+          [Unit]
+          Requires=paperless-ngx-redis.service
+          Requires=paperless-ngx-postgres.service
+          After=paperless-ngx-redis.service
+          After=paperless-ngx-postgres.service
+        - |
+          [Service]
+          Restart=always
+        - |
+          [Install]
+          WantedBy=default.target
+
+- name: Create readeck Quadlet
+  containers.podman.podman_container:
+    name: readeck
+    image: codeberg.org/readeck/readeck:latest
+    state: quadlet
+    quadlet_filename: readeck
+    quadlet_dir: "{{ quadlet_dir }}"
+    ports:
+      - "8000:8000"
+    volumes:
+      - "{{ podman_appdata_dir }}/readeck/data:/readeck:Z"
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Create stirling-pdf Quadlet
+  containers.podman.podman_container:
+    name: stirling-pdf
+    image: docker.io/frooodle/s-pdf:latest
+    state: quadlet
+    quadlet_filename: stirling-pdf
+    quadlet_dir: "{{ quadlet_dir }}"
+    ports:
+      - "8080:8080"
+    volumes:
+      - "{{ podman_appdata_dir }}/stirling-pdf/logs:/logs:Z"
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Create freshrss Quadlet
+  containers.podman.podman_container:
+    name: freshrss
+    image: docker.io/freshrss/freshrss:latest
+    state: quadlet
+    quadlet_filename: freshrss
+    quadlet_dir:  "{{ quadlet_dir }}"
+    ports:
+      - "8089:80"
+    volumes:
+      - "{{ podman_appdata_dir }}/freshrss/data:/var/www/FreshRSS/data:Z"
+    env_file:
+      - freshrss.env
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Restart services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
+  loop:
+  - paperless-ngx-redis.service
+  - paperless-ngx-postgres.service
+  - paperless-ngx.service
+  - stirling-pdf.service
+  - readeck.service
+  - freshrss.service

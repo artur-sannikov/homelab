@@ -1,0 +1,17 @@
+- name: start_firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    state: "started"
+    enabled: true
+
+- name: reload_firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    state: "reloaded"
+    enabled: true
+
+- name: restart_sshd
+  ansible.builtin.systemd:
+    name: sshd
+    state: "restarted"
+    enabled: true

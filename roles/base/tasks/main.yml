@@ -1,0 +1,62 @@
+- name: Install Podman and dependencies
+  tags: always
+  ansible.builtin.dnf:
+    update_cache: true
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - acl
+    - podman
+    - passt
+
+- name: Install other packages
+  ansible.builtin.dnf:
+    update_cache: true
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - firewalld
+
+- block:
+  - name: Open FirewalldD ports
+    ansible.posix.firewalld:
+      port: "{{ item }}"
+      permanent: true
+      state: enabled
+    loop:
+    - "22/tcp"
+    - "8080/tcp"
+    - "8089/tcp"
+    - "8000/tcp"
+    - "8001/tcp"
+    notify:
+      - start_firewalld
+      - reload_firewalld
+
+  - name: Enable and start FirewallD
+    ansible.builtin.systemd:
+      name: firewalld
+      state: "started"
+      daemon_reload: true
+      enabled: true
+
+- name: Generate sshd_config from template
+  tags: ssh
+  template:
+    src: "{{ sshd_template_file }}"
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart_sshd
+
+- name: Set SSH crypto-policies
+  ansible.builtin.copy:
+    src: opensshserver.config
+    dest: /etc/crypto-policies/back-ends/opensshserver.config
+    follow: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - restart_sshd
