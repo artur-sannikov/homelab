@@ -8,7 +8,6 @@
   ansible.builtin.systemd:
     name: firewalld
     state: "reloaded"
-    enabled: true
 
 - name: restart_sshd
   ansible.builtin.systemd:
