@@ -5,3 +5,4 @@ host_vars/
 files/public_keys/ansible.pub
 roles/podman/vars/main.yml
 roles/podman/files/paperless-ngx.env
+roles/podman/files/librechat.env

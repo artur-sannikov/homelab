@@ -29,6 +29,7 @@
     - "8089/tcp"
     - "8000/tcp"
     - "8001/tcp"
+    - "3080/tcp"
     notify:
       - start_firewalld
       - reload_firewalld

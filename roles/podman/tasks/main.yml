@@ -39,6 +39,8 @@
     - stirling-pdf/logs
     - readeck/data
     - freshrss/data
+    - librechat/mongodb/data
+    - librechat/meilisearch/data
 
 - name: Create folder for Podman containers
   ansible.builtin.file:
@@ -60,6 +62,7 @@
     - paperless-ngx-postgres.env
     - paperless-ngx.env
     - freshrss.env
+    - librechat.env
 
 - block:
   - name: Create paperless database password
@@ -232,6 +235,87 @@
         [Install]
         WantedBy=default.target
 
+- name: Create LibreChat network
+  containers.podman.podman_network:
+      name: librechat
+      quadlet_filename: librechat
+      quadlet_dir: "{{ quadlet_dir }}"
+      disable_dns: false
+      state: quadlet
+  become_user: "{{ podman_user }}"
+
+- name: Create LibreChat Quadlet
+  containers.podman.podman_container:
+    name: librechat
+    image: ghcr.io/danny-avila/librechat:v0.7.3
+    state: quadlet
+    quadlet_filename: librechat
+    quadlet_dir:  "{{ quadlet_dir }}"
+    ports:
+      - "3080:3080"
+    env_file:
+      - librechat.env
+    network:
+      - librechat.network
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - |
+        [Unit]
+        Requires=librechat-mongodb.service
+        Requires=librechat-meilisearch.service
+        After=librechat-mongodb.service
+        After=librechat-meilisearch.service
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Create LibreChat-mongodb Quadlet
+  containers.podman.podman_container:
+    name: librechat-mongodb
+    image: docker.io/mongo:7.0.12
+    state: quadlet
+    quadlet_filename: librechat-mongodb
+    quadlet_dir:  "{{ quadlet_dir }}"
+    volumes:
+      - "{{ podman_appdata_dir }}/librechat/mongodb/data:/data/db:Z"
+    env_file:
+      - librechat.env
+    network:
+      - librechat.network
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Create LibreChat-meilisearch Quadlet
+  containers.podman.podman_container:
+    name: librechat-meilisearch
+    image: docker.io/getmeili/meilisearch:v1.0
+    state: quadlet
+    quadlet_filename: librechat-meilisearch
+    quadlet_dir:  "{{ quadlet_dir }}"
+    volumes:
+      - "{{ podman_appdata_dir }}/librechat/meilisearch/data:/meili_data:Z"
+    env_file:
+      - librechat.env
+    network:
+      - librechat.network
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
 - name: Restart services
   ansible.builtin.systemd:
     name: "{{ item }}"
@@ -249,3 +333,6 @@
   - stirling-pdf.service
   - readeck.service
   - freshrss.service
+  - librechat-mongodb.service
+  - librechat-meilisearch.service
+  - librechat.service
