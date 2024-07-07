@@ -85,6 +85,7 @@
       quadlet_filename: paperless-ngx
       quadlet_dir: "{{ quadlet_dir }}"
       disable_dns: false
+      state: quadlet
     become_user: "{{ podman_user }}"
 
   - name: Create paperless-ngx-redis Quadlet
@@ -99,7 +100,7 @@
       env_file:
         - paperless-ngx-redis.env
       network:
-        - paperless-ngx
+        - paperless-ngx.network
       quadlet_options:
         - "NoNewPrivileges=true"
         - |
@@ -121,7 +122,7 @@
       env_file:
         - paperless-ngx-postgres.env
       network:
-        - paperless-ngx
+        - paperless-ngx.network
       secrets:
         - paperless_db_paperless_passwd
       quadlet_options:
@@ -150,7 +151,7 @@
       env_file:
         - paperless-ngx.env
       network:
-        - paperless-ngx
+        - paperless-ngx.network
       secrets:
         - paperless_secret_key
         - paperless_db_paperless_passwd
