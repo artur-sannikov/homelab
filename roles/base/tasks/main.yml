@@ -25,12 +25,13 @@
       immediate: true
       state: enabled
     loop:
-    - "22/tcp"
-    - "8080/tcp"
-    - "8089/tcp"
-    - "8000/tcp"
-    - "8001/tcp"
-    - "3080/tcp"
+    - "22/tcp" # ssh
+    - "8080/tcp" # stirling-pdf
+    - "8089/tcp" # freshrss
+    - "8000/tcp" # readeck
+    - "8001/tcp" # paperless-ngx
+    - "3080/tcp" # librechat
+    - "5000/tcp" # changedetection
     notify:
       - start_firewalld
 

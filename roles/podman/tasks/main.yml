@@ -41,6 +41,7 @@
     - freshrss/data
     - librechat/mongodb/data
     - librechat/meilisearch/data
+    - changedetection/datastore
 
 - name: Create folder for Podman containers
   ansible.builtin.file:
@@ -63,6 +64,8 @@
     - paperless-ngx.env
     - freshrss.env
     - librechat.env
+    - chromium-playwright.env
+    - changedetection.env
 
 - block:
   - name: Create paperless database password
@@ -316,6 +319,66 @@
       - |
         [Install]
         WantedBy=default.target
+- block:
+  - name: Create changedetection network
+    containers.podman.podman_network:
+        name: changedetection
+        quadlet_filename: changedetection
+        quadlet_dir: "{{ quadlet_dir }}"
+        disable_dns: false
+        state: quadlet
+    become_user: "{{ podman_user }}"
+
+  - name: Create chromium-playwright Quadlet
+    containers.podman.podman_container:
+      name: chromium-playwright
+      image: ghcr.io/browserless/chromium
+      state: quadlet
+      quadlet_filename: chromium-playwright
+      quadlet_dir:  "{{ quadlet_dir }}"
+      env_file:
+        - chromium-playwright.env
+      network:
+        - changedetection.network
+      shm_size: "2gb"
+      quadlet_options:
+        - "AutoUpdate=registry"
+        - "NoNewPrivileges=true"
+        - |
+          [Service]
+          Restart=always
+        - |
+          [Install]
+          WantedBy=default.target
+
+  - name: Create changedetection Quadlet
+    containers.podman.podman_container:
+      name: changedetection
+      image: ghcr.io/dgtlmoon/changedetection.io
+      state: quadlet
+      quadlet_filename: changedetection
+      quadlet_dir:  "{{ quadlet_dir }}"
+      ports:
+        - "5000:5000"
+      volumes:
+        - "{{ podman_appdata_dir }}/changedetection/datastore:/datastore:Z"
+      env_file:
+        - changedetection.env
+      network:
+        - changedetection.network
+      quadlet_options:
+        - "AutoUpdate=registry"
+        - "NoNewPrivileges=true"
+        - |
+          [Unit]
+          Requires=chromium-playwright.service
+          After=chromium-playwright.service
+        - |
+          [Service]
+          Restart=always
+        - |
+          [Install]
+          WantedBy=default.target
 
 - name: Restart services
   ansible.builtin.systemd:
@@ -337,3 +400,5 @@
   - librechat-mongodb.service
   - librechat-meilisearch.service
   - librechat.service
+  - chromium-playwright
+  - changedetection
