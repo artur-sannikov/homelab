@@ -15,6 +15,7 @@
     name: "{{ item }}"
     state: latest
   loop:
+    - dnf-automatic
     - firewalld
 
 - block:
@@ -41,6 +42,25 @@
       state: "started"
       daemon_reload: true
       enabled: true
+
+- block:
+  - name: Enable a timer unit for dnf-automatic
+    ansible.builtin.systemd_service:
+      name: dnf-automatic.timer
+      state: started
+      enabled: true
+  - name: Apply updates automatically
+    ansible.builtin.lineinfile:
+      path: /etc/dnf/automatic.conf
+      regexp: ^apply_updates = no
+      line: apply_updates = yes
+    notify: Restart timer for automatic updates
+  - name: Reboot after updates if needed
+    ansible.builtin.lineinfile:
+      path: /etc/dnf/automatic.conf
+      regexp: ^reboot = no
+      line: reboot = when-needed
+    notify: Restart timer for automatic updates
 
 - name: Generate sshd_config from template
   tags: ssh
