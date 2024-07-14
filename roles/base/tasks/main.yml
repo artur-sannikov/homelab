@@ -1,15 +1,5 @@
-- name: Install Podman and dependencies
-  tags: always
-  ansible.builtin.dnf:
-    update_cache: true
-    name: "{{ item }}"
-    state: latest
-  loop:
-    - acl
-    - podman
-    - passt
-
-- name: Install other packages
+- name: Install Fedora packages
+  tag: fedora
   ansible.builtin.dnf:
     update_cache: true
     name: "{{ item }}"
@@ -17,31 +7,15 @@
   loop:
     - dnf-automatic
     - firewalld
+  when: ansible_distribution == "Fedora"
 
-- block:
-  - name: Open FirewalldD ports
-    ansible.posix.firewalld:
-      port: "{{ item }}"
-      permanent: true
-      immediate: true
-      state: enabled
-    loop:
-    - "22/tcp" # ssh
-    - "8080/tcp" # stirling-pdf
-    - "8089/tcp" # freshrss
-    - "8000/tcp" # readeck
-    - "8001/tcp" # paperless-ngx
-    - "3080/tcp" # librechat
-    - "5000/tcp" # changedetection
-    notify:
-      - start_firewalld
-
-  - name: Enable and start FirewallD
-    ansible.builtin.systemd:
-      name: firewalld
-      state: "started"
-      daemon_reload: true
-      enabled: true
+- name: Enable and start FirewallD
+  ansible.builtin.systemd:
+    name: firewalld
+    state: "started"
+    daemon_reload: true
+    enabled: true
+  when: ansible_distribution == "Fedora"
 
 - block:
   - name: Enable a timer unit for dnf-automatic
@@ -49,36 +23,54 @@
       name: dnf-automatic.timer
       state: started
       enabled: true
+    when: ansible_distribution == "Fedora"
   - name: Apply updates automatically
     ansible.builtin.lineinfile:
       path: /etc/dnf/automatic.conf
       regexp: ^apply_updates = no
       line: apply_updates = yes
     notify: Restart timer for automatic updates
+    when: ansible_distribution == "Fedora"
   - name: Reboot after updates if needed
     ansible.builtin.lineinfile:
       path: /etc/dnf/automatic.conf
       regexp: ^reboot = no
       line: reboot = when-needed
     notify: Restart timer for automatic updates
+    when: ansible_distribution == "Fedora"
+- block:
+  - name: Generate sshd_config from template
+    tags: fedora,ssh
+    template:
+      src: "{{ sshd_template_file }}"
+      dest: /etc/ssh/sshd_config
+      owner: root
+      group: root
+      mode: "0644"
+    notify: restart_sshd
+    when: ansible_distribution == "Fedora"
 
-- name: Generate sshd_config from template
-  tags: ssh
-  template:
-    src: "{{ sshd_template_file }}"
-    dest: /etc/ssh/sshd_config
-    owner: root
-    group: root
-    mode: "0644"
-  notify: restart_sshd
+  - name: Set SSH crypto-policies
+    tags: fedora,ssh
+    ansible.builtin.copy:
+      src: opensshserver.config
+      dest: /etc/crypto-policies/back-ends/opensshserver.config
+      follow: true
+      owner: root
+      group: root
+      mode: "0644"
+    notify:
+      - restart_sshd
+    when: ansible_distribution == "Fedora"
 
-- name: Set SSH crypto-policies
-  ansible.builtin.copy:
-    src: opensshserver.config
-    dest: /etc/crypto-policies/back-ends/opensshserver.config
-    follow: true
-    owner: root
-    group: root
-    mode: "0644"
-  notify:
-    - restart_sshd
+- name: Update Debian/Ubuntu apt update_cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Debian/Ubuntu packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: "latest"
+  loop:
+    - ufw
+    - unattended-upgrades
