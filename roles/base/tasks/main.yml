@@ -1,5 +1,5 @@
 - name: Install Fedora packages
-  tag: fedora
+  tags: fedora
   ansible.builtin.dnf:
     update_cache: true
     name: "{{ item }}"
