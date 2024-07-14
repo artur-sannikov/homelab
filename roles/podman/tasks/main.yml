@@ -400,5 +400,5 @@
   - librechat-mongodb.service
   - librechat-meilisearch.service
   - librechat.service
-  - chromium-playwright
-  - changedetection
+  - chromium-playwright.service
+  - changedetection.service
