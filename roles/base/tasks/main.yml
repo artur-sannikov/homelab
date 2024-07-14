@@ -63,14 +63,17 @@
       - restart_sshd
     when: ansible_distribution == "Fedora"
 
-- name: Update Debian/Ubuntu apt update_cache
-  ansible.builtin.apt:
-    update_cache: true
+- block:
+  - name: Update Ubuntu apt cache
+    ansible.builtin.apt:
+      update_cache: true
 
-- name: Install Debian/Ubuntu packages
-  ansible.builtin.apt:
-    name: "{{ item }}"
-    state: "latest"
-  loop:
-    - ufw
-    - unattended-upgrades
+  - name: Install Ubuntu packages
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: "latest"
+    loop:
+      - ufw
+      - unattended-upgrades
+      - acl
+  when: ansible_distribution == "Ubuntu"
