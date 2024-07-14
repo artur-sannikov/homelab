@@ -1,3 +1,14 @@
+- name: Install Podman and dependencies
+  tags: always
+  ansible.builtin.dnf:
+    update_cache: true
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - acl
+    - podman
+    - passt
+
 - name: Podman user management
   block:
   - name: Create Podman group
