@@ -6,3 +6,5 @@ files/public_keys/ansible.pub
 roles/podman/vars/main.yml
 roles/podman/files/paperless-ngx.env
 roles/podman/files/librechat.env
+roles/podman/files/authentik-postgres.env
+roles/podman/files/authentik.env
