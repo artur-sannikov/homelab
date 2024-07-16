@@ -62,18 +62,3 @@
     notify:
       - restart_sshd
     when: ansible_distribution == "Fedora"
-
-- block:
-  - name: Update Ubuntu apt cache
-    ansible.builtin.apt:
-      update_cache: true
-
-  - name: Install Ubuntu packages
-    ansible.builtin.apt:
-      name: "{{ item }}"
-      state: "latest"
-    loop:
-      - ufw
-      - unattended-upgrades
-      - acl
-  when: ansible_distribution == "Ubuntu"
