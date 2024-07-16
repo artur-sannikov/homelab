@@ -24,6 +24,7 @@
       state: started
       enabled: true
     when: ansible_distribution == "Fedora"
+
   - name: Apply updates automatically
     ansible.builtin.lineinfile:
       path: /etc/dnf/automatic.conf
@@ -31,6 +32,7 @@
       line: apply_updates = yes
     notify: Restart timer for automatic updates
     when: ansible_distribution == "Fedora"
+
   - name: Reboot after updates if needed
     ansible.builtin.lineinfile:
       path: /etc/dnf/automatic.conf

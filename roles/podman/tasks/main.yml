@@ -239,7 +239,7 @@
     image: docker.io/freshrss/freshrss:latest
     state: quadlet
     quadlet_filename: freshrss
-    quadlet_dir:  "{{ quadlet_dir }}"
+    quadlet_dir: "{{ quadlet_dir }}"
     ports:
       - "8089:80"
     volumes:
@@ -271,7 +271,7 @@
     image: ghcr.io/danny-avila/librechat:v0.7.3
     state: quadlet
     quadlet_filename: librechat
-    quadlet_dir:  "{{ quadlet_dir }}"
+    quadlet_dir: "{{ quadlet_dir }}"
     ports:
       - "3080:3080"
     env_file:
@@ -299,7 +299,7 @@
     image: docker.io/mongo:7.0.12
     state: quadlet
     quadlet_filename: librechat-mongodb
-    quadlet_dir:  "{{ quadlet_dir }}"
+    quadlet_dir: "{{ quadlet_dir }}"
     volumes:
       - "{{ podman_appdata_dir }}/librechat/mongodb/data:/data/db:Z"
     env_file:
@@ -321,7 +321,7 @@
     image: docker.io/getmeili/meilisearch:v1.0
     state: quadlet
     quadlet_filename: librechat-meilisearch
-    quadlet_dir:  "{{ quadlet_dir }}"
+    quadlet_dir: "{{ quadlet_dir }}"
     volumes:
       - "{{ podman_appdata_dir }}/librechat/meilisearch/data:/meili_data:Z"
     env_file:
@@ -352,7 +352,7 @@
       image: ghcr.io/browserless/chromium
       state: quadlet
       quadlet_filename: chromium-playwright
-      quadlet_dir:  "{{ quadlet_dir }}"
+      quadlet_dir: "{{ quadlet_dir }}"
       env_file:
         - chromium-playwright.env
       network:
@@ -374,7 +374,7 @@
       image: ghcr.io/dgtlmoon/changedetection.io
       state: quadlet
       quadlet_filename: changedetection
-      quadlet_dir:  "{{ quadlet_dir }}"
+      quadlet_dir: "{{ quadlet_dir }}"
       ports:
         - "5000:5000"
       volumes:
