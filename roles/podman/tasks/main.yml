@@ -57,6 +57,7 @@
     - authentik/redis/data
     - authentik/media
     - authentik/certs
+    - myspeed/data
 
 - name: Create folder for Podman containers
   ansible.builtin.file:
@@ -533,6 +534,27 @@
       podman unshare chown -R 1000:1000 {{ podman_appdata_dir }}/authentik
     become_user: "{{ podman_user }}"
 
+  - name: Create myspeed Quadlet
+    containers.podman.podman_container:
+      name: myspeed
+      image: docker.io/germannewsmaker/myspeed:latest
+      state: quadlet
+      quadlet_filename: myspeed
+      quadlet_dir: "{{ quadlet_dir }}"
+      ports:
+        - "5216:5216"
+      volumes:
+        - "{{ podman_appdata_dir }}/myspeed/data:/myspeed/data:Z"
+      quadlet_options:
+        - "AutoUpdate=registry"
+        - "NoNewPrivileges=true"
+        - |
+          [Service]
+          Restart=always
+        - |
+          [Install]
+          WantedBy=default.target
+
 - name: Restart services
   ansible.builtin.systemd:
     name: "{{ item }}"
@@ -559,6 +581,7 @@
   - authentik-redis.service
   - authentik-server.service
   - authentik-worker.service
+  - myspeed.service
 
 - name: Open FirewalldD ports
   ansible.posix.firewalld:
@@ -576,5 +599,6 @@
   - "5000/tcp" # changedetection
   - "9000/tcp" # authentik http
   - "9443/tcp" # authentik https
+  - "5216/tcp" # myspeed
   notify:
     - Reload FirewallD
