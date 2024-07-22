@@ -1,0 +1,33 @@
+- name: Install Podman and dependencies
+  tags: always
+  ansible.builtin.dnf:
+    update_cache: true
+    name:
+      - acl
+      - podman
+      - passt
+    state: latest
+
+- name: Podman user management
+  block:
+  - name: Create Podman group
+    ansible.builtin.group:
+      name: "{{ podman_group }}"
+      state: present
+
+  - name: Create Podman user
+    ansible.builtin.user:
+      name: "{{ podman_user }}"
+      group: "{{ podman_group }}"
+      create_home: true
+      state: present
+    register: __user_info
+
+  - name: Check if Podman user is lingering
+    ansible.builtin.stat:
+      path: "/var/lib/systemd/linger/{{ podman_user }}"
+    register: __user_lingering
+
+  - name: Enable lingering for Podman user
+    ansible.builtin.command: "loginctl enable-linger {{ podman_user }}"
+    when: not __user_lingering.stat.exists
