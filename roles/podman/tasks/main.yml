@@ -192,6 +192,15 @@
       - "{{ podman_appdata_dir }}/stirling-pdf/logs:/logs:Z"
     env_file:
       - stirling-pdf.env
+    cap_drop:
+      - all
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FSETID
+      - FOWNER
+      - SETUID
+      - SETGID
     quadlet_options:
       - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
