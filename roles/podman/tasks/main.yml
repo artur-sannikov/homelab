@@ -49,6 +49,7 @@
     - changedetection.env
     - authentik-postgres.env
     - authentik.env
+    - stirling-pdf.env
 
 - block:
   - name: Create paperless database password
@@ -189,6 +190,8 @@
       - "8080:8080"
     volumes:
       - "{{ podman_appdata_dir }}/stirling-pdf/logs:/logs:Z"
+    env_file:
+      - stirling-pdf.env
     quadlet_options:
       - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
