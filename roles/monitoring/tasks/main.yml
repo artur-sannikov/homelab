@@ -63,6 +63,7 @@
         - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
         - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
       quadlet_options:
+        - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
         - |
           [Service]
@@ -93,6 +94,7 @@
       env:
         GF_INSTALL_PLUGINS: "grafana-clock-panel"
       quadlet_options:
+        - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
         - |
           [Service]
