@@ -9,3 +9,4 @@ roles/podman/files/librechat.env
 roles/podman/files/authentik-postgres.env
 roles/podman/files/authentik.env
 roles/podman/files/stirling-pdf.env
+roles/monitoring/vars/main.yml
