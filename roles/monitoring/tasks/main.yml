@@ -120,6 +120,13 @@
           - grafana-postgres.env
         secrets:
           - grafana_db_passwd
+        cap_drop:
+          - all
+        cap_add:
+          - DAC_OVERRIDE
+          - SETUID
+          - SETGID
+          - FOWNER
         quadlet_options:
           - "NoNewPrivileges=true"
           - |
