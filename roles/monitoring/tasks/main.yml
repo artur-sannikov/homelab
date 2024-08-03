@@ -74,13 +74,6 @@
       volumes:
         - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
         - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
-      cap_drop:
-        - all
-      cap_add:
-        - DAC_OVERRIDE
-        - SETUID
-        - SETGID
-        - FOWNER
       quadlet_options:
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
@@ -120,13 +113,6 @@
           - grafana-postgres.env
         secrets:
           - grafana_db_passwd
-        cap_drop:
-          - all
-        cap_add:
-          - DAC_OVERRIDE
-          - SETUID
-          - SETGID
-          - FOWNER
         quadlet_options:
           - "NoNewPrivileges=true"
           - |
