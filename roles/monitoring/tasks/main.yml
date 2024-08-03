@@ -27,6 +27,7 @@
     group: "{{ podman_group }}"
     mode: "0755"
   loop:
+    - grafana/postgres
     - grafana/data
     - influxdb2/config
     - influxdb2/data
@@ -38,6 +39,17 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0755"
+
+- name: Copy Podman environment files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ quadlet_dir }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+  loop:
+    - grafana-postgres.env
+    - grafana.env
 
 - block:
   - name: Create monitoring pod
@@ -80,6 +92,36 @@
       podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/grafana/data
     become_user: "{{ podman_user }}"
 
+  - name: Create grafana secret for database password
+    containers.podman.podman_secret:
+      state: present
+      name: grafana_db_passwd
+      data: "{{ grafana_db_passwd }}"
+    become_user: "{{ podman_user }}"
+
+  - name: Create grafana-postgres quadlet
+    containers.podman.podman_container:
+        name: grafana-postgres
+        image: docker.io/postgres:16.3-alpine
+        state: quadlet
+        quadlet_filename: grafana-postgres
+        quadlet_dir: "{{ quadlet_dir }}"
+        pod: monitoring.pod
+        volumes:
+          - "{{ podman_appdata_dir }}/grafana/postgres:/var/lib/postgresql/data:Z"
+        env_file:
+          - grafana-postgres.env
+        secrets:
+          - grafana_db_passwd
+        quadlet_options:
+          - "NoNewPrivileges=true"
+          - |
+            [Service]
+            Restart=always
+          - |
+            [Install]
+            WantedBy=default.target
+
   - name: Create Grafana quadlet
     containers.podman.podman_container:
       name: grafana
@@ -91,11 +133,17 @@
       user: "{{ podman_user_id }}"
       volumes:
         - "{{ podman_appdata_dir }}/grafana/data:/var/lib/grafana:Z"
-      env:
-        GF_INSTALL_PLUGINS: "grafana-clock-panel"
+      env_file:
+        - grafana.env
+      secrets:
+        - grafana_db_passwd
       quadlet_options:
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
+        - |
+          [Unit]
+          Requires=grafana-postgres.service
+          After=grafana-postgres.service
         - |
           [Service]
           Restart=always
@@ -115,6 +163,7 @@
     XDG_RUNTIME_DIR: "/run/user/{{ podman_user_id }}"
   loop:
   - influxdb2.service
+  - grafana-postgres.service
   - grafana.service
 
 - name: Open FirewalldD ports
