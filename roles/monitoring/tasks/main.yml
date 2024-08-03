@@ -80,6 +80,7 @@
         - DAC_OVERRIDE
         - SETUID
         - SETGID
+        - FOWNER
       quadlet_options:
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
