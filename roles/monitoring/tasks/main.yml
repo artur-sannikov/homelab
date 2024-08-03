@@ -74,6 +74,12 @@
       volumes:
         - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
         - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
+      cap_drop:
+        - all
+      cap_add:
+        - DAC_OVERRIDE
+        - SETUID
+        - SETGID
       quadlet_options:
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
