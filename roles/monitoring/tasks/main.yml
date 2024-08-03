@@ -137,6 +137,8 @@
         GF_INSTALL_PLUGINS: "grafana-clock-panel"
       env_file:
         - grafana.env
+      cap_drop:
+        - all
       secrets:
         - grafana_db_passwd
       quadlet_options:
