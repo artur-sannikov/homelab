@@ -376,14 +376,16 @@
           WantedBy=default.target
 
 - block:
-  - name: Create authentik network
-    containers.podman.podman_network:
-        name: authentik
-        quadlet_filename: authentik
-        quadlet_dir: "{{ quadlet_dir }}"
-        disable_dns: false
-        state: quadlet
-    become_user: "{{ podman_user }}"
+  - name: Create authentik pod
+    containers.podman.podman_pod:
+      name: authentik
+      state: quadlet
+      quadlet_filename: authentik
+      quadlet_dir: "{{ quadlet_dir }}"
+      infra_name: "authentik-pod"
+      ports:
+        - "9000:9000"
+        - "9443:9443"
 
   - name: Create authentik-postgres Quadlet
     containers.podman.podman_container:
@@ -392,12 +394,11 @@
       state: quadlet
       quadlet_filename: authentik-postgres
       quadlet_dir: "{{ quadlet_dir }}"
+      pod: authentik.pod
       volumes:
         - "{{ podman_appdata_dir }}/authentik/postgres/data:/var/lib/postgresql/data:Z"
       env_file:
         - authentik-postgres.env
-      network:
-        - authentik.network
       health_cmd: "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"
       health_startup_interval: 30s
       health_startup_retries: 5
@@ -419,10 +420,9 @@
       state: quadlet
       quadlet_filename: authentik-redis
       quadlet_dir: "{{ quadlet_dir }}"
+      pod: authentik.pod
       volumes:
         - "{{ podman_appdata_dir }}/authentik/redis/data:/data:Z"
-      network:
-        - authentik.network
       health_cmd: "redis-cli ping | grep PONG"
       health_startup_interval: 30s
       health_startup_retries: 5
@@ -445,15 +445,11 @@
       state: quadlet
       quadlet_filename: authentik-server
       quadlet_dir: "{{ quadlet_dir }}"
-      ports:
-        - "9000:9000"
-        - "9443:9443"
+      pod: authentik.pod
       volumes:
         - "{{ podman_appdata_dir }}/authentik/media:/media:z"
       env_file:
         - authentik.env
-      network:
-        - authentik.network
       quadlet_options:
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
@@ -478,13 +474,12 @@
       state: quadlet
       quadlet_filename: authentik-worker
       quadlet_dir: "{{ quadlet_dir }}"
+      pod: authentik.pod
       volumes:
         - "{{ podman_appdata_dir }}/authentik/media:/media:z"
         - "{{ podman_appdata_dir }}/authentik/certs:/certs:Z"
       env_file:
         - authentik.env
-      network:
-        - authentik.network
       quadlet_options:
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
