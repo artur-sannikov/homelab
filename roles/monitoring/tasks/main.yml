@@ -133,6 +133,8 @@
       user: "{{ podman_user_id }}"
       volumes:
         - "{{ podman_appdata_dir }}/grafana/data:/var/lib/grafana:Z"
+      env:
+        GF_INSTALL_PLUGINS: "grafana-clock-panel"
       env_file:
         - grafana.env
       secrets:
