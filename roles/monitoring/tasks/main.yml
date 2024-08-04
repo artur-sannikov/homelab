@@ -33,6 +33,7 @@
     - grafana/data
     - prometheus/config
     - prometheus/data
+    - uptime-kuma/data
 
 - name: Create folder for Podman containers
   ansible.builtin.file:
@@ -200,6 +201,26 @@
       podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/data
     become_user: "{{ podman_user }}"
 
+  - name: Create uptime-kuma quadlet
+    containers.podman.podman_container:
+        name: uptime-kuma
+        image: docker.io/louislam/uptime-kuma:1
+        state: quadlet
+        quadlet_filename: uptime-kuma
+        quadlet_dir: "{{ quadlet_dir }}"
+        ports:
+          - "3001:3001"
+        volumes:
+          - "{{ podman_appdata_dir }}/uptime-kuma/data:/app/data:Z"
+        quadlet_options:
+          - "NoNewPrivileges=true"
+          - |
+            [Service]
+            Restart=always
+          - |
+            [Install]
+            WantedBy=default.target
+
 - name: Restart services
   ansible.builtin.systemd:
     name: "{{ item }}"
@@ -215,6 +236,7 @@
   - grafana-postgres.service
   - grafana.service
   - prometheus.service
+  - uptime-kuma.service
 
 - name: Restart monitoring pod
   containers.podman.podman_pod:
@@ -232,5 +254,6 @@
     - "3000/tcp" # grafana
     - "8086/tcp" # influxdb2
     - "9090/tcp" # prometheus
+    - "3001/tcp" # uptime-kuma
   notify:
     - Reload FirewallD
