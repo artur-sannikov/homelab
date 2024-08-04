@@ -100,7 +100,7 @@
   - name: Create paperless-ngx-postgres Quadlet
     containers.podman.podman_container:
       name: paperless-ngx-postgres
-      image: docker.io/postgres:16.3-alpine
+      image: docker.io/postgres:16.3
       state: quadlet
       quadlet_filename: paperless-ngx-postgres
       quadlet_dir: "{{ quadlet_dir }}"
