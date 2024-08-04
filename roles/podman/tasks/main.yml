@@ -66,28 +66,33 @@
       data: "{{ paperless_secret_key }}"
     become_user: "{{ podman_user }}"
 
-  - name: Create paperless-ngx network
-    containers.podman.podman_network:
+  - name: Create paperless-ngx pod
+    containers.podman.podman_pod:
       name: paperless-ngx
+      state: quadlet
       quadlet_filename: paperless-ngx
       quadlet_dir: "{{ quadlet_dir }}"
-      disable_dns: false
-      state: quadlet
-    become_user: "{{ podman_user }}"
+      infra_name: "paperless-ngx-pod"
+      ports:
+        - "8001:8000"
 
   - name: Create paperless-ngx-redis Quadlet
     containers.podman.podman_container:
       name: paperless-ngx-redis
-      image: docker.io/redis:7.2.5-alpine
+      image: docker.io/redis:7.4.0
       state: quadlet
       quadlet_filename: paperless-ngx-redis
       quadlet_dir: "{{ quadlet_dir }}"
+      pod: paperless-ngx.pod
       volumes:
         - "{{ podman_appdata_dir }}/paperless-ngx/redis:/data:Z"
       env_file:
         - paperless-ngx-redis.env
-      network:
-        - paperless-ngx.network
+      health_cmd: "redis-cli ping | grep PONG"
+      health_startup_interval: 30s
+      health_startup_retries: 5
+      healthcheck_start_period: 20s
+      healthcheck_timeout: 10s
       quadlet_options:
         - "NoNewPrivileges=true"
         - |
@@ -100,18 +105,22 @@
   - name: Create paperless-ngx-postgres Quadlet
     containers.podman.podman_container:
       name: paperless-ngx-postgres
-      image: docker.io/postgres:16.3-alpine
+      image: docker.io/postgres:16.3
       state: quadlet
       quadlet_filename: paperless-ngx-postgres
       quadlet_dir: "{{ quadlet_dir }}"
+      pod: paperless-ngx.pod
       volumes:
         - "{{ podman_appdata_dir }}/paperless-ngx/postgres:/var/lib/postgresql/data:Z"
       env_file:
         - paperless-ngx-postgres.env
-      network:
-        - paperless-ngx.network
       secrets:
         - paperless_db_paperless_passwd
+      health_cmd: "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"
+      health_startup_interval: 30s
+      health_startup_retries: 5
+      healthcheck_start_period: 20s
+      healthcheck_timeout: 10s
       quadlet_options:
         - "NoNewPrivileges=true"
         - |
@@ -128,8 +137,7 @@
       state: quadlet
       quadlet_filename: paperless-ngx
       quadlet_dir: "{{ quadlet_dir }}"
-      ports:
-        - "8001:8000"
+      pod: paperless-ngx.pod
       volumes:
         - "{{ podman_appdata_dir }}/paperless-ngx/data:/usr/src/paperless/data:Z"
         - "{{ podman_appdata_dir }}/paperless-ngx/media:/usr/src/paperless/media:Z"
@@ -137,11 +145,14 @@
         - "{{ podman_appdata_dir }}/paperless-ngx/consume:/usr/src/paperless/consume:Z"
       env_file:
         - paperless-ngx.env
-      network:
-        - paperless-ngx.network
       secrets:
         - paperless_secret_key
         - paperless_db_paperless_passwd
+      health_cmd: "curl -fs -S --max-time 2 http://localhost:8000"
+      health_startup_interval: 30s
+      health_startup_retries: 5
+      healthcheck_start_period: 20s
+      healthcheck_timeout: 10s
       quadlet_options:
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
@@ -390,7 +401,7 @@
   - name: Create authentik-postgres Quadlet
     containers.podman.podman_container:
       name: authentik-postgres
-      image: docker.io/library/postgres:16.3-alpine
+      image: docker.io/library/postgres:16.3
       state: quadlet
       quadlet_filename: authentik-postgres
       quadlet_dir: "{{ quadlet_dir }}"
@@ -416,7 +427,7 @@
   - name: Create authentik-redis Quadlet
     containers.podman.podman_container:
       name: authentik-redis
-      image: docker.io/library/redis:7.2.5-alpine
+      image: docker.io/library/redis:7.4.0
       state: quadlet
       quadlet_filename: authentik-redis
       quadlet_dir: "{{ quadlet_dir }}"
@@ -538,9 +549,7 @@
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
   loop:
-  - paperless-ngx-redis.service
-  - paperless-ngx-postgres.service
-  - paperless-ngx.service
+  - paperless-ngx-pod.service
   - stirling-pdf.service
   - readeck.service
   - freshrss.service
@@ -549,10 +558,7 @@
   - librechat.service
   - chromium-playwright.service
   - changedetection.service
-  - authentik-postgres.service
-  - authentik-redis.service
-  - authentik-server.service
-  - authentik-worker.service
+  - authentik-pod.service
   - myspeed.service
 
 - name: Open FirewalldD ports
