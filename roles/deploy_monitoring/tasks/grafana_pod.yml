@@ -1,0 +1,11 @@
+  - name: Create grafana pod
+    containers.podman.podman_pod:
+      name: grafana
+      state: quadlet
+      quadlet_filename: grafana
+      quadlet_dir: "{{ quadlet_dir }}"
+      infra_name: "grafana-pod"
+      ports:
+        - "3000:3000" # grafana
+        - "8086:8086" # influxdb
+        - "9090:9090" # prometheus

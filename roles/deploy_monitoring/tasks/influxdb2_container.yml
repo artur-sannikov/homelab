@@ -1,0 +1,20 @@
+- name: Create InfluxDB2 quadlet
+  containers.podman.podman_container:
+    name: influxdb2
+    image: docker.io/influxdb:latest
+    state: quadlet
+    quadlet_filename: influxdb2
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: grafana.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
+      - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target

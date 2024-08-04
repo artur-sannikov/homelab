@@ -3,5 +3,5 @@
   become: true
   roles:
     - base
-    - install-podman
-    - monitoring
+    - install_podman
+    - deploy_monitoring

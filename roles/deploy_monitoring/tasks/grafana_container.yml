@@ -1,0 +1,70 @@
+- name: Create grafana secret for database password
+  containers.podman.podman_secret:
+    state: present
+    name: grafana_db_passwd
+    data: "{{ grafana_db_passwd }}"
+  become_user: "{{ podman_user }}"
+
+- name: Change owner of grafana/data directories to podman_user_id:podman_group_id
+  # We need to run Grafana as podman user inside Grafana container
+  # Podman is unable to automatically change the owner of directories inside containers
+  # so we need to user podman unshare to run chown inside Podman's user namespace
+  ansible.builtin.shell: |
+    podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/grafana/data
+  become_user: "{{ podman_user }}"
+
+- name: Create grafana-postgres quadlet
+  containers.podman.podman_container:
+      name: grafana-postgres
+      image: docker.io/postgres:16.3
+      state: quadlet
+      quadlet_filename: grafana-postgres
+      quadlet_dir: "{{ quadlet_dir }}"
+      pod: grafana.pod
+      volumes:
+        - "{{ podman_appdata_dir }}/grafana/postgres:/var/lib/postgresql/data:Z"
+      env_file:
+        - grafana-postgres.env
+      secrets:
+        - grafana_db_passwd
+      quadlet_options:
+        - "NoNewPrivileges=true"
+        - |
+          [Service]
+          Restart=always
+        - |
+          [Install]
+          WantedBy=default.target
+
+- name: Create Grafana quadlet
+  containers.podman.podman_container:
+    name: grafana
+    image: docker.io/grafana/grafana:latest
+    state: quadlet
+    quadlet_filename: grafana
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: grafana.pod
+    user: "{{ podman_user_id }}"
+    volumes:
+      - "{{ podman_appdata_dir }}/grafana/data:/var/lib/grafana:Z"
+    env:
+      GF_INSTALL_PLUGINS: "grafana-clock-panel"
+    env_file:
+      - grafana.env
+    cap_drop:
+      - all
+    secrets:
+      - grafana_db_passwd
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Unit]
+        Requires=grafana-postgres.service
+        After=grafana-postgres.service
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
