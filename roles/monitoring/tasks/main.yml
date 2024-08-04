@@ -27,10 +27,12 @@
     group: "{{ podman_group }}"
     mode: "0755"
   loop:
-    - grafana/postgres
-    - grafana/data
     - influxdb2/config
     - influxdb2/data
+    - grafana/postgres
+    - grafana/data
+    - prometheus/config
+    - prometheus/data
 
 - name: Create folder for Podman containers
   ansible.builtin.file:
@@ -60,8 +62,9 @@
       quadlet_dir: "{{ quadlet_dir }}"
       infra_name: "monitoring-pod"
       ports:
-        - "3000:3000"
-        - "8086:8086"
+        - "3000:3000" # grafana
+        - "8086:8086" # influxdb
+        - "9090:9090" # prometheus
 
   - name: Create InfluxDB2 quadlet
     containers.podman.podman_container:
@@ -155,6 +158,48 @@
           [Install]
           WantedBy=default.target
 
+  - name: Create Prometheus quadlet
+    containers.podman.podman_container:
+      name: prometheus
+      image: docker.io/prom/prometheus:latest
+      state: quadlet
+      quadlet_filename: prometheus
+      quadlet_dir: "{{ quadlet_dir }}"
+      pod: monitoring.pod
+      user: "{{ podman_user_id }}"
+      cap_drop:
+        - all
+      volumes:
+        - "{{ podman_appdata_dir }}/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml:Z,ro"
+        - "{{ podman_appdata_dir }}/prometheus/data:/prometheus:Z"
+      quadlet_options:
+        - "AutoUpdate=registry"
+        - "NoNewPrivileges=true"
+        - "Exec=--config.file=/etc/prometheus/prometheus.yaml"
+        - |
+          [Service]
+          Restart=always
+        - |
+          [Install]
+          WantedBy=default.target
+
+  - name: Copy Prometheus config file
+    ansible.builtin.copy:
+      src: prometheus.yaml
+      dest: "{{ podman_appdata_dir }}/prometheus/config"
+      owner: "{{ podman_user }}"
+      group: "{{ podman_group }}"
+      mode: "0644"
+
+  - name: Change owner of prometheus/{config,data} directories to podman_user_id:podman_group_id
+    # We need to run Prometheus as podman user inside Prometheus container (same as Grafana)
+    # Podman is unable to automatically change the owner of directories inside containers
+    # so we need to user podman unshare to run chown inside Podman's user namespace
+    ansible.builtin.shell: |
+      podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/config;
+      podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/data
+    become_user: "{{ podman_user }}"
+
 - name: Restart services
   ansible.builtin.systemd:
     name: "{{ item }}"
@@ -169,6 +214,13 @@
   - influxdb2.service
   - grafana-postgres.service
   - grafana.service
+  - prometheus.service
+
+- name: Restart monitoring pod
+  containers.podman.podman_pod:
+    name: monitoring
+    state: "restarted"
+  become_user: "{{ podman_user }}"
 
 - name: Open FirewalldD ports
   ansible.posix.firewalld:
@@ -179,5 +231,6 @@
   loop:
     - "3000/tcp" # grafana
     - "8086/tcp" # influxdb2
+    - "9090/tcp" # prometheus
   notify:
     - Reload FirewallD
