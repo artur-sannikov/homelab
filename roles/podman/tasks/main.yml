@@ -138,6 +138,11 @@
       secrets:
         - paperless_secret_key
         - paperless_db_paperless_passwd
+      health_cmd: "curl -fs -S --max-time 2 http://localhost:8000"
+      health_startup_interval: 30s
+      health_startup_retries: 5
+      healthcheck_start_period: 20s
+      healthcheck_timeout: 10s
       quadlet_options:
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
