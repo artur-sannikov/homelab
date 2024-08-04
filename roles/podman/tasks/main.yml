@@ -66,14 +66,15 @@
       data: "{{ paperless_secret_key }}"
     become_user: "{{ podman_user }}"
 
-  - name: Create paperless-ngx network
-    containers.podman.podman_network:
+  - name: Create paperless-ngx pod
+    containers.podman.podman_pod:
       name: paperless-ngx
+      state: quadlet
       quadlet_filename: paperless-ngx
       quadlet_dir: "{{ quadlet_dir }}"
-      disable_dns: false
-      state: quadlet
-    become_user: "{{ podman_user }}"
+      infra_name: "paperless-ngx-pod"
+      ports:
+        - "8001:8000"
 
   - name: Create paperless-ngx-redis Quadlet
     containers.podman.podman_container:
@@ -82,12 +83,11 @@
       state: quadlet
       quadlet_filename: paperless-ngx-redis
       quadlet_dir: "{{ quadlet_dir }}"
+      pod: paperless-ngx.pod
       volumes:
         - "{{ podman_appdata_dir }}/paperless-ngx/redis:/data:Z"
       env_file:
         - paperless-ngx-redis.env
-      network:
-        - paperless-ngx.network
       quadlet_options:
         - "NoNewPrivileges=true"
         - |
@@ -104,12 +104,11 @@
       state: quadlet
       quadlet_filename: paperless-ngx-postgres
       quadlet_dir: "{{ quadlet_dir }}"
+      pod: paperless-ngx.pod
       volumes:
         - "{{ podman_appdata_dir }}/paperless-ngx/postgres:/var/lib/postgresql/data:Z"
       env_file:
         - paperless-ngx-postgres.env
-      network:
-        - paperless-ngx.network
       secrets:
         - paperless_db_paperless_passwd
       quadlet_options:
@@ -128,8 +127,7 @@
       state: quadlet
       quadlet_filename: paperless-ngx
       quadlet_dir: "{{ quadlet_dir }}"
-      ports:
-        - "8001:8000"
+      pod: paperless-ngx.pod
       volumes:
         - "{{ podman_appdata_dir }}/paperless-ngx/data:/usr/src/paperless/data:Z"
         - "{{ podman_appdata_dir }}/paperless-ngx/media:/usr/src/paperless/media:Z"
@@ -137,8 +135,6 @@
         - "{{ podman_appdata_dir }}/paperless-ngx/consume:/usr/src/paperless/consume:Z"
       env_file:
         - paperless-ngx.env
-      network:
-        - paperless-ngx.network
       secrets:
         - paperless_secret_key
         - paperless_db_paperless_passwd
@@ -538,9 +534,7 @@
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
   loop:
-  - paperless-ngx-redis.service
-  - paperless-ngx-postgres.service
-  - paperless-ngx.service
+  - paperless-ngx-pod.service
   - stirling-pdf.service
   - readeck.service
   - freshrss.service
