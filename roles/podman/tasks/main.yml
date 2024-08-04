@@ -543,10 +543,7 @@
   - librechat.service
   - chromium-playwright.service
   - changedetection.service
-  - authentik-postgres.service
-  - authentik-redis.service
-  - authentik-server.service
-  - authentik-worker.service
+  - authentik-pod.service
   - myspeed.service
 
 - name: Open FirewalldD ports
