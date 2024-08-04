@@ -78,7 +78,7 @@
   - name: Create paperless-ngx-redis Quadlet
     containers.podman.podman_container:
       name: paperless-ngx-redis
-      image: docker.io/redis:7.2.5-alpine
+      image: docker.io/redis:7.4.0
       state: quadlet
       quadlet_filename: paperless-ngx-redis
       quadlet_dir: "{{ quadlet_dir }}"
@@ -416,7 +416,7 @@
   - name: Create authentik-redis Quadlet
     containers.podman.podman_container:
       name: authentik-redis
-      image: docker.io/library/redis:7.2.5-alpine
+      image: docker.io/library/redis:7.4.0
       state: quadlet
       quadlet_filename: authentik-redis
       quadlet_dir: "{{ quadlet_dir }}"
