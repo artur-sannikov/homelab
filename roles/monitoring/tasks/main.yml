@@ -52,6 +52,7 @@
   loop:
     - grafana-postgres.env
     - grafana.env
+    - influxdb2.env
 
 - block:
   - name: Create monitoring pod
@@ -77,6 +78,8 @@
       volumes:
         - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
         - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
+      env_file:
+        - influxdb2.env
       quadlet_options:
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
