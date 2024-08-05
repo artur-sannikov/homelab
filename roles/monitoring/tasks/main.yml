@@ -55,13 +55,13 @@
     - influxdb2.env
 
 - block:
-  - name: Create monitoring pod
+  - name: Create grafana pod
     containers.podman.podman_pod:
-      name: monitoring
+      name: grafana
       state: quadlet
-      quadlet_filename: monitoring
+      quadlet_filename: grafana
       quadlet_dir: "{{ quadlet_dir }}"
-      infra_name: "monitoring-pod"
+      infra_name: "grafana-pod"
       ports:
         - "3000:3000" # grafana
         - "8086:8086" # influxdb
@@ -74,7 +74,7 @@
       state: quadlet
       quadlet_filename: influxdb2
       quadlet_dir: "{{ quadlet_dir }}"
-      pod: monitoring.pod
+      pod: grafana.pod
       volumes:
         - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
         - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
@@ -112,7 +112,7 @@
         state: quadlet
         quadlet_filename: grafana-postgres
         quadlet_dir: "{{ quadlet_dir }}"
-        pod: monitoring.pod
+        pod: grafana.pod
         volumes:
           - "{{ podman_appdata_dir }}/grafana/postgres:/var/lib/postgresql/data:Z"
         env_file:
@@ -135,7 +135,7 @@
       state: quadlet
       quadlet_filename: grafana
       quadlet_dir: "{{ quadlet_dir }}"
-      pod: monitoring.pod
+      pod: grafana.pod
       user: "{{ podman_user_id }}"
       volumes:
         - "{{ podman_appdata_dir }}/grafana/data:/var/lib/grafana:Z"
@@ -168,7 +168,7 @@
       state: quadlet
       quadlet_filename: prometheus
       quadlet_dir: "{{ quadlet_dir }}"
-      pod: monitoring.pod
+      pod: grafana.pod
       user: "{{ podman_user_id }}"
       cap_drop:
         - all
@@ -214,7 +214,7 @@
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
   loop:
-    - monitoring-pod.service
+    - grafana-pod.service
 
 - name: Open FirewalldD ports
   ansible.posix.firewalld:
