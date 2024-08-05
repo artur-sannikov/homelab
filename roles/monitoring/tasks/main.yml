@@ -212,18 +212,9 @@
     enabled: true
   become_user: "{{ podman_user }}"
   environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ podman_user_id }}"
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
   loop:
-  - influxdb2.service
-  - grafana-postgres.service
-  - grafana.service
-  - prometheus.service
-
-- name: Restart monitoring pod
-  containers.podman.podman_pod:
-    name: monitoring
-    state: "restarted"
-  become_user: "{{ podman_user }}"
+    - monitoring-pod.service
 
 - name: Open FirewalldD ports
   ansible.posix.firewalld:
