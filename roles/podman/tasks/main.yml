@@ -15,6 +15,7 @@
     - stirling-pdf/logs
     - readeck/data
     - freshrss/data
+    - librechat/config
     - librechat/mongodb/data
     - librechat/meilisearch/data
     - changedetection/datastore
@@ -255,6 +256,14 @@
     ports:
       - "3080:3080"
 
+- name: Generate librechat.yaml from template
+  template:
+    src: "{{ librechat_yaml_template_file }}"
+    dest: "{{ podman_appdata_dir }}/librechat/config/librechat.yaml"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+
 - name: Create LibreChat Quadlet
   containers.podman.podman_container:
     name: librechat
@@ -263,6 +272,8 @@
     quadlet_filename: librechat
     quadlet_dir: "{{ quadlet_dir }}"
     pod: librechat.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/librechat/config/librechat.yaml:/app/librechat.yaml:Z,U,ro"
     env_file:
       - librechat.env
     quadlet_options:
