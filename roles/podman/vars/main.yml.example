@@ -4,3 +4,4 @@ podman_appdata_dir: /home/podman/appdata
 quadlet_dir: /home/podman/.config/containers/systemd
 paperless_db_paperless_passwd:
 paperless_secret_key:
+HUGGINGFACE_TOKEN:
