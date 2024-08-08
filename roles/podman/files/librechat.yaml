@@ -16,7 +16,7 @@ interface:
 endpoints:
   custom:
     - name: 'HuggingFace'
-      apiKey: '{{HUGGINGFACE_TOKEN}}'
+      apiKey: '${HUGGINGFACE_TOKEN}'
       baseURL: 'https://api-inference.huggingface.co/v1'
       models:
         default: [
