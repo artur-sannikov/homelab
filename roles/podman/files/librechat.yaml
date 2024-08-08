@@ -1,0 +1,39 @@
+version: 1.0.8
+
+cache: true
+
+interface:
+  # Privacy policy settings
+  privacyPolicy:
+    externalUrl: 'https://librechat.ai/privacy-policy'
+    openNewTab: true
+
+  # Terms of service
+  termsOfService:
+    externalUrl: 'https://librechat.ai/tos'
+    openNewTab: true
+
+endpoints:
+  custom:
+    - name: 'HuggingFace'
+      apiKey: '${HUGGINGFACE_TOKEN}'
+      baseURL: 'https://api-inference.huggingface.co/v1'
+      models:
+        default: [
+          "codellama/CodeLlama-34b-Instruct-hf",
+          "google/gemma-1.1-2b-it",
+          "google/gemma-1.1-7b-it",
+          "HuggingFaceH4/starchat2-15b-v0.1",
+          "HuggingFaceH4/zephyr-7b-beta",
+          "meta-llama/Meta-Llama-3-8B-Instruct",
+          "microsoft/Phi-3-mini-4k-instruct",
+          "mistralai/Mistral-7B-Instruct-v0.1",
+          "mistralai/Mistral-7B-Instruct-v0.2",
+          "mistralai/Mixtral-8x7B-Instruct-v0.1",
+          "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
+        ]
+        fetch: true
+      titleConvo: true
+      titleModel: "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO"
+      dropParams: ["top_p"]
+      modelDisplayLabel: "HuggingFace"

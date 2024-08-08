@@ -15,6 +15,7 @@
     - stirling-pdf/logs
     - readeck/data
     - freshrss/data
+    - librechat/config
     - librechat/mongodb/data
     - librechat/meilisearch/data
     - changedetection/datastore
@@ -44,7 +45,6 @@
     - paperless-ngx-postgres.env
     - paperless-ngx.env
     - freshrss.env
-    - librechat.env
     - chromium-playwright.env
     - changedetection.env
     - authentik-postgres.env
@@ -245,14 +245,31 @@
         [Install]
         WantedBy=default.target
 
-- name: Create LibreChat network
-  containers.podman.podman_network:
-      name: librechat
-      quadlet_filename: librechat
-      quadlet_dir: "{{ quadlet_dir }}"
-      disable_dns: false
-      state: quadlet
-  become_user: "{{ podman_user }}"
+- name: Create Librechat pod
+  containers.podman.podman_pod:
+    name: librechat
+    state: quadlet
+    quadlet_filename: librechat
+    quadlet_dir: "{{ quadlet_dir }}"
+    infra_name: "librechat-pod"
+    ports:
+      - "3080:3080"
+
+- name: Copy librechat config file
+  ansible.builtin.copy:
+    src: librechat.yaml
+    dest: "{{ podman_appdata_dir }}/librechat/config"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0644"
+
+- name: Generate librechat.env from template
+  template:
+    src: "{{ librechat_env_template_file }}"
+    dest: "{{ quadlet_dir }}/librechat.env"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
 
 - name: Create LibreChat Quadlet
   containers.podman.podman_container:
@@ -261,20 +278,13 @@
     state: quadlet
     quadlet_filename: librechat
     quadlet_dir: "{{ quadlet_dir }}"
-    ports:
-      - "3080:3080"
+    pod: librechat.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/librechat/config/librechat.yaml:/app/librechat.yaml:Z,U,ro"
     env_file:
       - librechat.env
-    network:
-      - librechat.network
     quadlet_options:
       - "NoNewPrivileges=true"
-      - |
-        [Unit]
-        Requires=librechat-mongodb.service
-        Requires=librechat-meilisearch.service
-        After=librechat-mongodb.service
-        After=librechat-meilisearch.service
       - |
         [Service]
         Restart=always
@@ -289,12 +299,11 @@
     state: quadlet
     quadlet_filename: librechat-mongodb
     quadlet_dir: "{{ quadlet_dir }}"
+    pod: librechat.pod
     volumes:
       - "{{ podman_appdata_dir }}/librechat/mongodb/data:/data/db:Z"
     env_file:
       - librechat.env
-    network:
-      - librechat.network
     quadlet_options:
       - "NoNewPrivileges=true"
       - |
@@ -311,12 +320,11 @@
     state: quadlet
     quadlet_filename: librechat-meilisearch
     quadlet_dir: "{{ quadlet_dir }}"
+    pod: librechat.pod
     volumes:
       - "{{ podman_appdata_dir }}/librechat/meilisearch/data:/meili_data:Z"
     env_file:
       - librechat.env
-    network:
-      - librechat.network
     quadlet_options:
       - "NoNewPrivileges=true"
       - |
@@ -553,9 +561,7 @@
   - stirling-pdf.service
   - readeck.service
   - freshrss.service
-  - librechat-mongodb.service
-  - librechat-meilisearch.service
-  - librechat.service
+  - librechat-pod.service
   - chromium-playwright.service
   - changedetection.service
   - authentik-pod.service
