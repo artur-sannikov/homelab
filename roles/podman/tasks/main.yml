@@ -557,6 +557,7 @@
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
   loop:
+  - authentik-pod.service
   - paperless-ngx-pod.service
   - stirling-pdf.service
   - readeck.service
@@ -564,7 +565,6 @@
   - librechat-pod.service
   - chromium-playwright.service
   - changedetection.service
-  - authentik-pod.service
   - myspeed.service
 
 - name: Open FirewalldD ports
