@@ -11,3 +11,4 @@ CREDS_IV:
 MEILI_MASTER_KEY:
 JWT_SECRET:
 JWT_REFRESH_SECRET:
+DOMAIN: https://librechat.example.com
