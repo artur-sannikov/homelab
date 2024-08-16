@@ -10,3 +10,4 @@
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
   loop:
     - grafana-pod.service
+    - uptime-kuma.service
