@@ -12,3 +12,5 @@ MEILI_MASTER_KEY:
 JWT_SECRET:
 JWT_REFRESH_SECRET:
 DOMAIN: https://librechat.example.com
+PAPERLESS_URL: https://paperless.example.com
+paperless_ngx_env_template_file: paperless-ngx.env.j2

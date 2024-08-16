@@ -3,5 +3,5 @@
   become: true
   roles:
     - base
-    - install-podman
+    - install_podman
     - podman
