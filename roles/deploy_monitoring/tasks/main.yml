@@ -5,5 +5,6 @@
 - include_tasks: grafana_container.yml
 - include_tasks: influxdb2_container.yml
 - include_tasks: prometheus_container.yml
+- include_tasks: uptime_kuma.yml
 - include_tasks: setup_firewall.yml
 - include_tasks: restart_services.yml

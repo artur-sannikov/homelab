@@ -12,6 +12,7 @@
     - grafana/data
     - prometheus/config
     - prometheus/data
+    - uptime-kuma/data
 
 - name: Create folder for Podman containers
   ansible.builtin.file:
