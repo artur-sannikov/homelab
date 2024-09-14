@@ -557,15 +557,15 @@
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
   loop:
-  - authentik-pod.service
-  - paperless-ngx-pod.service
-  - stirling-pdf.service
-  - readeck.service
-  - freshrss.service
-  - librechat-pod.service
-  - chromium-playwright.service
-  - changedetection.service
-  - myspeed.service
+    - authentik-pod.service
+    - paperless-ngx-pod.service
+    - stirling-pdf.service
+    - readeck.service
+    - freshrss.service
+    - librechat-pod.service
+    - chromium-playwright.service
+    - changedetection.service
+    - myspeed.service
 
 - name: Open FirewalldD ports
   ansible.posix.firewalld:
@@ -574,15 +574,15 @@
     immediate: true
     state: enabled
   loop:
-  - "22/tcp" # ssh
-  - "8080/tcp" # stirling-pdf
-  - "8089/tcp" # freshrss
-  - "8000/tcp" # readeck
-  - "8001/tcp" # paperless-ngx
-  - "3080/tcp" # librechat
-  - "5000/tcp" # changedetection
-  - "9000/tcp" # authentik http
-  - "9443/tcp" # authentik https
-  - "5216/tcp" # myspeed
+    - "22/tcp" # ssh
+    - "8080/tcp" # stirling-pdf
+    - "8089/tcp" # freshrss
+    - "8000/tcp" # readeck
+    - "8001/tcp" # paperless-ngx
+    - "3080/tcp" # librechat
+    - "5000/tcp" # changedetection
+    - "9000/tcp" # authentik http
+    - "9443/tcp" # authentik https
+    - "5216/tcp" # myspeed
   notify:
     - Reload FirewallD
