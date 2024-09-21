@@ -11,3 +11,4 @@ roles/podman/files/authentik.env
 roles/podman/files/stirling-pdf.env
 roles/deploy_monitoring/files/prometheus.yaml
 roles/deploy_monitoring/vars/main.yml
+roles/monitoring/vars/main.yml
