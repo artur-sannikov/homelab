@@ -24,8 +24,6 @@
     - authentik/media
     - authentik/certs
     - myspeed/data
-    - forgejo/data
-    - forgejo/postgres/data
 
 - name: Create folder for Podman containers
   ansible.builtin.file:
@@ -554,79 +552,6 @@
         - |
           [Install]
           WantedBy=default.target
-- block:
-    - name: Create Forgejo pod
-      containers.podman.podman_pod:
-        name: forgejo
-        state: quadlet
-        quadlet_filename: forgejo
-        quadlet_dir: "{{ quadlet_dir }}"
-        infra_name: "forgejo-pod"
-        ports:
-          - "3002:3000"
-          - "2222:22"
-
-    - name: Generate forgejo-postgres.env from template
-      template:
-        src: "{{ forgejo_postgres_env_template_file }}"
-        dest: "{{ quadlet_dir }}/forgejo-postgres.env"
-        owner: "{{ podman_user }}"
-        group: "{{ podman_group }}"
-        mode: "0600"
-
-    - name: Generate forgejo.env from template
-      template:
-        src: "{{ forgejo_env_template_file }}"
-        dest: "{{ quadlet_dir }}/forgejo.env"
-        owner: "{{ podman_user }}"
-        group: "{{ podman_group }}"
-        mode: "0600"
-
-    - name: Create forgejo-postgres Quadlet
-      containers.podman.podman_container:
-        name: forgejo-postgres
-        image: docker.io/postgres:16.4
-        state: quadlet
-        quadlet_filename: forgejo-postgres
-        quadlet_dir: "{{ quadlet_dir }}"
-        pod: forgejo.pod
-        volumes:
-          - "{{ podman_appdata_dir }}/forgejo/postgres/data:/var/lib/postgresql/data:Z"
-        env_file:
-          - forgejo-postgres.env
-        health_cmd: "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"
-        health_startup_interval: 30s
-        health_startup_retries: 5
-        healthcheck_start_period: 20s
-        healthcheck_timeout: 10s
-        quadlet_options:
-          - "NoNewPrivileges=true"
-          - |
-            [Service]
-            Restart=always
-          - |
-            [Install]
-            WantedBy=default.target
-    - name: Create forgejo Quadlet
-      containers.podman.podman_container:
-        name: forgejo
-        image: codeberg.org/forgejo/forgejo:8
-        state: quadlet
-        quadlet_filename: forgejo
-        quadlet_dir: "{{ quadlet_dir }}"
-        pod: forgejo.pod
-        volumes:
-          - "{{ podman_appdata_dir }}/forgejo/data:/data:Z"
-        env_file:
-          - forgejo.env
-        quadlet_options:
-          - "NoNewPrivileges=true"
-          - |
-            [Service]
-            Restart=always
-          - |
-            [Install]
-            WantedBy=default.target
 
 - name: Restart services
   ansible.builtin.systemd:
@@ -648,7 +573,6 @@
     - chromium-playwright.service
     - changedetection.service
     - myspeed.service
-    - forgejo-pod.service
 
 - name: Open FirewalldD ports
   ansible.posix.firewalld:
@@ -667,7 +591,5 @@
     - "9000/tcp" # authentik http
     - "9443/tcp" # authentik https
     - "5216/tcp" # myspeed
-    - "2222/tcp" # forgejo
-    - "3002/tcp" # forgejo
   notify:
     - Reload FirewallD

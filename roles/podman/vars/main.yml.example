@@ -14,6 +14,3 @@ JWT_REFRESH_SECRET:
 DOMAIN: https://librechat.example.com
 PAPERLESS_URL: https://paperless.example.com
 paperless_ngx_env_template_file: paperless-ngx.env.j2
-FORGEJO__database__PASSWD:
-forgejo_postgres_env_template_file: forgejo_postgres.env.j2
-forgejo_env_template_file: forgejo.env.j2
