@@ -3,7 +3,7 @@
   ansible.builtin.dnf:
     update_cache: true
     name: "{{ item }}"
-    state: latest
+    state: present
   loop:
     - dnf-automatic
     - firewalld
@@ -18,32 +18,33 @@
   when: ansible_distribution == "Fedora"
 
 - block:
-  - name: Enable a timer unit for dnf-automatic
-    ansible.builtin.systemd_service:
-      name: dnf-automatic.timer
-      state: started
-      enabled: true
-    when: ansible_distribution == "Fedora"
+    - name: Enable a timer unit for dnf-automatic
+      ansible.builtin.systemd_service:
+        name: dnf-automatic.timer
+        state: started
+        enabled: true
+      when: ansible_distribution == "Fedora"
 
-  - name: Apply updates automatically
-    ansible.builtin.lineinfile:
-      path: /etc/dnf/automatic.conf
-      regexp: ^apply_updates = no
-      line: apply_updates = yes
-    notify: Restart timer for automatic updates
-    when: ansible_distribution == "Fedora"
+    - name: Apply updates automatically
+      ansible.builtin.lineinfile:
+        path: /etc/dnf/automatic.conf
+        regexp: ^apply_updates = no
+        line: apply_updates = yes
+      notify: Restart timer for automatic updates
+      when: ansible_distribution == "Fedora"
 
-  - name: Reboot after updates if needed
-    ansible.builtin.lineinfile:
-      path: /etc/dnf/automatic.conf
-      regexp: ^reboot = no
-      line: reboot = when-needed
-    notify: Restart timer for automatic updates
-    when: ansible_distribution == "Fedora"
+    - name: Reboot after updates if needed
+      ansible.builtin.lineinfile:
+        path: /etc/dnf/automatic.conf
+        regexp: ^reboot = no
+        line: reboot = when-needed
+      notify: Restart timer for automatic updates
+      when: ansible_distribution == "Fedora"
+
 - block:
   - name: Generate sshd_config from template
     tags: fedora,ssh
-    template:
+    ansible.builtin.template:
       src: "{{ sshd_template_file }}"
       dest: /etc/ssh/sshd_config
       owner: root
