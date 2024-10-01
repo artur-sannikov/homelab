@@ -331,14 +331,15 @@
         [Install]
         WantedBy=default.target
 - block:
-  - name: Create changedetection network
-    containers.podman.podman_network:
-        name: changedetection
-        quadlet_filename: changedetection
-        quadlet_dir: "{{ quadlet_dir }}"
-        disable_dns: false
-        state: quadlet
-    become_user: "{{ podman_user }}"
+  - name: Create changedetection pod
+    containers.podman.podman_pod:
+      name: changedetection
+      state: quadlet
+      quadlet_filename: changedetection
+      quadlet_dir: "{{ quadlet_dir }}"
+      infra_name: "changedetection-pod"
+      ports:
+        - "5000:5000"
 
   - name: Create chromium-playwright Quadlet
     containers.podman.podman_container:
@@ -347,10 +348,9 @@
       state: quadlet
       quadlet_filename: chromium-playwright
       quadlet_dir: "{{ quadlet_dir }}"
+      pod: changedetection.pod
       env_file:
         - chromium-playwright.env
-      network:
-        - changedetection.network
       shm_size: "2gb"
       quadlet_options:
         - "AutoUpdate=registry"
@@ -369,14 +369,11 @@
       state: quadlet
       quadlet_filename: changedetection
       quadlet_dir: "{{ quadlet_dir }}"
-      ports:
-        - "5000:5000"
+      pod: changedetection.pod
       volumes:
         - "{{ podman_appdata_dir }}/changedetection/datastore:/datastore:Z"
       env_file:
         - changedetection.env
-      network:
-        - changedetection.network
       quadlet_options:
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
@@ -547,8 +544,7 @@
     - readeck.service
     - freshrss.service
     - librechat-pod.service
-    - chromium-playwright.service
-    - changedetection.service
+    - changedetection-pod.service
     - myspeed.service
 
 - name: Open FirewalldD ports
