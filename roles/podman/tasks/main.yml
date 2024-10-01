@@ -473,13 +473,6 @@
         - |
           [Service]
           Restart=always
-        - |
-          [Unit]
-          Requires=authentik-postgres.service
-          Requires=authentik-redis.service
-          After=authentik-postgres.service
-          After=authentik-redis.service
-        - |
           [Install]
           WantedBy=default.target
 
@@ -503,12 +496,6 @@
         - |
           [Service]
           Restart=always
-        - |
-          [Unit]
-          Requires=authentik-postgres.service
-          Requires=authentik-redis.service
-          After=authentik-postgres.service
-          After=authentik-redis.service
         - |
           [Install]
           WantedBy=default.target
