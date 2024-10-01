@@ -98,6 +98,7 @@
         - |
           [Service]
           Restart=always
+          TimeoutStartSec=90
         - |
           [Install]
           WantedBy=default.target
@@ -126,6 +127,7 @@
         - |
           [Service]
           Restart=always
+          TimeoutStartSec=90
         - |
           [Install]
           WantedBy=default.target
@@ -157,14 +159,9 @@
         - "AutoUpdate=registry"
         - "NoNewPrivileges=true"
         - |
-          [Unit]
-          Requires=paperless-ngx-redis.service
-          Requires=paperless-ngx-postgres.service
-          After=paperless-ngx-redis.service
-          After=paperless-ngx-postgres.service
-        - |
           [Service]
           Restart=always
+          TimeoutStartSec=90
         - |
           [Install]
           WantedBy=default.target
