@@ -24,6 +24,7 @@
     - authentik/media
     - authentik/certs
     - myspeed/data
+    - actual-budget/data
 
 - name: Create folder for Podman containers
   ansible.builtin.file:
@@ -527,6 +528,27 @@
           [Install]
           WantedBy=default.target
 
+  - name: Create Actual Buget Quadlet
+    containers.podman.podman_container:
+      name: actual-budget
+      image: docker.io/actualbudget/actual-server:latest
+      state: quadlet
+      quadlet_filename: actual-budget
+      quadlet_dir: "{{ quadlet_dir }}"
+      ports:
+        - "5006:5006"
+      volumes:
+        - "{{ podman_appdata_dir }}/actual-budget/data:/data:Z"
+      quadlet_options:
+        - "AutoUpdate=registry"
+        - "NoNewPrivileges=true"
+        - |
+          [Service]
+          Restart=always
+        - |
+          [Install]
+          WantedBy=default.target
+
 - name: Restart services
   ansible.builtin.systemd:
     name: "{{ item }}"
@@ -546,6 +568,7 @@
     - librechat-pod.service
     - changedetection-pod.service
     - myspeed.service
+    - actual-budget.service
 
 - name: Open FirewalldD ports
   ansible.posix.firewalld:
@@ -564,5 +587,6 @@
     - "9000/tcp" # authentik http
     - "9443/tcp" # authentik https
     - "5216/tcp" # myspeed
+    - "5006/tcp" # actual-budget
   notify:
     - Reload FirewallD
