@@ -1,5 +1,5 @@
-podman_user: podman
-podman_group: podman
-podman_appdata_dir: /home/podman/appdata
-quadlet_dir: /home/podman/.config/containers/systemd
-grafana_db_passwd:
+monitoring_podman_user: podman
+monitoring_podman_group: podman
+monitoring_podman_appdata_dir: /home/podman/appdata
+monitoring_quadlet_dir: /home/podman/.config/containers/systemd
+monitoring_grafana_db_passwd:
