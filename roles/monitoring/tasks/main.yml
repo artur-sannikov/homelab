@@ -6,8 +6,8 @@
       register: podman_user_info
 
     - name: Extract podman UID
-      set_fact:
-        podman_user_id: "{{ podman_user_info.ansible_facts['getent_passwd'][podman_user][1]}}"
+      ansible.builtin.set_fact:
+        podman_user_id: "{{ podman_user_info.ansible_facts['getent_passwd'][podman_user][1] }}"
 
     - name: Get podman group information
       ansible.builtin.getent:
@@ -16,8 +16,8 @@
       register: podman_group_info
 
     - name: Extract podman GID
-      set_fact:
-        podman_group_id: "{{ podman_user_info.ansible_facts['getent_passwd'][podman_group][2]}}"
+      setansible.builtin.set_fact_fact:
+        podman_group_id: "{{ podman_user_info.ansible_facts['getent_passwd'][podman_group][2] }}"
 
 - name: Create folders for container config files
   ansible.builtin.file:
@@ -56,58 +56,58 @@
     - influxdb2.env
 
 - block:
-  - name: Create grafana pod
-    containers.podman.podman_pod:
-      name: grafana
-      state: quadlet
-      quadlet_filename: grafana
-      quadlet_dir: "{{ quadlet_dir }}"
-      infra_name: "grafana-pod"
-      ports:
-        - "3000:3000" # grafana
-        - "8086:8086" # influxdb
-        - "9090:9090" # prometheus
+    - name: Create grafana pod
+      containers.podman.podman_pod:
+        name: grafana
+        state: quadlet
+        quadlet_filename: grafana
+        quadlet_dir: "{{ quadlet_dir }}"
+        infra_name: "grafana-pod"
+        ports:
+          - "3000:3000" # grafana
+          - "8086:8086" # influxdb
+          - "9090:9090" # prometheus
 
-  - name: Create InfluxDB2 quadlet
-    containers.podman.podman_container:
-      name: influxdb2
-      image: docker.io/influxdb:latest
-      state: quadlet
-      quadlet_filename: influxdb2
-      quadlet_dir: "{{ quadlet_dir }}"
-      pod: grafana.pod
-      volumes:
-        - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
-        - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
-      env_file:
-        - influxdb2.env
-      quadlet_options:
-        - "AutoUpdate=registry"
-        - "NoNewPrivileges=true"
-        - |
-          [Service]
-          Restart=always
-        - |
-          [Install]
-          WantedBy=default.target
+    - name: Create InfluxDB2 quadlet
+      containers.podman.podman_container:
+        name: influxdb2
+        image: docker.io/influxdb:latest
+        state: quadlet
+        quadlet_filename: influxdb2
+        quadlet_dir: "{{ quadlet_dir }}"
+        pod: grafana.pod
+        volumes:
+          - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
+          - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
+        env_file:
+          - influxdb2.env
+        quadlet_options:
+          - "AutoUpdate=registry"
+          - "NoNewPrivileges=true"
+          - |
+            [Service]
+            Restart=always
+          - |
+            [Install]
+            WantedBy=default.target
 
-  - name: Change owner of grafana/data directories to podman_user_id:podman_group_id
-    # We need to run Grafana as podman user inside Grafana container
-    # Podman is unable to automatically change the owner of directories inside containers
-    # so we need to user podman unshare to run chown inside Podman's user namespace
-    ansible.builtin.shell: |
-      podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/grafana/data
-    become_user: "{{ podman_user }}"
+    - name: Change owner of grafana/data directories to podman_user_id:podman_group_id
+      # We need to run Grafana as podman user inside Grafana container
+      # Podman is unable to automatically change the owner of directories inside containers
+      # so we need to user podman unshare to run chown inside Podman's user namespace
+      ansible.builtin.shell: |
+        podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/grafana/data
+      become_user: "{{ podman_user }}"
 
-  - name: Create grafana secret for database password
-    containers.podman.podman_secret:
-      state: present
-      name: grafana_db_passwd
-      data: "{{ grafana_db_passwd }}"
-    become_user: "{{ podman_user }}"
+    - name: Create grafana secret for database password
+      containers.podman.podman_secret:
+        state: present
+        name: grafana_db_passwd
+        data: "{{ grafana_db_passwd }}"
+      become_user: "{{ podman_user }}"
 
-  - name: Create grafana-postgres quadlet
-    containers.podman.podman_container:
+    - name: Create grafana-postgres quadlet
+      containers.podman.podman_container:
         name: grafana-postgres
         image: docker.io/postgres:16.3-alpine
         state: quadlet
@@ -129,100 +129,100 @@
             [Install]
             WantedBy=default.target
 
-  - name: Create Grafana quadlet
-    containers.podman.podman_container:
-      name: grafana
-      image: docker.io/grafana/grafana:latest
-      state: quadlet
-      quadlet_filename: grafana
-      quadlet_dir: "{{ quadlet_dir }}"
-      pod: grafana.pod
-      user: "{{ podman_user_id }}"
-      volumes:
-        - "{{ podman_appdata_dir }}/grafana/data:/var/lib/grafana:Z"
-      env:
-        GF_INSTALL_PLUGINS: "grafana-clock-panel"
-      env_file:
-        - grafana.env
-      cap_drop:
-        - all
-      secrets:
-        - grafana_db_passwd
-      quadlet_options:
-        - "AutoUpdate=registry"
-        - "NoNewPrivileges=true"
-        - |
-          [Unit]
-          Requires=grafana-postgres.service
-          After=grafana-postgres.service
-        - |
-          [Service]
-          Restart=always
-        - |
-          [Install]
-          WantedBy=default.target
+    - name: Create Grafana quadlet
+      containers.podman.podman_container:
+        name: grafana
+        image: docker.io/grafana/grafana:latest
+        state: quadlet
+        quadlet_filename: grafana
+        quadlet_dir: "{{ quadlet_dir }}"
+        pod: grafana.pod
+        user: "{{ podman_user_id }}"
+        volumes:
+          - "{{ podman_appdata_dir }}/grafana/data:/var/lib/grafana:Z"
+        env:
+          GF_INSTALL_PLUGINS: "grafana-clock-panel"
+        env_file:
+          - grafana.env
+        cap_drop:
+          - all
+        secrets:
+          - grafana_db_passwd
+        quadlet_options:
+          - "AutoUpdate=registry"
+          - "NoNewPrivileges=true"
+          - |
+            [Unit]
+            Requires=grafana-postgres.service
+            After=grafana-postgres.service
+          - |
+            [Service]
+            Restart=always
+          - |
+            [Install]
+            WantedBy=default.target
 
-  - name: Create Prometheus quadlet
-    containers.podman.podman_container:
-      name: prometheus
-      image: docker.io/prom/prometheus:latest
-      state: quadlet
-      quadlet_filename: prometheus
-      quadlet_dir: "{{ quadlet_dir }}"
-      pod: grafana.pod
-      user: "{{ podman_user_id }}"
-      cap_drop:
-        - all
-      volumes:
-        - "{{ podman_appdata_dir }}/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml:Z,ro"
-        - "{{ podman_appdata_dir }}/prometheus/data:/prometheus:Z"
-      quadlet_options:
-        - "AutoUpdate=registry"
-        - "NoNewPrivileges=true"
-        - "Exec=--config.file=/etc/prometheus/prometheus.yaml"
-        - |
-          [Service]
-          Restart=always
-        - |
-          [Install]
-          WantedBy=default.target
+    - name: Create Prometheus quadlet
+      containers.podman.podman_container:
+        name: prometheus
+        image: docker.io/prom/prometheus:latest
+        state: quadlet
+        quadlet_filename: prometheus
+        quadlet_dir: "{{ quadlet_dir }}"
+        pod: grafana.pod
+        user: "{{ podman_user_id }}"
+        cap_drop:
+          - all
+        volumes:
+          - "{{ podman_appdata_dir }}/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml:Z,ro"
+          - "{{ podman_appdata_dir }}/prometheus/data:/prometheus:Z"
+        quadlet_options:
+          - "AutoUpdate=registry"
+          - "NoNewPrivileges=true"
+          - "Exec=--config.file=/etc/prometheus/prometheus.yaml"
+          - |
+            [Service]
+            Restart=always
+          - |
+            [Install]
+            WantedBy=default.target
 
-  - name: Copy Prometheus config file
-    ansible.builtin.copy:
-      src: prometheus.yaml
-      dest: "{{ podman_appdata_dir }}/prometheus/config"
-      owner: "{{ podman_user }}"
-      group: "{{ podman_group }}"
-      mode: "0644"
+    - name: Copy Prometheus config file
+      ansible.builtin.copy:
+        src: prometheus.yaml
+        dest: "{{ podman_appdata_dir }}/prometheus/config"
+        owner: "{{ podman_user }}"
+        group: "{{ podman_group }}"
+        mode: "0644"
 
-  - name: Change owner of prometheus/{config,data} directories to podman_user_id:podman_group_id
-    # We need to run Prometheus as podman user inside Prometheus container (same as Grafana)
-    # Podman is unable to automatically change the owner of directories inside containers
-    # so we need to user podman unshare to run chown inside Podman's user namespace
-    ansible.builtin.shell: |
-      podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/config;
-      podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/data
-    become_user: "{{ podman_user }}"
+    - name: Change owner of prometheus/{config,data} directories to podman_user_id:podman_group_id
+      # We need to run Prometheus as podman user inside Prometheus container (same as Grafana)
+      # Podman is unable to automatically change the owner of directories inside containers
+      # so we need to user podman unshare to run chown inside Podman's user namespace
+      ansible.builtin.shell: |
+        podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/config;
+        podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/data
+      become_user: "{{ podman_user }}"
 
-  - name: Create uptime-kuma quadlet
-    containers.podman.podman_container:
-      name: uptime-kuma
-      image: docker.io/louislam/uptime-kuma:1
-      state: quadlet
-      quadlet_filename: uptime-kuma
-      quadlet_dir: "{{ quadlet_dir }}"
-      ports:
-        - "3001:3001"
-      volumes:
-        - "{{ podman_appdata_dir }}/uptime-kuma/data:/app/data:Z"
-      quadlet_options:
-        - "NoNewPrivileges=true"
-        - |
-          [Service]
-          Restart=always
-        - |
-          [Install]
-          WantedBy=default.target
+    - name: Create uptime-kuma quadlet
+      containers.podman.podman_container:
+        name: uptime-kuma
+        image: docker.io/louislam/uptime-kuma:1
+        state: quadlet
+        quadlet_filename: uptime-kuma
+        quadlet_dir: "{{ quadlet_dir }}"
+        ports:
+          - "3001:3001"
+        volumes:
+          - "{{ podman_appdata_dir }}/uptime-kuma/data:/app/data:Z"
+        quadlet_options:
+          - "NoNewPrivileges=true"
+          - |
+            [Service]
+            Restart=always
+          - |
+            [Install]
+            WantedBy=default.target
 
 - name: Restart services
   ansible.builtin.systemd:
