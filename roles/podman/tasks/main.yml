@@ -399,7 +399,6 @@
       infra_name: "authentik-pod"
       ports:
         - "9000:9000"
-        - "9443:9443"
 
   - name: Create authentik-postgres Quadlet
     containers.podman.podman_container:
@@ -585,7 +584,6 @@
     - "3080/tcp" # librechat
     - "5000/tcp" # changedetection
     - "9000/tcp" # authentik http
-    - "9443/tcp" # authentik https
     - "5216/tcp" # myspeed
     - "5006/tcp" # actual-budget
   notify:
