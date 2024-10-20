@@ -40,17 +40,18 @@
         line: reboot = when-needed
       notify: Restart timer for automatic updates
       when: ansible_distribution == "Fedora"
+
 - block:
-    - name: Generate sshd_config from template
-      tags: fedora,ssh
-      ansible.builtin.template:
-        src: "{{ sshd_template_file }}"
-        dest: /etc/ssh/sshd_config
-        owner: root
-        group: root
-        mode: "0644"
-      notify: restart_sshd
-      when: ansible_distribution == "Fedora"
+  - name: Generate sshd_config from template
+    tags: fedora,ssh
+    ansible.builtin.template:
+      src: "{{ sshd_template_file }}"
+      dest: /etc/ssh/sshd_config
+      owner: root
+      group: root
+      mode: "0644"
+    notify: restart_sshd
+    when: ansible_distribution == "Fedora"
 
     - name: Set SSH crypto-policies
       tags: fedora,ssh
