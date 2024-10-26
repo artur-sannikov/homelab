@@ -35,18 +35,6 @@
     podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/grafana/data
   become_user: "{{ podman_user }}"
 
-- name: Create grafana pod
-  containers.podman.podman_pod:
-    name: grafana
-    state: quadlet
-    quadlet_filename: grafana
-    quadlet_dir: "{{ quadlet_dir }}"
-    infra_name: "grafana-pod"
-    ports:
-      - "3000:3000" # grafana
-      - "8086:8086" # influxdb
-      - "9090:9090" # prometheus
-
 - name: Create grafana-postgres quadlet
   containers.podman.podman_container:
     name: grafana-postgres
@@ -54,7 +42,7 @@
     state: quadlet
     quadlet_filename: grafana-postgres
     quadlet_dir: "{{ quadlet_dir }}"
-    pod: grafana.pod
+    pod: monitoring.pod
     volumes:
       - "{{ podman_appdata_dir }}/grafana/postgres:/var/lib/postgresql/data:Z"
     env_file:
@@ -77,7 +65,7 @@
     state: quadlet
     quadlet_filename: grafana
     quadlet_dir: "{{ quadlet_dir }}"
-    pod: grafana.pod
+    pod: monitoring.pod
     user: "{{ podman_user_id }}"
     volumes:
       - "{{ podman_appdata_dir }}/grafana/data:/var/lib/grafana:Z"
@@ -111,14 +99,3 @@
     state: enabled
   notify:
     - Reload firewalld
-
-- name: Restart Grafana service
-  ansible.builtin.systemd:
-    name: grafana.service
-    state: "restarted"
-    scope: "user"
-    daemon_reload: true
-    enabled: true
-  become_user: "{{ podman_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"

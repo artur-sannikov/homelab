@@ -1,0 +1,47 @@
+- name: Create folder for Uptime Kuma data files
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/uptime-kuma/data"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+
+- name: Create uptime-kuma quadlet
+  containers.podman.podman_container:
+    name: uptime-kuma
+    image: docker.io/louislam/uptime-kuma:1
+    state: quadlet
+    quadlet_filename: uptime-kuma
+    quadlet_dir: "{{ quadlet_dir }}"
+    ports:
+      - "3001:3001"
+    volumes:
+      - "{{ podman_appdata_dir }}/uptime-kuma/data:/app/data:Z"
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Open firewalld port for Uptime Kuma
+  ansible.posix.firewalld:
+    port: "3001/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart Uptime Kuma service
+  ansible.builtin.systemd:
+    name: uptime-kuma.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
