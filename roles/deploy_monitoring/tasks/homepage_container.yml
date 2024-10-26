@@ -39,8 +39,6 @@
     permanent: true
     immediate: true
     state: enabled
-  loop:
-
   notify:
     - Reload firewalld
 
