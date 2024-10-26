@@ -1,0 +1,57 @@
+- name: Create folders for Homepage config files
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+  loop:
+    - homepage/config
+    - homepage/icons
+
+- name: Create homepage quadlet
+  containers.podman.podman_container:
+    name: homepage
+    image: ghcr.io/gethomepage/homepage:latest
+    state: quadlet
+    quadlet_filename: homepage
+    quadlet_dir: "{{ monitoring_quadlet_dir }}"
+    ports:
+      - "3002:3000"
+    volumes:
+      - "{{ monitoring_podman_appdata_dir }}/homepage/config:/app/config:Z"
+      - "{{ monitoring_podman_appdata_dir }}/homepage/icons:/app/public/icons:Z"
+    env_file:
+      - homepage.env
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - "AutoUpdate = registry"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Open firewalld port for Homepage
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  loop:
+    - "3001/tcp" # uptime-kuma
+    - "3002/tcp" # homepage
+  notify:
+    - Reload FirewallD
+
+- name: Restart services
+  ansible.builtin.systemd:
+    name: homepage.servie
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ monitoring_podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
