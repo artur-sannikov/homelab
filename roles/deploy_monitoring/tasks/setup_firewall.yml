@@ -10,4 +10,4 @@
     - "9090/tcp" # prometheus
     - "3001/tcp" # uptime-kuma
   notify:
-    - Reload FirewallD
+    - Reload firewalld
