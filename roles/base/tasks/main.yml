@@ -53,15 +53,15 @@
     notify: restart_sshd
     when: ansible_distribution == "Fedora"
 
-    - name: Set SSH crypto-policies
-      tags: fedora,ssh
-      ansible.builtin.copy:
-        src: opensshserver.config
-        dest: /etc/crypto-policies/back-ends/opensshserver.config
-        follow: true
-        owner: root
-        group: root
-        mode: "0644"
-      notify:
-        - restart_sshd
-      when: ansible_distribution == "Fedora"
+  - name: Set SSH crypto-policies
+    tags: fedora,ssh
+    ansible.builtin.copy:
+      src: opensshserver.config
+      dest: /etc/crypto-policies/back-ends/opensshserver.config
+      follow: true
+      owner: root
+      group: root
+      mode: "0644"
+    notify:
+      - restart_sshd
+    when: ansible_distribution == "Fedora"
