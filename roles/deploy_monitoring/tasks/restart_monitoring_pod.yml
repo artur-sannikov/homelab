@@ -1,6 +1,6 @@
-- name: Restart services
+- name: Restart monitoring pod
   ansible.builtin.systemd:
-    name: "{{ item }}"
+    name: "monitoring-pod.service"
     state: "restarted"
     scope: "user"
     daemon_reload: true
@@ -8,6 +8,3 @@
   become_user: "{{ podman_user }}"
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
-  loop:
-    - grafana-pod.service
-    - uptime-kuma.service

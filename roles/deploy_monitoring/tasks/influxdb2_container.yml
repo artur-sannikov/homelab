@@ -11,7 +11,7 @@
 
 - name: Copy InfluxDB2 environment file
   ansible.builtin.copy:
-    src: "influxdb2"
+    src: "influxdb2.env"
     dest: "{{ quadlet_dir }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
@@ -24,7 +24,7 @@
     state: quadlet
     quadlet_filename: influxdb2
     quadlet_dir: "{{ quadlet_dir }}"
-    pod: grafana.pod
+    pod: monitoring.pod
     volumes:
       - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
       - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
@@ -46,14 +46,3 @@
     state: enabled
   notify:
     - Reload firewalld
-
-- name: Restart InfluxDB2 service
-  ansible.builtin.systemd:
-    name: influxdb.service
-    state: "restarted"
-    scope: "user"
-    daemon_reload: true
-    enabled: true
-  become_user: "{{ podman_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"

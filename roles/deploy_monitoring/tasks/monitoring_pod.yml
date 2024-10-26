@@ -1,0 +1,11 @@
+- name: Create monitoring pod
+  containers.podman.podman_pod:
+    name: monitoring
+    state: quadlet
+    quadlet_filename: monitoring
+    quadlet_dir: "{{ quadlet_dir }}"
+    infra_name: "monitoring-pod"
+    ports:
+      - "3000:3000" # grafana
+      - "8086:8086" # influxdb
+      - "9090:9090" # prometheus
