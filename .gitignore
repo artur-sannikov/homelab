@@ -16,5 +16,8 @@ roles/monitoring/files/grafana-postgres.env
 roles/monitoring/files/grafana.env
 roles/monitoring/files/prometheus.yaml
 roles/monitoring/files/homepage.env
+roles/deploy_monitoring/files/homepage.env
 roles/monitoring/files/settings.yaml
 roles/monitoring/files/services.yaml
+roles/deploy_monitoring/files/settings.yaml
+roles/deploy_monitoring/files/services.yaml

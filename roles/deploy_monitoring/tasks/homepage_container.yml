@@ -35,17 +35,16 @@
 
 - name: Open firewalld port for Homepage
   ansible.posix.firewalld:
-    port: "{{ item }}"
+    port: "3002/tcp"
     permanent: true
     immediate: true
     state: enabled
   loop:
-    - "3001/tcp" # uptime-kuma
-    - "3002/tcp" # homepage
-  notify:
-    - Reload FirewallD
 
-- name: Restart services
+  notify:
+    - Reload firewalld
+
+- name: Restart homepage service
   ansible.builtin.systemd:
     name: homepage.servie
     state: "restarted"
