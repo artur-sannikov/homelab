@@ -44,7 +44,7 @@
 
 - name: Restart homepage service
   ansible.builtin.systemd:
-    name: homepage.servie
+    name: homepage.service
     state: "restarted"
     scope: "user"
     daemon_reload: true
