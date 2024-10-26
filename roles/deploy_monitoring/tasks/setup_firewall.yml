@@ -5,9 +5,6 @@
     immediate: true
     state: enabled
   loop:
-    - "3000/tcp" # grafana
-    - "8086/tcp" # influxdb2
-    - "9090/tcp" # prometheus
     - "3001/tcp" # uptime-kuma
   notify:
     - Reload firewalld

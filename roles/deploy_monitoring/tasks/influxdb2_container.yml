@@ -1,3 +1,22 @@
+- name: Create folders for InfluxDB2 config files
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+  loop:
+    - influxdb2/config
+    - influxdb2/data
+
+- name: Copy InfluxDB2 environment file
+  ansible.builtin.copy:
+    src: "influxdb2"
+    dest: "{{ quadlet_dir }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+
 - name: Create InfluxDB2 quadlet
   containers.podman.podman_container:
     name: influxdb2
@@ -18,3 +37,23 @@
       - |
         [Install]
         WantedBy=default.target
+
+- name: Open firewalld port for InfluxDB2
+  ansible.posix.firewalld:
+    port: "8086/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart InfluxDB2 service
+  ansible.builtin.systemd:
+    name: influxdb.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"

@@ -5,8 +5,8 @@
   register: podman_user_info
 
 - name: Extract podman UID
-  set_fact:
-    podman_user_id: "{{ podman_user_info.ansible_facts['getent_passwd'][podman_user][1]}}"
+  ansible.builtin.set_fact:
+    podman_user_id: "{{ podman_user_info.ansible_facts['getent_passwd'][podman_user][1] }}"
 
 - name: Get podman group information
   ansible.builtin.getent:
@@ -15,5 +15,5 @@
   register: podman_group_info
 
 - name: Extract podman GID
-  set_fact:
-    podman_group_id: "{{ podman_user_info.ansible_facts['getent_passwd'][podman_group][2]}}"
+  ansible.builtin.set_fact:
+    podman_group_id: "{{ podman_user_info.ansible_facts['getent_passwd'][podman_group][2] }}"
