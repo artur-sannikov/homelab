@@ -1,4 +1,26 @@
-- name: Create grafana secret for database password
+- name: Create folders for Grafana container config files
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+  loop:
+    - grafana/postgres
+    - grafana/data
+
+- name: Copy Grafana environment files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ quadlet_dir }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+  loop:
+    - grafana-postgres.env
+    - grafana.env
+
+- name: Create Grafana secret for database password
   containers.podman.podman_secret:
     state: present
     name: grafana_db_passwd
@@ -13,28 +35,40 @@
     podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/grafana/data
   become_user: "{{ podman_user }}"
 
+- name: Create grafana pod
+  containers.podman.podman_pod:
+    name: grafana
+    state: quadlet
+    quadlet_filename: grafana
+    quadlet_dir: "{{ quadlet_dir }}"
+    infra_name: "grafana-pod"
+    ports:
+      - "3000:3000" # grafana
+      - "8086:8086" # influxdb
+      - "9090:9090" # prometheus
+
 - name: Create grafana-postgres quadlet
   containers.podman.podman_container:
-      name: grafana-postgres
-      image: docker.io/postgres:16.3
-      state: quadlet
-      quadlet_filename: grafana-postgres
-      quadlet_dir: "{{ quadlet_dir }}"
-      pod: grafana.pod
-      volumes:
-        - "{{ podman_appdata_dir }}/grafana/postgres:/var/lib/postgresql/data:Z"
-      env_file:
-        - grafana-postgres.env
-      secrets:
-        - grafana_db_passwd
-      quadlet_options:
-        - "NoNewPrivileges=true"
-        - |
-          [Service]
-          Restart=always
-        - |
-          [Install]
-          WantedBy=default.target
+    name: grafana-postgres
+    image: docker.io/postgres:16.3
+    state: quadlet
+    quadlet_filename: grafana-postgres
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: grafana.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/grafana/postgres:/var/lib/postgresql/data:Z"
+    env_file:
+      - grafana-postgres.env
+    secrets:
+      - grafana_db_passwd
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
 
 - name: Create Grafana quadlet
   containers.podman.podman_container:
@@ -68,3 +102,23 @@
       - |
         [Install]
         WantedBy=default.target
+
+- name: Open firewalld port for Grafana
+  ansible.posix.firewalld:
+    port: "3000/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart Grafana service
+  ansible.builtin.systemd:
+    name: grafana.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ monitoring_podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"

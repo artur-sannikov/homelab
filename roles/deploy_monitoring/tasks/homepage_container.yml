@@ -15,12 +15,12 @@
     image: ghcr.io/gethomepage/homepage:latest
     state: quadlet
     quadlet_filename: homepage
-    quadlet_dir: "{{ monitoring_quadlet_dir }}"
+    quadlet_dir: "{{ quadlet_dir }}"
     ports:
       - "3002:3000"
     volumes:
-      - "{{ monitoring_podman_appdata_dir }}/homepage/config:/app/config:Z"
-      - "{{ monitoring_podman_appdata_dir }}/homepage/icons:/app/public/icons:Z"
+      - "{{ podman_appdata_dir }}/homepage/config:/app/config:Z"
+      - "{{ podman_appdata_dir }}/homepage/icons:/app/public/icons:Z"
     env_file:
       - homepage.env
     quadlet_options:
@@ -49,6 +49,6 @@
     scope: "user"
     daemon_reload: true
     enabled: true
-  become_user: "{{ monitoring_podman_user }}"
+  become_user: "{{ podman_user }}"
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
