@@ -9,7 +9,26 @@
     - homepage/config
     - homepage/icons
 
-- name: Create homepage quadlet
+- name: Copy Homepage environment files
+  ansible.builtin.copy:
+    src: "homepage.env"
+    dest: "{{ quadlet_dir }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+
+- name: Copy Homepage config files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ podman_appdata_dir }}/homepage/config"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0644"
+  loop:
+    - services.yaml
+    - settings.yaml
+
+- name: Create Homepage quadlet
   containers.podman.podman_container:
     name: homepage
     image: ghcr.io/gethomepage/homepage:latest
