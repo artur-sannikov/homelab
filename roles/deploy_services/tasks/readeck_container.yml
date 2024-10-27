@@ -1,0 +1,47 @@
+- name: Create folders for Readeck data files
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/readeck/data"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+
+- name: Create readeck Quadlet
+  containers.podman.podman_container:
+    name: readeck
+    image: codeberg.org/readeck/readeck:latest
+    state: quadlet
+    quadlet_filename: readeck
+    quadlet_dir: "{{ quadlet_dir }}"
+    ports:
+      - "8000:8000"
+    volumes:
+      - "{{ podman_appdata_dir }}/readeck/data:/readeck:Z"
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Open firewalld port for Readeck
+  ansible.posix.firewalld:
+    port: "8000/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart Readeck service
+  ansible.builtin.systemd:
+    name: readeck.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
