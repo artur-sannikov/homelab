@@ -1,0 +1,67 @@
+- name: Create folder for Stirling-PDF logs
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/stirling-pdf/logs"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+
+- name: Generate stirling-pdf.env from template
+  ansible.builtin.template:
+    src: "{{ stirling_pdf_env_template_file }}"
+    dest: "{{ quadlet_dir }}/stirling-pdf.env"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+
+- name: Create Stirling-PDF Quadlet
+  containers.podman.podman_container:
+    name: stirling-pdf
+    image: docker.io/frooodle/s-pdf:latest
+    state: quadlet
+    quadlet_filename: stirling-pdf
+    quadlet_dir: "{{ quadlet_dir }}"
+    ports:
+      - "8080:8080"
+    volumes:
+      - "{{ podman_appdata_dir }}/stirling-pdf/logs:/logs:Z"
+    env_file:
+      - stirling-pdf.env
+    cap_drop:
+      - all
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FSETID
+      - FOWNER
+      - SETUID
+      - SETGID
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Open firewalld port for Stirling-PDF
+  ansible.posix.firewalld:
+    port: "8080/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart Stirling-PDF service
+  ansible.builtin.systemd:
+    name: stirling-pdf.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
