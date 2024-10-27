@@ -13,14 +13,25 @@
     - paperless-ngx/export
     - paperless-ngx/consume
 
-- name: Create paperless database password
+- name: Copy Paperless-ngx environment files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ quadlet_dir }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+  loop:
+    - paperless-ngx-redis.env
+    - paperless-ngx-postgres.env
+
+- name: Create Paperless-ngx database password
   containers.podman.podman_secret:
     state: present
     name: paperless_db_paperless_passwd
     data: "{{ paperless_db_paperless_passwd }}"
   become_user: "{{ podman_user }}"
 
-- name: Create paperless secret paperless_secret_key
+- name: Create Paperless-ngx secret paperless_secret_key
   containers.podman.podman_secret:
     state: present
     name: paperless_secret_key
@@ -135,7 +146,16 @@
         [Install]
         WantedBy=default.target
 
-- name: Restart Paperless-ngx service
+- name: Open firewalld port for Paperless-ngx
+  ansible.posix.firewalld:
+    port: "8001/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart Paperless-ngx pod service
   ansible.builtin.systemd:
     name: paperless-ngx-pod.service
     state: "restarted"
