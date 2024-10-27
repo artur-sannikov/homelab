@@ -15,6 +15,7 @@ DOMAIN: https://librechat.example.com
 PAPERLESS_URL: https://paperless.example.com
 paperless_ngx_env_template_file: paperless-ngx.env.j2
 stirling_pdf_env_template_file: stirling-pdf.env.j2
+librechat_env_template_file: librechat.env.j2
 STIRLING_PDF_SECURITY_OAUTH2_ISSUER: "https://authentik.example.com/application/o/stirling-pdf/"
 STIRLING_PDF_SECURITY_OAUTH2_CLIENTID:
 STIRLING_PDF_SECURITY_OAUTH2_CLIENTSECRET:
