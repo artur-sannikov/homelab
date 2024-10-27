@@ -1,0 +1,58 @@
+- name: Create folder for FreshRSS data
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/freshrss/data"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+
+- name: Copy FreshRSS environment file
+  ansible.builtin.copy:
+    src: freshrss.env
+    dest: "{{ quadlet_dir }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+
+- name: Create FreshRSS Quadlet
+  containers.podman.podman_container:
+    name: freshrss
+    image: docker.io/freshrss/freshrss:latest
+    state: quadlet
+    quadlet_filename: freshrss
+    quadlet_dir: "{{ quadlet_dir }}"
+    ports:
+      - "8089:80"
+    volumes:
+      - "{{ podman_appdata_dir }}/freshrss/data:/var/www/FreshRSS/data:Z"
+    env_file:
+      - freshrss.env
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Open firewalld port for FreshRSS
+  ansible.posix.firewalld:
+    port: "8089/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart FreshRSS service
+  ansible.builtin.systemd:
+    name: freshrss.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
