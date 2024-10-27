@@ -1,0 +1,95 @@
+- name: Create folder for Changedetection data
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/changedetection/datastore"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+
+- name: Copy Changedetection environment files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ quadlet_dir }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+  loop:
+    - changedetection.env
+    - chromium-playwright.env
+
+- name: Create changedetection pod
+  containers.podman.podman_pod:
+    name: changedetection
+    state: quadlet
+    quadlet_filename: changedetection
+    quadlet_dir: "{{ quadlet_dir }}"
+    infra_name: "changedetection-pod"
+    ports:
+      - "5000:5000"
+
+- name: Create chromium-playwright Quadlet
+  containers.podman.podman_container:
+    name: chromium-playwright
+    image: ghcr.io/browserless/chromium
+    state: quadlet
+    quadlet_filename: chromium-playwright
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: changedetection.pod
+    env_file:
+      - chromium-playwright.env
+    shm_size: "2gb"
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Create changedetection Quadlet
+  containers.podman.podman_container:
+    name: changedetection
+    image: ghcr.io/dgtlmoon/changedetection.io
+    state: quadlet
+    quadlet_filename: changedetection
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: changedetection.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/changedetection/datastore:/datastore:Z"
+    env_file:
+      - changedetection.env
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Unit]
+        Requires=chromium-playwright.service
+        After=chromium-playwright.service
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Open firewalld port for Changedetection
+  ansible.posix.firewalld:
+    port: "5000/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart Changedetection pod service
+  ansible.builtin.systemd:
+    name: changedetection-pod.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
