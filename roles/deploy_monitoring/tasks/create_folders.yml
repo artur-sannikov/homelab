@@ -14,14 +14,6 @@
     - prometheus/data
     - uptime-kuma/data
 
-- name: Create folder for Podman containers
-  ansible.builtin.file:
-    path: "{{ quadlet_dir }}"
-    state: directory
-    owner: "{{ podman_user }}"
-    group: "{{ podman_group }}"
-    mode: "0755"
-
 - name: Copy Podman environment files
   ansible.builtin.copy:
     src: "{{ item }}"

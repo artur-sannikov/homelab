@@ -53,3 +53,11 @@
   become_user: "{{ podman_user }}"
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
+
+- name: Create folder for Podman containers
+  ansible.builtin.file:
+    path: "{{ quadlet_dir }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
