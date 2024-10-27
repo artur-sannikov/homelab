@@ -21,3 +21,4 @@ roles/monitoring/files/settings.yaml
 roles/monitoring/files/services.yaml
 roles/deploy_monitoring/files/settings.yaml
 roles/deploy_monitoring/files/services.yaml
+roles/deploy_services/vars/main.yml
