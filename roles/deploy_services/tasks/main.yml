@@ -3,3 +3,4 @@
 - ansible.builtin.include_tasks: readeck_container.yml
 - ansible.builtin.include_tasks: stirling_pdf_container.yml
 - ansible.builtin.include_tasks: freshrss_container.yml
+- ansible.builtin.include_tasks: librechat_container.yml
