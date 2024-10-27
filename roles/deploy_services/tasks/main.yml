@@ -5,3 +5,4 @@
 - ansible.builtin.include_tasks: freshrss_container.yml
 - ansible.builtin.include_tasks: librechat_container.yml
 - ansible.builtin.include_tasks: changedetection_container.yml
+- ansible.builtin.include_tasks: authentik_container.yml

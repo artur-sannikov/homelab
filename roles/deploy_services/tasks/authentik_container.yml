@@ -1,0 +1,164 @@
+- name: Create folder for FreshRSS data
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+  loop:
+    - authentik/postgres/data
+    - authentik/redis/data
+    - authentik/media
+    - authentik/certs
+
+- name: Generate authentik.env from template
+  ansible.builtin.template:
+    src: "{{ authentik_env_template_file }}"
+    dest: "{{ quadlet_dir }}/authentik.env"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+
+- name: Generate authentik-postgres.env from template
+  ansible.builtin.template:
+    src: "{{ authentik_postgres_env_template_file }}"
+    dest: "{{ quadlet_dir }}/authentik-postgres.env"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+
+- name: Create authentik pod
+  containers.podman.podman_pod:
+    name: authentik
+    state: quadlet
+    quadlet_filename: authentik
+    quadlet_dir: "{{ quadlet_dir }}"
+    infra_name: "authentik-pod"
+    ports:
+      - "9000:9000"
+
+- name: Create authentik-postgres Quadlet
+  containers.podman.podman_container:
+    name: authentik-postgres
+    image: docker.io/library/postgres:16.3
+    state: quadlet
+    quadlet_filename: authentik-postgres
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: authentik.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/authentik/postgres/data:/var/lib/postgresql/data:Z"
+    env_file:
+      - authentik-postgres.env
+    health_cmd: "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"
+    health_startup_interval: 30s
+    health_startup_retries: 5
+    healthcheck_start_period: 20s
+    healthcheck_timeout: 10s
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Create authentik-redis Quadlet
+  containers.podman.podman_container:
+    name: authentik-redis
+    image: docker.io/library/redis:7.4.0
+    state: quadlet
+    quadlet_filename: authentik-redis
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: authentik.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/authentik/redis/data:/data:Z"
+    health_cmd: "redis-cli ping | grep PONG"
+    health_startup_interval: 30s
+    health_startup_retries: 5
+    healthcheck_start_period: 20s
+    healthcheck_timeout: 10s
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - "Exec=--save 60 1 --loglevel warning"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Create authentik-server Quadlet
+  containers.podman.podman_container:
+    name: authentik-server
+    image: ghcr.io/goauthentik/server:latest
+    state: quadlet
+    quadlet_filename: authentik-server
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: authentik.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/authentik/media:/media:z"
+    env_file:
+      - authentik.env
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - "Exec=server"
+      - |
+        [Service]
+        Restart=always
+        [Install]
+        WantedBy=default.target
+
+- name: Create authentik-worker Quadlet
+  containers.podman.podman_container:
+    name: authentik-worker
+    image: ghcr.io/goauthentik/server:latest
+    state: quadlet
+    quadlet_filename: authentik-worker
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: authentik.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/authentik/media:/media:z"
+      - "{{ podman_appdata_dir }}/authentik/certs:/certs:Z"
+    env_file:
+      - authentik.env
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - "Exec=worker"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Change owner of authentik/{media,certs} directories to 1000:1000
+  # authentik-server and authentik-worker run as authentik user with UID 1000
+  # inside these containers
+  # Podman is unable to automatically change owner of the directories inside the containers
+  # so we need to run podman unshare to run chown inside Podman's user namespace
+  ansible.builtin.shell: |
+    podman unshare chown -R 1000:1000 {{ podman_appdata_dir }}/authentik
+  become_user: "{{ podman_user }}"
+
+- name: Open firewalld port for Authentik
+  ansible.posix.firewalld:
+    port: "9000/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart Authentik service
+  ansible.builtin.systemd:
+    name: authentik-pod.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
