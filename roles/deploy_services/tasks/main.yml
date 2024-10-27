@@ -1,2 +1,2 @@
 ---
-- include_tasks: paperless_ngx_container.yml
+- ansible.builtin.include_tasks: paperless_ngx_container.yml
