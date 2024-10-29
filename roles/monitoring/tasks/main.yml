@@ -2,29 +2,29 @@
     - name: Get podman user information
       ansible.builtin.getent:
         database: passwd
-        key: "{{ monitoring_podman_user }}"
+        key: "{{ podman_user }}"
       register: podman_user_info
 
     - name: Extract podman UID
       ansible.builtin.set_fact:
-        podman_user_id: "{{ podman_user_info.ansible_facts['getent_passwd'][monitoring_podman_user][1] }}"
+        podman_user_id: "{{ podman_user_info.ansible_facts['getent_passwd'][podman_user][1] }}"
 
     - name: Get podman group information
       ansible.builtin.getent:
         database: group
-        key: "{{ monitoring_podman_group }}"
+        key: "{{ podman_group }}"
       register: podman_group_info
 
     - name: Extract podman GID
       ansible.builtin.set_fact:
-        podman_group_id: "{{ podman_user_info.ansible_facts['getent_passwd'][monitoring_podman_user][2] }}"
+        podman_group_id: "{{ podman_user_info.ansible_facts['getent_passwd'][podman_user][2] }}"
 
 - name: Create folders for container config files
   ansible.builtin.file:
-    path: "{{ monitoring_podman_appdata_dir }}/{{ item }}"
+    path: "{{ podman_appdata_dir }}/{{ item }}"
     state: directory
-    owner: "{{ monitoring_podman_user }}"
-    group: "{{ monitoring_podman_group }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
     mode: "0755"
   loop:
     - influxdb2/config
@@ -39,18 +39,18 @@
 
 - name: Create folder for Podman containers
   ansible.builtin.file:
-    path: "{{ monitoring_quadlet_dir }}"
+    path: "{{ quadlet_dir }}"
     state: directory
-    owner: "{{ monitoring_podman_user }}"
-    group: "{{ monitoring_podman_group }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
     mode: "0755"
 
 - name: Copy Podman environment files
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "{{ monitoring_quadlet_dir }}"
-    owner: "{{ monitoring_podman_user }}"
-    group: "{{ monitoring_podman_group }}"
+    dest: "{{ quadlet_dir }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
     mode: "0600"
   loop:
     - grafana-postgres.env
@@ -61,9 +61,9 @@
 - name: Copy Homepage config files
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "{{ monitoring_podman_appdata_dir }}/homepage/config"
-    owner: "{{ monitoring_podman_user }}"
-    group: "{{ monitoring_podman_group }}"
+    dest: "{{ podman_appdata_dir }}/homepage/config"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
     mode: "0600"
   loop:
     - settings.yaml
@@ -75,7 +75,7 @@
         name: grafana
         state: quadlet
         quadlet_filename: grafana
-        quadlet_dir: "{{ monitoring_quadlet_dir }}"
+        quadlet_dir: "{{ quadlet_dir }}"
         infra_name: "grafana-pod"
         ports:
           - "3000:3000" # grafana
@@ -88,11 +88,11 @@
         image: docker.io/influxdb:latest
         state: quadlet
         quadlet_filename: influxdb2
-        quadlet_dir: "{{ monitoring_quadlet_dir }}"
+        quadlet_dir: "{{ quadlet_dir }}"
         pod: grafana.pod
         volumes:
-          - "{{ monitoring_podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
-          - "{{ monitoring_podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
+          - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
+          - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
         env_file:
           - influxdb2.env
         quadlet_options:
@@ -110,15 +110,15 @@
       # Podman is unable to automatically change the owner of directories inside containers
       # so we need to user podman unshare to run chown inside Podman's user namespace
       ansible.builtin.shell: |
-        podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ monitoring_podman_appdata_dir }}/grafana/data
-      become_user: "{{ monitoring_podman_user }}"
+        podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/grafana/data
+      become_user: "{{ podman_user }}"
 
     - name: Create grafana secret for database password
       containers.podman.podman_secret:
         state: present
         name: grafana_db_passwd
         data: "{{ monitoring_grafana_db_passwd }}"
-      become_user: "{{ monitoring_podman_user }}"
+      become_user: "{{ podman_user }}"
 
     - name: Create grafana-postgres quadlet
       containers.podman.podman_container:
@@ -126,10 +126,10 @@
         image: docker.io/postgres:16.3-alpine
         state: quadlet
         quadlet_filename: grafana-postgres
-        quadlet_dir: "{{ monitoring_quadlet_dir }}"
+        quadlet_dir: "{{ quadlet_dir }}"
         pod: grafana.pod
         volumes:
-          - "{{ monitoring_podman_appdata_dir }}/grafana/postgres:/var/lib/postgresql/data:Z"
+          - "{{ podman_appdata_dir }}/grafana/postgres:/var/lib/postgresql/data:Z"
         env_file:
           - grafana-postgres.env
         secrets:
@@ -149,11 +149,11 @@
         image: docker.io/grafana/grafana:latest
         state: quadlet
         quadlet_filename: grafana
-        quadlet_dir: "{{ monitoring_quadlet_dir }}"
+        quadlet_dir: "{{ quadlet_dir }}"
         pod: grafana.pod
         user: "{{ podman_user_id }}"
         volumes:
-          - "{{ monitoring_podman_appdata_dir }}/grafana/data:/var/lib/grafana:Z"
+          - "{{ podman_appdata_dir }}/grafana/data:/var/lib/grafana:Z"
         env:
           GF_INSTALL_PLUGINS: "grafana-clock-panel"
         env_file:
@@ -182,14 +182,14 @@
         image: docker.io/prom/prometheus:latest
         state: quadlet
         quadlet_filename: prometheus
-        quadlet_dir: "{{ monitoring_quadlet_dir }}"
+        quadlet_dir: "{{ quadlet_dir }}"
         pod: grafana.pod
         user: "{{ podman_user_id }}"
         cap_drop:
           - all
         volumes:
-          - "{{ monitoring_podman_appdata_dir }}/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml:Z,ro"
-          - "{{ monitoring_podman_appdata_dir }}/prometheus/data:/prometheus:Z"
+          - "{{ podman_appdata_dir }}/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml:Z,ro"
+          - "{{ podman_appdata_dir }}/prometheus/data:/prometheus:Z"
         quadlet_options:
           - "AutoUpdate=registry"
           - "NoNewPrivileges=true"
@@ -204,9 +204,9 @@
     - name: Copy Prometheus config file
       ansible.builtin.copy:
         src: prometheus.yaml
-        dest: "{{ monitoring_podman_appdata_dir }}/prometheus/config"
-        owner: "{{ monitoring_podman_user }}"
-        group: "{{ monitoring_podman_group }}"
+        dest: "{{ podman_appdata_dir }}/prometheus/config"
+        owner: "{{ podman_user }}"
+        group: "{{ podman_group }}"
         mode: "0644"
 
     - name: Change owner of prometheus/{config,data} directories to podman_user_id:podman_group_id
@@ -214,9 +214,9 @@
       # Podman is unable to automatically change the owner of directories inside containers
       # so we need to user podman unshare to run chown inside Podman's user namespace
       ansible.builtin.shell: |
-        podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ monitoring_podman_appdata_dir }}/prometheus/config;
-        podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ monitoring_podman_appdata_dir }}/prometheus/data
-      become_user: "{{ monitoring_podman_user }}"
+        podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/config;
+        podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/data
+      become_user: "{{ podman_user }}"
 
     - name: Create uptime-kuma quadlet
       containers.podman.podman_container:
@@ -224,11 +224,11 @@
         image: docker.io/louislam/uptime-kuma:1
         state: quadlet
         quadlet_filename: uptime-kuma
-        quadlet_dir: "{{ monitoring_quadlet_dir }}"
+        quadlet_dir: "{{ quadlet_dir }}"
         ports:
           - "3001:3001"
         volumes:
-          - "{{ monitoring_podman_appdata_dir }}/uptime-kuma/data:/app/data:Z"
+          - "{{ podman_appdata_dir }}/uptime-kuma/data:/app/data:Z"
         quadlet_options:
           - "NoNewPrivileges=true"
           - |
@@ -244,12 +244,12 @@
         image: ghcr.io/gethomepage/homepage:latest
         state: quadlet
         quadlet_filename: homepage
-        quadlet_dir: "{{ monitoring_quadlet_dir }}"
+        quadlet_dir: "{{ quadlet_dir }}"
         ports:
           - "3002:3000"
         volumes:
-          - "{{ monitoring_podman_appdata_dir }}/homepage/config:/app/config:Z"
-          - "{{ monitoring_podman_appdata_dir }}/homepage/icons:/app/public/icons:Z"
+          - "{{ podman_appdata_dir }}/homepage/config:/app/config:Z"
+          - "{{ podman_appdata_dir }}/homepage/icons:/app/public/icons:Z"
         env_file:
           - homepage.env
         quadlet_options:
@@ -269,7 +269,7 @@
     scope: "user"
     daemon_reload: true
     enabled: true
-  become_user: "{{ monitoring_podman_user }}"
+  become_user: "{{ podman_user }}"
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
   loop:
