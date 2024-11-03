@@ -18,50 +18,46 @@
   when: ansible_distribution == "Fedora"
 
 - block:
-    - name: Enable a timer unit for dnf-automatic
+    - name: Enable a timer unit for dnf5-automatic
       ansible.builtin.systemd_service:
-        name: dnf-automatic.timer
+        name: dnf5-automatic.timer
         state: started
         enabled: true
       when: ansible_distribution == "Fedora"
 
-    - name: Apply updates automatically
-      ansible.builtin.lineinfile:
-        path: /etc/dnf/automatic.conf
-        regexp: ^apply_updates = no
-        line: apply_updates = yes
-      notify: Restart timer for automatic updates
-      when: ansible_distribution == "Fedora"
-
-    - name: Reboot after updates if needed
-      ansible.builtin.lineinfile:
-        path: /etc/dnf/automatic.conf
-        regexp: ^reboot = no
-        line: reboot = when-needed
+    - name: Creating configuration file for dnf5-automatic
+      ansible.builtin.copy:
+        dest: /etc/dnf/automatic.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          apply_updates = yes
+          reboot = when-needed
       notify: Restart timer for automatic updates
       when: ansible_distribution == "Fedora"
 
 - block:
-  - name: Generate sshd_config from template
-    tags: fedora,ssh
-    ansible.builtin.template:
-      src: "{{ sshd_template_file }}"
-      dest: /etc/ssh/sshd_config
-      owner: root
-      group: root
-      mode: "0644"
-    notify: restart_sshd
-    when: ansible_distribution == "Fedora"
+    - name: Generate sshd_config from template
+      tags: fedora,ssh
+      ansible.builtin.template:
+        src: "{{ sshd_template_file }}"
+        dest: /etc/ssh/sshd_config
+        owner: root
+        group: root
+        mode: "0644"
+      notify: restart_sshd
+      when: ansible_distribution == "Fedora"
 
-  - name: Set SSH crypto-policies
-    tags: fedora,ssh
-    ansible.builtin.copy:
-      src: opensshserver.config
-      dest: /etc/crypto-policies/back-ends/opensshserver.config
-      follow: true
-      owner: root
-      group: root
-      mode: "0644"
-    notify:
-      - restart_sshd
-    when: ansible_distribution == "Fedora"
+    - name: Set SSH crypto-policies
+      tags: fedora,ssh
+      ansible.builtin.copy:
+        src: opensshserver.config
+        dest: /etc/crypto-policies/back-ends/opensshserver.config
+        follow: true
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - restart_sshd
+      when: ansible_distribution == "Fedora"
