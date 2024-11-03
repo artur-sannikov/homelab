@@ -6,6 +6,6 @@
 
 - name: Restart timer for automatic updates
   ansible.builtin.systemd:
-    name: dnf-automatic.timer
+    name: dnf5-automatic.timer
     state: "restarted"
     enabled: true
