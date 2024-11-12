@@ -32,6 +32,7 @@
         group: root
         mode: "0644"
         content: |
+          [commands]
           apply_updates = yes
           reboot = when-needed
       notify: Restart timer for automatic updates
