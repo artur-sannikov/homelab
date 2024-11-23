@@ -1,5 +1,5 @@
 ---
-- hosts: monitoring,podman
+- hosts: monitoring
   become: true
   roles:
     - base
