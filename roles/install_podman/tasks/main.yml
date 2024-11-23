@@ -6,7 +6,7 @@
       - acl
       - podman
       - passt
-    state: latest
+    state: present
 
 - name: Podman user management
   block:
