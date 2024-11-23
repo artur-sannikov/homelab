@@ -1,5 +1,5 @@
 ---
-- hosts: services,podman
+- hosts: services
   become: true
   roles:
     - base
