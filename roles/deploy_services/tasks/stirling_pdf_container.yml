@@ -17,7 +17,7 @@
 - name: Create Stirling-PDF Quadlet
   containers.podman.podman_container:
     name: stirling-pdf
-    image: docker.io/frooodle/s-pdf:latest
+    image: docker.io/stirlingtools/stirling-pdf:latest
     state: quadlet
     quadlet_filename: stirling-pdf
     quadlet_dir: "{{ quadlet_dir }}"
