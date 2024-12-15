@@ -7,8 +7,15 @@
     mode: "0755"
   loop:
     - librechat/config
+    - librechat/logs
     - librechat/mongodb/data
     - librechat/meilisearch/data
+
+- name: Change logs folder permissions to 777
+  # See https://github.com/danny-avila/LibreChat/discussions/2141#discussioncomment-8845459
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/librechat/logs"
+    mode: "1777"
 
 - name: Create Librechat pod
   containers.podman.podman_pod:
@@ -28,6 +35,14 @@
     group: "{{ podman_group }}"
     mode: "0600"
 
+- name: Generate librechat.yaml from template
+  ansible.builtin.template:
+    src: "{{ librechat_yaml_template_file }}"
+    dest: "{{ podman_appdata_dir }}/librechat/config/librechat.yaml"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0644"
+
 - name: Create LibreChat Quadlet
   containers.podman.podman_container:
     name: librechat
@@ -36,6 +51,9 @@
     quadlet_filename: librechat
     quadlet_dir: "{{ quadlet_dir }}"
     pod: librechat.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/librechat/config/librechat.yaml:/app/librechat.yaml:Z,ro"
+      - "{{ podman_appdata_dir }}/librechat/logs:/app/api/logs:Z"
     env_file:
       - librechat.env
     quadlet_options:

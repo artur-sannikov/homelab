@@ -13,6 +13,7 @@ paperless_ngx_env_template_file: paperless-ngx.env.j2
 ### Librechat ###
 HUGGINGFACE_TOKEN:
 OPENAI_API_KEY:
+OPENROUTER_KEY:
 CREDS_KEY:
 CREDS_IV:
 MEILI_MASTER_KEY:
@@ -20,7 +21,7 @@ JWT_SECRET:
 JWT_REFRESH_SECRET:
 DOMAIN: https://librechat.example.com
 librechat_env_template_file: librechat.env.j2
-
+librechat_yaml_template_file: librechat.yaml.j2
 
 ### Authentik ###
 authentik_env_template_file: authentik.env.j2

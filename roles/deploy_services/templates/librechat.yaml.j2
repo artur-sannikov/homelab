@@ -1,0 +1,29 @@
+# For more information, see the Configuration Guide:
+# https://www.librechat.ai/docs/configuration/librechat_yaml
+
+# Configuration version (required)
+version: 1.1.5
+
+# Cache settings: Set to true to enable caching
+cache: true
+
+# Custom interface configuration
+interface:
+  # Privacy policy settings
+  privacyPolicy:
+    externalUrl: 'https://librechat.ai/privacy-policy'
+    openNewTab: true
+
+endpoints:
+  custom:
+    - name: "OpenRouter"
+      apiKey: "${OPENROUTER_KEY}"
+      baseURL: "https://openrouter.ai/api/v1"
+      models:
+        default: ["meta-llama/llama-3-70b-instruct"]
+        fetch: true
+      titleConvo: true
+      titleModel: "meta-llama/llama-3-70b-instruct"
+      # Recommended: Drop the stop parameter from the request as Openrouter models use a variety of stop tokens.
+      dropParams: ["stop"]
+      modelDisplayLabel: "OpenRouter"
