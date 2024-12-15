@@ -1,5 +1,5 @@
 ---
-- hosts: monitoring
+- hosts: monitoring-srv
   become: true
   roles:
     - base
