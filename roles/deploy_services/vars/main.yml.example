@@ -1,0 +1,36 @@
+### Podman ###
+podman_user: podman
+podman_group: podman
+podman_appdata_dir: /home/podman/appdata
+quadlet_dir: /home/podman/.config/containers/systemd
+
+### Paperless-ngx ###
+paperless_db_paperless_passwd:
+paperless_secret_key:
+PAPERLESS_URL: https://paperless.example.com
+paperless_ngx_env_template_file: paperless-ngx.env.j2
+
+### Librechat ###
+HUGGINGFACE_TOKEN:
+OPENAI_API_KEY:
+OPENROUTER_KEY:
+CREDS_KEY:
+CREDS_IV:
+MEILI_MASTER_KEY:
+JWT_SECRET:
+JWT_REFRESH_SECRET:
+DOMAIN: https://librechat.example.com
+librechat_env_template_file: librechat.env.j2
+librechat_yaml_template_file: librechat.yaml.j2
+
+### Authentik ###
+authentik_env_template_file: authentik.env.j2
+authentik_postgres_env_template_file:
+AUTHENTIK_POSTGRES_PASSWORD:
+AUTHENTIK_SECRET_KEY:
+
+### Stirling-PDF ###
+stirling_pdf_env_template_file: stirling-pdf.env.j2
+STIRLING_PDF_SECURITY_OAUTH2_ISSUER: "https://authentik.example.com/application/o/stirling-pdf/"
+STIRLING_PDF_SECURITY_OAUTH2_CLIENTID:
+STIRLING_PDF_SECURITY_OAUTH2_CLIENTSECRET:

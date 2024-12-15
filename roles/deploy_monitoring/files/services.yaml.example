@@ -1,0 +1,13 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/services
+- Admin:
+    - Proxmox:
+        href: "{{HOMEPAGE_VAR_PROXMOX_URL}}"
+        icon: proxmox.png
+    - Service1:
+        href: "{{HOMEPAGE_VAR_SERVICE1_URL}}"
+        icon: service1.png
+    - Service2:
+        href: "{{HOMEPAGE_VAR_SERVICE2_URL}}"
+        icon: service2.png
