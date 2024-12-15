@@ -1,0 +1,61 @@
+- name: Create folders for Prometheus container config files
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+  loop:
+    - prometheus/config
+    - prometheus/data
+
+- name: Change owner of prometheus/{config,data} directories to podman_user_id:podman_group_id
+  # We need to run Prometheus as podman user inside Prometheus container (same as Grafana)
+  # Podman is unable to automatically change the owner of directories inside containers
+  # so we need to user podman unshare to run chown inside Podman's user namespace
+  ansible.builtin.shell: |
+    podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/config;
+    podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/data
+  become_user: "{{ podman_user }}"
+
+- name: Copy Prometheus config file
+  ansible.builtin.copy:
+    src: prometheus.yaml
+    dest: "{{ podman_appdata_dir }}/prometheus/config"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0644"
+
+- name: Create Prometheus quadlet
+  containers.podman.podman_container:
+    name: prometheus
+    image: docker.io/prom/prometheus:latest
+    state: quadlet
+    quadlet_filename: prometheus
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: monitoring.pod
+    user: "{{ podman_user_id }}"
+    cap_drop:
+      - all
+    volumes:
+      - "{{ podman_appdata_dir }}/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml:Z,ro"
+      - "{{ podman_appdata_dir }}/prometheus/data:/prometheus:Z"
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - "Exec=--config.file=/etc/prometheus/prometheus.yaml"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Open firewalld port for Prometheus
+  ansible.posix.firewalld:
+    port: "9090/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld

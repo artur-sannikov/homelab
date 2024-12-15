@@ -1,0 +1,47 @@
+- name: Create folders for MySpeed data files
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/myspeed/data"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+
+- name: Create MySpeed Quadlet
+  containers.podman.podman_container:
+    name: myspeed
+    image: docker.io/germannewsmaker/myspeed:latest
+    state: quadlet
+    quadlet_filename: myspeed
+    quadlet_dir: "{{ quadlet_dir }}"
+    ports:
+      - "5216:5216"
+    volumes:
+      - "{{ podman_appdata_dir }}/myspeed/data:/myspeed/data:Z"
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Open firewalld port for MySpeed
+  ansible.posix.firewalld:
+    port: "5216/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart MySpeed service
+  ansible.builtin.systemd:
+    name: myspeed.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"

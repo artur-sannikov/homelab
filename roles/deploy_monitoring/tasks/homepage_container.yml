@@ -1,0 +1,73 @@
+- name: Create folders for Homepage config files
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0755"
+  loop:
+    - homepage/config
+    - homepage/icons
+
+- name: Copy Homepage environment files
+  ansible.builtin.copy:
+    src: "homepage.env"
+    dest: "{{ quadlet_dir }}"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+
+- name: Copy Homepage config files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ podman_appdata_dir }}/homepage/config"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0644"
+  loop:
+    - services.yaml
+    - settings.yaml
+
+- name: Create Homepage quadlet
+  containers.podman.podman_container:
+    name: homepage
+    image: ghcr.io/gethomepage/homepage:latest
+    state: quadlet
+    quadlet_filename: homepage
+    quadlet_dir: "{{ quadlet_dir }}"
+    ports:
+      - "3002:3000"
+    volumes:
+      - "{{ podman_appdata_dir }}/homepage/config:/app/config:Z"
+      - "{{ podman_appdata_dir }}/homepage/icons:/app/public/icons:Z"
+    env_file:
+      - homepage.env
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - "AutoUpdate = registry"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Open firewalld port for Homepage
+  ansible.posix.firewalld:
+    port: "3002/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart homepage service
+  ansible.builtin.systemd:
+    name: homepage.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
