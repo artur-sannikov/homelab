@@ -4,6 +4,7 @@
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
+    mode: "0755"
 
 - name: Create MySpeed Quadlet
   containers.podman.podman_container:
