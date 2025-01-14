@@ -14,4 +14,6 @@ roles/deploy_monitoring/vars/main.yml
 roles/deploy_monitoring/files/homepage.env
 roles/deploy_monitoring/files/settings.yaml
 roles/deploy_monitoring/files/services.yaml
+roles/deploy_monitoring/files/speedtest-tracker.env
 roles/deploy_services/vars/main.yml
+
