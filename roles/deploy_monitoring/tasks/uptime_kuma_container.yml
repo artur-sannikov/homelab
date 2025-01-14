@@ -12,6 +12,7 @@
     image: docker.io/louislam/uptime-kuma:1
     state: quadlet
     quadlet_filename: uptime-kuma
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     ports:
       - "3001:3001"
