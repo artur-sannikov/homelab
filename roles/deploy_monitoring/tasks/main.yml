@@ -8,4 +8,3 @@
 - include_tasks: influxdb2_container.yml
 - include_tasks: prometheus_container.yml
 - include_tasks: restart_monitoring_pod.yml
-# - include_tasks: myspeed_container.yml
