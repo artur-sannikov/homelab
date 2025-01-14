@@ -68,6 +68,7 @@
     scope: "user"
     daemon_reload: true
     enabled: true
+  become: true
   become_user: "{{ podman_user }}"
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
