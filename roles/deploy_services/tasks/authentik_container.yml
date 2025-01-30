@@ -66,7 +66,7 @@
 - name: Create authentik-redis Quadlet
   containers.podman.podman_container:
     name: authentik-redis
-    image: docker.io/library/redis:7.4.0
+    image: docker.io/library/redis:7.4.2
     state: quadlet
     quadlet_filename: authentik-redis
     quadlet_dir: "{{ quadlet_dir }}"
