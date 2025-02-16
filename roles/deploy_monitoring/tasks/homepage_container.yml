@@ -63,7 +63,7 @@
     - Reload firewalld
 
 - name: Restart homepage service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: homepage.service
     state: "restarted"
     scope: "user"

@@ -1,5 +1,5 @@
 - name: Restart monitoring pod
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: "monitoring-pod.service"
     state: "restarted"
     scope: "user"

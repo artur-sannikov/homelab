@@ -36,7 +36,7 @@
     - Reload firewalld
 
 - name: Restart Actual Budget service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: actual-budget.service
     state: "restarted"
     scope: "user"

@@ -36,7 +36,7 @@
     - Reload firewalld
 
 - name: Restart Readeck service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: readeck.service
     state: "restarted"
     scope: "user"

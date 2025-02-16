@@ -156,7 +156,7 @@
     - Reload firewalld
 
 - name: Restart Paperless-ngx pod service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: paperless-ngx-pod.service
     state: "restarted"
     scope: "user"
