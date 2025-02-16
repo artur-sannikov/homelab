@@ -37,7 +37,7 @@
     - Reload firewalld
 
 - name: Restart Uptime Kuma service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: uptime-kuma.service
     state: "restarted"
     scope: "user"

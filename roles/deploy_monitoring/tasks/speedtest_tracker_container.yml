@@ -48,7 +48,7 @@
     - Reload firewalld
 
 - name: Restart Speedtest-tracker service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: speedtest-tracker.service
     state: "restarted"
     scope: "user"

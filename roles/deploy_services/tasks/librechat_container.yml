@@ -117,7 +117,7 @@
     - Reload firewalld
 
 - name: Restart Librechat service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: librechat.service
     state: "restarted"
     scope: "user"

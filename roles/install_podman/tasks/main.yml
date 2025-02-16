@@ -33,23 +33,27 @@
       when: not __user_lingering.stat.exists
 
 - name: Enable Podman auto-update service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: podman-auto-update
+    enabled: true
     state: "started"
     scope: "user"
     daemon_reload: true
     enabled: true
+  become: true
   become_user: "{{ podman_user }}"
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
 
 - name: Enable Podman auto-update timer
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: podman-auto-update.timer
+    enabled: true
     state: "started"
     scope: "user"
     daemon_reload: true
     enabled: true
+  become: true
   become_user: "{{ podman_user }}"
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
