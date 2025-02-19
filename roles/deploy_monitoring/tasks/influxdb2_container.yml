@@ -23,6 +23,7 @@
     image: docker.io/influxdb:latest
     state: quadlet
     quadlet_filename: influxdb2
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: monitoring.pod
     volumes:

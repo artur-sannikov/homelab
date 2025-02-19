@@ -1,10 +1,10 @@
 ---
 - include_tasks: podman_user_info.yml
+- include_tasks: speedtest_tracker_container.yml
+- include_tasks: uptime_kuma_container.yml
+- include_tasks: homepage_container.yml
 - include_tasks: monitoring_pod.yml
 - include_tasks: grafana_container.yml
 - include_tasks: influxdb2_container.yml
 - include_tasks: prometheus_container.yml
 - include_tasks: restart_monitoring_pod.yml
-- include_tasks: uptime_kuma_container.yml
-- include_tasks: homepage_container.yml
-- include_tasks: myspeed_container.yml

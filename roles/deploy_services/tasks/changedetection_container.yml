@@ -84,7 +84,7 @@
     - Reload firewalld
 
 - name: Restart Changedetection pod service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: changedetection-pod.service
     state: "restarted"
     scope: "user"

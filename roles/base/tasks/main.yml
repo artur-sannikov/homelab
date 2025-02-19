@@ -10,7 +10,7 @@
   when: ansible_distribution == "Fedora"
 
 - name: Enable and start FirewallD
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: firewalld
     state: "started"
     daemon_reload: true
