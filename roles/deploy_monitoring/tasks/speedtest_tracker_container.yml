@@ -1,51 +1,36 @@
-- name: Create folders for Homepage config files
+- name: Create folder for Speedtest-tracker config files
   ansible.builtin.file:
-    path: "{{ podman_appdata_dir }}/{{ item }}"
+    path: "{{ podman_appdata_dir }}/speedtest-tracker/config"
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0755"
-  loop:
-    - homepage/config
-    - homepage/icons
 
-- name: Copy Homepage environment files
+- name: Copy Speedtest-tracker environment files
   ansible.builtin.copy:
-    src: "homepage.env"
+    src: "speedtest-tracker.env"
     dest: "{{ quadlet_dir }}"
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
 
-- name: Copy Homepage config files
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ podman_appdata_dir }}/homepage/config"
-    owner: "{{ podman_user }}"
-    group: "{{ podman_group }}"
-    mode: "0644"
-  loop:
-    - services.yaml
-    - settings.yaml
-
-- name: Create Homepage quadlet
+- name: Create Speedtest-tracker Quadlet
   containers.podman.podman_container:
-    name: homepage
-    image: ghcr.io/gethomepage/homepage:latest
+    name: speedtest-tracker
+    image: lscr.io/linuxserver/speedtest-tracker:latest
     state: quadlet
-    quadlet_filename: homepage
+    quadlet_filename: speedtest-tracker
     quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     ports:
-      - "3002:3000"
+      - "8080:80"
     volumes:
-      - "{{ podman_appdata_dir }}/homepage/config:/app/config:Z"
-      - "{{ podman_appdata_dir }}/homepage/icons:/app/public/icons:Z"
+      - "{{ podman_appdata_dir }}/speedtest-tracker/config:/config:Z"
     env_file:
-      - homepage.env
+      - speedtest-tracker.env
     quadlet_options:
+      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
-      - "AutoUpdate = registry"
       - |
         [Service]
         Restart=always
@@ -53,18 +38,18 @@
         [Install]
         WantedBy=default.target
 
-- name: Open firewalld port for Homepage
+- name: Open firewalld port for Speedtest-tracker
   ansible.posix.firewalld:
-    port: "3002/tcp"
+    port: "8080/tcp"
     permanent: true
     immediate: true
     state: enabled
   notify:
     - Reload firewalld
 
-- name: Restart homepage service
+- name: Restart Speedtest-tracker service
   ansible.builtin.systemd_service:
-    name: homepage.service
+    name: speedtest-tracker.service
     state: "restarted"
     scope: "user"
     daemon_reload: true

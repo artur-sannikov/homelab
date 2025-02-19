@@ -17,7 +17,7 @@
 - name: Create Stirling-PDF Quadlet
   containers.podman.podman_container:
     name: stirling-pdf
-    image: docker.io/stirlingtools/stirling-pdf:latest
+    image: ghcr.io/stirling-tools/s-pdf:latest
     state: quadlet
     quadlet_filename: stirling-pdf
     quadlet_dir: "{{ quadlet_dir }}"
@@ -56,7 +56,7 @@
     - Reload firewalld
 
 - name: Restart Stirling-PDF service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: stirling-pdf.service
     state: "restarted"
     scope: "user"

@@ -59,7 +59,7 @@
 - name: Create paperless-ngx-redis Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-redis
-    image: docker.io/redis:7.4.0
+    image: docker.io/redis:7.4.2
     state: quadlet
     quadlet_filename: paperless-ngx-redis
     quadlet_dir: "{{ quadlet_dir }}"
@@ -156,7 +156,7 @@
     - Reload firewalld
 
 - name: Restart Paperless-ngx pod service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: paperless-ngx-pod.service
     state: "restarted"
     scope: "user"

@@ -66,7 +66,7 @@
 - name: Create authentik-redis Quadlet
   containers.podman.podman_container:
     name: authentik-redis
-    image: docker.io/library/redis:7.4.0
+    image: docker.io/library/redis:7.4.2
     state: quadlet
     quadlet_filename: authentik-redis
     quadlet_dir: "{{ quadlet_dir }}"
@@ -153,7 +153,7 @@
     - Reload firewalld
 
 - name: Restart Authentik service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: authentik-pod.service
     state: "restarted"
     scope: "user"
