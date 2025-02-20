@@ -1,10 +1,13 @@
 - name: Create folder for Stirling-PDF logs
   ansible.builtin.file:
-    path: "{{ podman_appdata_dir }}/stirling-pdf/logs"
+    path: "{{ podman_appdata_dir }}/{{ item }}"
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0755"
+  loop:
+    - stirling-pdf/logs
+    - stirling-pdf/extraConfigs
 
 - name: Generate stirling-pdf.env from template
   ansible.builtin.template:
@@ -25,6 +28,7 @@
       - "8080:8080"
     volumes:
       - "{{ podman_appdata_dir }}/stirling-pdf/logs:/logs:Z"
+      - "{{ podman_appdata_dir }}/stirling-pdf/extraConfigs:/configs:Z"
     env_file:
       - stirling-pdf.env
     cap_drop:
