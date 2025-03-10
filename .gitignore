@@ -1,6 +1,7 @@
 inventory
 ansible.cfg
 .vscode/
+.ansible/
 host_vars/
 files/public_keys/ansible.pub
 roles/podman/vars/main.yml
