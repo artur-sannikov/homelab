@@ -11,7 +11,7 @@ This is my attempt to achieve this for my homelab.
 >
 > It's a hardware and software experimental laboratory for you to test and break
 > bleeding-edge technologies. And learn, learn so much about how the internet works,
-> what's behind the scenes of common cloud services and large services, and much more.
+> what's behind the scenes of common cloud services and large websites, and much more.
 >
 > At the same time, a homelab can be your production environment to run self-hosted
 > services to enhance your quality of life, while achieving maximum privacy, because
