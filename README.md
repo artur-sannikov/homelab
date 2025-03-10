@@ -62,3 +62,8 @@ See my NixOS repo [here](https://github.com/artur-sannikov/nixos/tree/main/hosts
 Ansible Vault
 - [ ] Tailscale deployment
 - [ ] Merge this repo with [my Caddy deployment](https://github.com/artur-sannikov/caddy-ansible)
+
+## Availability
+
+The repo is available on [Codeberg](https://codeberg.org/arsann/homelab) and is mirrored
+on [GitHub](https://github.com/artur-sannikov/homelab).
