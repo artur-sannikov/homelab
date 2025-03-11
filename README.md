@@ -37,21 +37,21 @@ This is my attempt to achieve this for my homelab.
 
 All the services are deployed via Podman Quadlets.
 
-| Software          | Purpose                          |
-|-------------------|----------------------------------|
-| Actual Budget     | Budgeting                        |
-| Authentik         | Single-Sign On                   |
-| Changedetection   | Detect website changes           |
-| FreshRSS          | Follow RSS feeds                 |
-| Librechat         | API access to multiple LLMs      |
-| Paperless-ngx     | Document management              |
-| Readeck           | Read-it-later                    |
-| Stirling-PDF      | PDF manipulation                 |
-| Grafana           | Observe homelab with nice charts |
-| Homepage          | ...Homepage                      |
-| Prometheus        | Collect data for Grafana         |
-| Speedtest-tracker | Measure Internet speed           |
-| Uptime Kuma       | Monitor uptime                   |
+| Software                                                               | Purpose                          |
+|------------------------------------------------------------------------|----------------------------------|
+| [Actual Budget](https://github.com/actualbudget/actual)                | Budgeting                        |
+| [Authentik](https://github.com/goauthentik/authentik)                  | Single-Sign On                   |
+| [Changedetection](https://github.com/dgtlmoon/changedetection.io)      | Detect website changes           |
+| [FreshRSS](https://github.com/FreshRSS/FreshRSS)                       | Follow RSS feeds                 |
+| [Librechat](https://github.com/danny-avila/LibreChat)                  | API access to multiple LLMs      |
+| [Paperless-ngx](https://github.com/paperless-ngx/paperless-ngx)        | Document management              |
+| [Readeck](https://codeberg.org/readeck/readeck)                        | Read-it-later                    |
+| [Stirling-PDF](https://github.com/Frooodle/Stirling-PDF)               | PDF manipulation                 |
+| [Grafana](https://github.com/grafana/grafana)                          | Observe homelab with nice charts |
+| [Homepage](https://github.com/gethomepage/homepage)                    | ...Homepage                      |
+| [Prometheus](https://github.com/prometheus/prometheus)                 | Collect data for Grafana         |
+| [Speedtest-tracker](https://github.com/alexjustesen/speedtest-tracker) | Measure Internet speed           |
+| [Uptime Kuma](https://github.com/louislam/uptime-kuma)                 | Monitor uptime                   |
 
 I also deploy Forgejo for version control and Immich for photos with Nix.
 See my NixOS repo [here](https://github.com/artur-sannikov/nixos/tree/main/hosts/homelab-services).
