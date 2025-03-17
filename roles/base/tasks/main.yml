@@ -2,11 +2,11 @@
   tags: fedora
   ansible.builtin.dnf:
     update_cache: true
-    name: "{{ item }}"
+    name:
+      - dnf-automatic
+      - firewalld
     state: present
-  loop:
-    - dnf-automatic
-    - firewalld
+
   when: ansible_distribution == "Fedora"
 
 - name: Enable and start FirewallD
