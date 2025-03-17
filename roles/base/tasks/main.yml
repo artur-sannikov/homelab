@@ -1,12 +1,11 @@
 - name: Install Fedora packages
   tags: fedora
-  ansible.builtin.dnf:
+  ansible.builtin.dnf5:
     update_cache: true
     name:
-      - dnf-automatic
+      - dnf5-plugin-automatic
       - firewalld
     state: present
-
   when: ansible_distribution == "Fedora"
 
 - name: Enable and start FirewallD
