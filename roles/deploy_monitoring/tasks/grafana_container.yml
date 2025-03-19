@@ -25,6 +25,7 @@
     state: present
     name: grafana_db_passwd
     data: "{{ grafana_db_passwd }}"
+  become: true
   become_user: "{{ podman_user }}"
 
 - name: Change owner of grafana/data directories to podman_user_id:podman_group_id
@@ -33,6 +34,7 @@
   # so we need to user podman unshare to run chown inside Podman's user namespace
   ansible.builtin.shell: |
     podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/grafana/data
+  become: true
   become_user: "{{ podman_user }}"
 
 - name: Create grafana-postgres quadlet
