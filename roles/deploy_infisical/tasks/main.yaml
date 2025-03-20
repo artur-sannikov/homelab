@@ -1,0 +1,126 @@
+- name: Create folders for Infisical data
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0750"
+  loop:
+    - infisical/postgres/data
+    - infisical/redis/data
+
+- name: Generate infisical.env from template
+  ansible.builtin.template:
+    src: "{{ infisical_env_template_file }}"
+    dest: "{{ quadlet_dir }}/infisical.env"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+
+- name: Create Infisical pod
+  containers.podman.podman_pod:
+    name: infisical
+    state: quadlet
+    quadlet_filename: infisical
+    quadlet_file_mode: "0644"
+    quadlet_dir: "{{ quadlet_dir }}"
+    infra_name: "infisical-pod"
+    ports:
+      - "8080:8080"
+
+- name: Create infisical-postgres quadlet
+  containers.podman.podman_container:
+    name: infisical-postgres
+    image: docker.io/postgres:14-alpine
+    state: quadlet
+    quadlet_filename: infisical-postgres
+    quadlet_file_mode: "0644"
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: infisical.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/infisical/postgres/data:/var/lib/postgresql/data:Z"
+    env_file: infisical.env
+    health_cmd: "pg_isready --username=$${POSTGRES_USER} && psql --username=$${POSTGRES_USER} --list"
+    health_startup_interval: 30s
+    health_startup_retries: 5
+    healthcheck_start_period: 20s
+    healthcheck_timeout: 10s
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Create infisical-redis quadlet
+  containers.podman.podman_container:
+    name: infisical-redis
+    image: docker.io/library/redis:7.4.2
+    state: quadlet
+    quadlet_filename: infisical-redis
+    quadlet_file_mode: "0644"
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: infisical.pod
+    volumes:
+      - "{{ podman_appdata_dir }}/infisical/redis/data:/data:Z"
+    env_file: infisical.env
+    env: ALLOW_EMPTY_PASSWORD=yes
+    health_cmd: "redis-cli ping | grep PONG"
+    health_startup_interval: 30s
+    health_startup_retries: 5
+    healthcheck_start_period: 20s
+    healthcheck_timeout: 10s
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Create infisical-backend quadlet
+  containers.podman.podman_container:
+    name: infisical-backend
+    image: mirror.gcr.io/infisical/infisical:latest-postgres # Use Google mirror
+    state: quadlet
+    quadlet_filename: infisical-backend
+    quadlet_file_mode: "0644"
+    quadlet_dir: "{{ quadlet_dir }}"
+    pod: infisical.pod
+    env_file: infisical.env
+    env: NODE_ENV=production
+    quadlet_options:
+      - "AutoUpdate=registry"
+      - "NoNewPrivileges=true"
+      - "Pull=newer"
+      - "DropCapability=ALL"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+
+- name: Open firewalld port for Infisical
+  ansible.posix.firewalld:
+    port: "8080/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
+
+- name: Restart infisical-pod service
+  ansible.builtin.systemd_service:
+    name: infisical-pod.service
+    state: "restarted"
+    scope: "user"
+    daemon_reload: true
+    enabled: true
+  become: true
+  become_user: "{{ podman_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"

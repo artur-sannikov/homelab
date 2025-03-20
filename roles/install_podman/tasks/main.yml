@@ -39,7 +39,6 @@
     state: "started"
     scope: "user"
     daemon_reload: true
-    enabled: true
   become: true
   become_user: "{{ podman_user }}"
   environment:
@@ -52,7 +51,6 @@
     state: "started"
     scope: "user"
     daemon_reload: true
-    enabled: true
   become: true
   become_user: "{{ podman_user }}"
   environment:
