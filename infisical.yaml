@@ -1,0 +1,8 @@
+---
+- name: Deploy Infisical
+  hosts: infisical
+  become: true
+  roles:
+    - base
+    - install_podman
+    - deploy_infisical
