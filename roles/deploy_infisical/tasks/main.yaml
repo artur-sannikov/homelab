@@ -47,7 +47,6 @@
     healthcheck_timeout: 10s
     quadlet_options:
       - "NoNewPrivileges=true"
-      # - "DropCapability=ALL"
       - |
         [Service]
         Restart=always
@@ -75,7 +74,6 @@
     healthcheck_timeout: 10s
     quadlet_options:
       - "NoNewPrivileges=true"
-      # - "DropCapability=ALL"
       - |
         [Service]
         Restart=always
