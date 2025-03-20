@@ -63,10 +63,10 @@
     quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: infisical.pod
-    env_file: infisical.env
-    env: ALLOW_EMPTY_PASSWORD=yes
     volumes:
       - "{{ podman_appdata_dir }}/infisical/redis/data:/data:Z"
+    env_file: infisical.env
+    env: ALLOW_EMPTY_PASSWORD=yes
     health_cmd: "redis-cli ping | grep PONG"
     health_startup_interval: 30s
     health_startup_retries: 5
@@ -90,8 +90,7 @@
     quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: infisical.pod
-    env_file:
-      - infisical.env
+    env_file: infisical.env
     env: NODE_ENV=production
     quadlet_options:
       - "AutoUpdate=registry"
