@@ -38,7 +38,8 @@
       notify: Restart timer for automatic updates
       when: ansible_distribution == "Fedora"
 
-- name: Configure sshd
+- name: Configure sshd for Fedora
+  when: ansible_distribution == "Fedora"
   block:
     - name: Generate sshd_config from template
       tags: fedora,ssh
@@ -49,17 +50,13 @@
         group: root
         mode: "0644"
       notify: restart_sshd
-      when: ansible_distribution == "Fedora"
 
-    - name: Set SSH crypto-policies
-      tags: fedora,ssh
-      ansible.builtin.copy:
-        src: opensshserver.config
+
+    - name: Set ssh crypto-policies
+      ansible.builtin.template:
+        src: "{{ base_opensshserver_server_template_file }}"
         dest: /etc/crypto-policies/back-ends/opensshserver.config
-        follow: true
         owner: root
         group: root
         mode: "0644"
-      notify:
-        - restart_sshd
-      when: ansible_distribution == "Fedora"
+      notify: Reboot system
