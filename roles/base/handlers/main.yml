@@ -10,5 +10,9 @@
     state: "restarted"
     enabled: true
 
+- name: Reload ufw
+  community.general.ufw:
+    state: reloaded
+
 - name: Reboot system
   ansible.builtin.reboot:
