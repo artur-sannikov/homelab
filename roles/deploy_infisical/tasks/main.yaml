@@ -91,7 +91,9 @@
     quadlet_dir: "{{ quadlet_dir }}"
     pod: infisical.pod
     env_file: infisical.env
-    env: NODE_ENV=production
+    env:
+      NODE_ENV: production
+      TELEMETRY_ENABLED: false
     quadlet_options:
       - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
