@@ -1,0 +1,6 @@
+---
+- name: Deploy Unifi Network Controller
+  hosts: 192.168.10.101
+  become: true
+  roles:
+    - base

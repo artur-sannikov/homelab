@@ -38,13 +38,36 @@
       notify: Restart timer for automatic updates
       when: ansible_distribution == "Fedora"
 
+
+# Reference: https://github.com/dev-sec/ansible-collection-hardening/blob/3172a43202b3390558e1e5fb986e508bca185bec/roles/ssh_hardening/tasks/hardening.yml#L30
+- name: Get openssh-version
+  ansible.builtin.command: ssh -V
+  register: sshd_version_raw
+  changed_when: false
+  check_mode: false
+
+- name: Parse openssh-version
+  ansible.builtin.set_fact:
+    sshd_version: "{{ sshd_version_raw.stderr | regex_replace('.*_([0-9]*.[0-9]).*', '\\1') }}"
+
+# Thanks https://github.com/dev-sec/ansible-collection-hardening/blob/3172a43202b3390558e1e5fb986e508bca185bec/roles/ssh_hardening/tasks/crypto_kex.yml
+- name: Set kex according to openssh-version if openssh >= 9.2
+  ansible.builtin.set_fact:
+    base_ssh_kex_algorithms: "{{ base_ssh_kex_algorithms_92 }}"
+  when: sshd_version is version('9.2', '>=')
+
+- name: Set kex according to openssh-version if openssh >= 9.9
+  ansible.builtin.set_fact:
+    base_ssh_kex_algorithms: "{{ base_ssh_kex_algorithms_99 }}"
+  when: sshd_version is version('9.9', '>=')
+
 - name: Configure sshd for Fedora
   when: ansible_distribution == "Fedora"
   block:
     - name: Generate sshd_config from template
       tags: fedora,ssh
       ansible.builtin.template:
-        src: "{{ sshd_template_file }}"
+        src: sshd_config_fedora.j2
         dest: /etc/ssh/sshd_config
         owner: root
         group: root
@@ -60,3 +83,68 @@
         group: root
         mode: "0644"
       notify: Reboot system
+
+- name: Install Debian packages
+  tags: debian
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - sudo
+      - ufw
+    state: present
+  when: ansible_distribution == "debian" or inventory_hostname in groups["debian-lxc"]
+
+- name: Setup Debian LXC container
+  tags: debian,lxc
+  when: inventory_hostname in groups["debian-lxc"]
+  block:
+    - name: Create user
+      ansible.builtin.user:
+        name: "{{ username }}"
+        shell: /bin/bash
+        groups: sudo
+
+    - name: Add ssh authorized key for {{ username }}
+      ansible.posix.authorized_key:
+        user: "{{ username }}"
+        state: present
+        key: "{{ lookup('url', 'https://codeberg.org/arsann.keys', split_lines=False) }}"
+
+    - name: Allow passwordless sudo for {{ username }}
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/{{ username }}"
+        content: "{{ username }} ALL=(ALL) NOPASSWD:ALL"
+        mode: "0440"
+
+    - name: Generate sshd_config from template
+      tags: ssh
+      ansible.builtin.template:
+        src: sshd_config_debian.j2
+        dest: /etc/ssh/sshd_config
+        owner: root
+        group: root
+        mode: "0600"
+      notify: Restart sshd
+
+    - name: Limit access to ssh port
+      tags: ufw
+      community.general.ufw:
+        rule: limit
+        src: 192.168.10.0/24
+        port: "22"
+        proto: tcp
+
+    - name: Deny other incoming traffic and enable UFW
+      tags: ufw
+      community.general.ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
+
+    - name: Disable ufw IPv6
+      tags: ufw
+      ansible.builtin.lineinfile:
+        path: /etc/default/ufw
+        regexp: ^IPV6=
+        line: IPV6=no
+      notify: Reload ufw
