@@ -1,0 +1,78 @@
+- name: Install base packages
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - gnupg
+      - curl
+      - ca-certificates
+      - apt-transport-https
+    state: present
+
+- name: Download MongoDB GPG key
+  ansible.builtin.get_url:
+    url: https://www.mongodb.org/static/pgp/server-7.0.asc
+    dest: /tmp/mongodb-server-7.0.gpg_armored
+    checksum: sha256:b254e7858367d4c1762f931762c4db3ad7a6a0af11f3a965b709e9933c52852b # curl -sL https://www.mongodb.org/static/pgp/server-7.0.asc | sha256sum
+    owner: root
+    group: root
+    mode: "644"
+
+- name: De-armor MongoDB GPG key
+  ansible.builtin.command: gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor /tmp/mongodb-server-7.0.gpg_armored
+  args:
+    creates: /usr/share/keyrings/mongodb-server-7.0.gpg
+
+- name: Add MongoDB repo
+  ansible.builtin.apt_repository:
+    filename: mongodb-org-7.0
+    repo: "deb [ signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] http://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main"
+
+- name: Install MongoDB
+  ansible.builtin.apt:
+    update_cache: true
+    name: mongodb-org
+    state: present
+
+- name: Download UniFi GPG key
+  ansible.builtin.get_url:
+    url: https://dl.ui.com/unifi/unifi-repo.gpg
+    dest: /usr/share/keyrings/unifi-repo.gpg
+    checksum: sha256:f4625b8f05619d506961d64ca25c262d4a033acf4d1f5303babd7f5b9a971207 # curl -sL https://dl.ui.com/unifi/unifi-repo.gpg | sha256sum
+    owner: root
+    group: root
+    mode: "644"
+
+- name: Add UniFi repo
+  ansible.builtin.apt_repository:
+    filename: 100-ubnt-unifi
+    repo: "deb [ signed-by=/usr/share/keyrings/unifi-repo.gpg ] https://www.ui.com/downloads/unifi/debian stable ubiquiti"
+
+- name: Install UniFi Network Server
+  ansible.builtin.apt:
+    update_cache: true
+    name: unifi
+    state: present
+
+- name: Open ufw for UniFi Network Server web-ui
+  tags: ufw
+  community.general.ufw:
+    rule: allow
+    state: reloaded
+    port: "8443"
+    proto: tcp
+
+- name: Open ufw for UniFi Network Server inform
+  tags: ufw
+  community.general.ufw:
+    rule: allow
+    state: reloaded
+    port: "8080"
+    proto: tcp
+
+- name: Open ufw for UniFi Network Server device auto-discovery
+  tags: ufw
+  community.general.ufw:
+    rule: allow
+    state: reloaded
+    port: "10001"
+    proto: udp

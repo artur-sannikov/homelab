@@ -1,2 +1,1 @@
-ssh_users: "artur"
 sshd_template_file: sshd_config_fedora.j2

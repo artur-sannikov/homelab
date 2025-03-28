@@ -1,0 +1,56 @@
+# SSH
+base_ssh_ciphers:
+  - chacha20-poly1305@openssh.com
+  - aes256-gcm@openssh.com
+  - aes256-ctr
+  - aes192-ctr
+  - aes128-gcm@openssh.com
+  - aes128-ctr
+base_ssh_macs:
+  - hmac-sha2-512-etm@openssh.com
+  - hmac-sha2-256-etm@openssh.com
+  - umac-128-etm@openssh.com
+base_ssh_hostbased_accepted_algorithms:
+  - ssh-ed25519
+  - ssh-ed25519-cert-v01@openssh.com
+  - rsa-sha2-256
+  - rsa-sha2-512
+base_ssh_gssapi_kex_algorithm: gss-curve25519-sha256-
+base_ssh_kex_algorithms_92:
+  - sntrup761x25519-sha512@openssh.com
+  - curve25519-sha256@libssh.org
+  - diffie-hellman-group-exchange-sha256
+  - curve25519-sha256
+  - diffie-hellman-group16-sha512
+  - diffie-hellman-group18-sha512
+base_ssh_kex_algorithms_99:
+  - sntrup761x25519-sha512@openssh.com
+  - curve25519-sha256@libssh.org
+  - curve25519-sha256
+  - diffie-hellman-group-exchange-sha256
+  - diffie-hellman-group16-sha512
+  - diffie-hellman-group18-sha512
+  - mlkem768x25519-sha256
+  - sntrup761x25519-sha512
+base_ssh_hostkey_algorithms:
+  - ssh-ed25519
+  - ssh-ed25519-cert-v01@openssh.com
+  - rsa-sha2-256
+  - rsa-sha2-512
+base_ssh_pubkey_accepted_key_types:
+  - ssh-ed25519
+  - ssh-ed25519-cert-v01@openssh.com
+  - rsa-sha2-256
+  - rsa-sha2-512
+base_ssh_ca_signature_algorithms:
+  - ecdsa-sha2-nistp256
+  - sk-ecdsa-sha2-nistp256@openssh.com
+  - ecdsa-sha2-nistp384
+  - ecdsa-sha2-nistp521
+  - ssh-ed25519
+  - sk-ssh-ed25519@openssh.com
+  - rsa-sha2-256
+  - rsa-sha2-512
+base_ssh_required_rsa_size: 3072
+base_sshd_template_file: sshd_config.j2
+base_opensshserver_server_template_file: opensshserver.config.j2
