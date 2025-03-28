@@ -1,4 +1,4 @@
-- name: restart_sshd
+- name: Restart sshd
   ansible.builtin.systemd_service:
     name: sshd
     state: "restarted"
@@ -9,3 +9,10 @@
     name: dnf5-automatic.timer
     state: "restarted"
     enabled: true
+
+- name: Reload ufw
+  community.general.ufw:
+    state: reloaded
+
+- name: Reboot system
+  ansible.builtin.reboot:

@@ -1,0 +1,9 @@
+Ciphers {{ base_ssh_ciphers | join(',') }}
+MACs {{ base_ssh_macs | join(',') }}
+HostbasedAcceptedAlgorithms {{ base_ssh_hostbased_accepted_algorithms | join(',') }}
+GSSAPIKexAlgorithms {{ base_ssh_gssapi_kex_algorithm }}
+KexAlgorithms {{ base_ssh_kex_algorithms | join(',') }}
+HostKeyAlgorithms {{ base_ssh_hostkey_algorithms | join(',') }}
+PubkeyAcceptedKeyTypes {{ base_ssh_pubkey_accepted_key_types | join(',') }}
+CASignatureAlgorithms {{ base_ssh_ca_signature_algorithms | join(',') }}
+RequiredRSASize {{ base_ssh_required_rsa_size }}

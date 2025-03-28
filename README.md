@@ -67,3 +67,8 @@ Ansible Vault
 
 The repo is available on [Codeberg](https://codeberg.org/arsann/homelab) and is mirrored
 on [GitHub](https://github.com/artur-sannikov/homelab).
+
+## Thanks
+
+1. [Ansible Collection - devsec.hardening](https://github.com/dev-sec/ansible-collection-hardening/tree/master).
+I used their code to dynamically generate my sshd configuration.

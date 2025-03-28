@@ -1,0 +1,7 @@
+---
+- name: Deploy Unifi Network Controller
+  hosts: unifi-controller
+  become: true
+  roles:
+    - base
+    - deploy_unifi_network_server
