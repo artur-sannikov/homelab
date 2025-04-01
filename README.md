@@ -25,7 +25,7 @@ This is my attempt to achieve this for my homelab.
 
 - Intel NUC11ATKC4:
   - CPU: `Intel Celeron N5105 @ 2.00GHz`
-  - RAM: `16GB`
+  - RAM: `32GB`
   - SSD: `1TB`
 
 - Dell OptiPlex 3000 Micro:
