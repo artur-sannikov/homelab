@@ -1,0 +1,9 @@
+---
+- name: Update servers
+  hosts: all
+  serial: 1
+  become: true
+  gather_facts: true
+  ignore_errors: true
+  roles:
+    - maintenence
