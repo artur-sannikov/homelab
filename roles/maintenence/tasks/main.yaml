@@ -1,0 +1,24 @@
+- name: Update APT packages on Debian/Ubuntu
+  ansible.builtin.apt:
+    name: "*"
+    update_cache: true
+    state: latest
+    autoremove: true
+  when: ansible_os_family == "Debian" or ansible_os_family == "Zorin OS"
+
+- name: Update DNF packages on Fedora
+  ansible.builtin.dnf5:
+    name: "*"
+    state: latest
+  when: ansible_os_family == "RedHat"
+
+- name: Remove packages that are not longer needed
+  ansible.builtin.dnf5:
+    autoremove: true
+  when: ansible_os_family == "RedHat"
+
+- name: Update Flatpaks
+  ansible.builtin.command: flatpak update --noninteractive
+  register: flatpak_update_output
+  changed_when: "'app/' in flatpak_update_output.stdout"
+  when: ansible_os_family == "Zorin OS"
