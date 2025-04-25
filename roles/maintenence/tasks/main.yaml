@@ -18,7 +18,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: Update Flatpaks
-  community.general.flatpak:
-    state: latest
-    name: "*"
+  ansible.builtin.command: flatpak update --noninteractive
+  register: flatpak_update_output
+  changed_when: "'app/' in flatpak_update_output.stdout"
   when: ansible_os_family == "Zorin OS"
