@@ -84,7 +84,7 @@
 - name: Create infisical-backend quadlet
   containers.podman.podman_container:
     name: infisical-backend
-    image: mirror.gcr.io/infisical/infisical:latest-postgres # Use Google mirror
+    image: docker.io/infisical/infisical:latest-postgres # Use Google mirror
     state: quadlet
     quadlet_filename: infisical-backend
     quadlet_file_mode: "0644"
