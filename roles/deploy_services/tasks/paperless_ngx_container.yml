@@ -12,7 +12,6 @@
     - paperless-ngx/media
     - paperless-ngx/export
     - paperless-ngx/consume
-
 - name: Copy Paperless-ngx environment files
   ansible.builtin.copy:
     src: "{{ item }}"
@@ -23,21 +22,18 @@
   loop:
     - paperless-ngx-redis.env
     - paperless-ngx-postgres.env
-
 - name: Create Paperless-ngx database password
   containers.podman.podman_secret:
     state: present
     name: paperless_db_paperless_passwd
     data: "{{ paperless_db_paperless_passwd }}"
   become_user: "{{ podman_user }}"
-
 - name: Create Paperless-ngx secret paperless_secret_key
   containers.podman.podman_secret:
     state: present
     name: paperless_secret_key
     data: "{{ paperless_secret_key }}"
   become_user: "{{ podman_user }}"
-
 - name: Generate paperless-ngx.env from template
   ansible.builtin.template:
     src: "{{ paperless_ngx_env_template_file }}"
@@ -45,7 +41,6 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
-
 - name: Create paperless-ngx pod
   containers.podman.podman_pod:
     name: paperless-ngx
@@ -55,11 +50,10 @@
     infra_name: "paperless-ngx-pod"
     ports:
       - "8001:8000"
-
 - name: Create paperless-ngx-redis Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-redis
-    image: docker.io/redis:7.4.2
+    image: docker.io/redis:8
     state: quadlet
     quadlet_filename: paperless-ngx-redis
     quadlet_dir: "{{ quadlet_dir }}"
@@ -82,11 +76,10 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Create paperless-ngx-postgres Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-postgres
-    image: docker.io/postgres:16.6
+    image: docker.io/postgres:17
     state: quadlet
     quadlet_filename: paperless-ngx-postgres
     quadlet_dir: "{{ quadlet_dir }}"
@@ -111,7 +104,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Create paperless-ngx Quadlet
   containers.podman.podman_container:
     name: paperless-ngx
@@ -145,7 +137,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Paperless-ngx
   ansible.posix.firewalld:
     port: "8001/tcp"
@@ -154,7 +145,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart Paperless-ngx pod service
   ansible.builtin.systemd_service:
     name: paperless-ngx-pod.service

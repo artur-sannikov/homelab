@@ -1,0 +1,39 @@
+- name: Deploy Tailscale subnet router
+  hosts: tailscale-subnet-router
+  become: true
+  pre_tasks:
+    - name: Enable IPv4 forwarding
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: "1"
+        sysctl_set: true
+        state: present
+        reload: true
+    - name: Enable IPv6 forwarding
+      ansible.posix.sysctl:
+        name: net.ipv6.conf.all.forwarding
+        value: "1"
+        sysctl_set: true
+        state: present
+        reload: true
+        # See https://github.com/Romira915/romira-arcadia-ops/blob/5d0ac2ae5c9324fea1a7a644c7556e6f9ebc4b08/ansible/roles/Tailscale/tasks/main.yml#L73
+    - name: Detect active network device for internet access
+      ansible.builtin.command: ip -o route get 8.8.8.8
+      register: route_info
+    - name: Extract network device name
+      ansible.builtin.set_fact:
+        netdev: "{{ route_info.stdout.split()[4] }}"
+    - name: Apply ethtool settings for the detected device
+      ansible.builtin.command: ethtool -K {{ netdev }} rx-udp-gro-forwarding on rx-gro-list off
+    - name: Create persistence script for ethtool settings
+      ansible.builtin.copy:
+        dest: /etc/networkd-dispatcher/routable.d/50-tailscale
+        content: |
+          #!/bin/sh
+          ethtool -K {{ netdev }} rx-udp-gro-forwarding on rx-gro-list off
+        owner: root
+        group: root
+        mode: "0755"
+  roles:
+    - base
+    - artis3n.tailscale.machine

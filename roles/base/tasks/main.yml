@@ -5,9 +5,9 @@
     name:
       - dnf5-plugin-automatic
       - firewalld
+      - qemu-guest-agent
     state: present
   when: ansible_distribution == "Fedora"
-
 - name: Enable and start FirewallD
   ansible.builtin.systemd_service:
     name: firewalld
@@ -15,7 +15,11 @@
     daemon_reload: true
     enabled: true
   when: ansible_distribution == "Fedora"
-
+- name: Enable QEMU guest agent
+  ansible.builtin.systemd_service:
+    state: started
+    enabled: true
+    name: qemu-guest-agent
 - name: Configure automatic updates with dnf5
   block:
     - name: Enable a timer unit for dnf5-automatic
@@ -24,7 +28,6 @@
         state: started
         enabled: true
       when: ansible_distribution == "Fedora"
-
     - name: Creating configuration file for dnf5-automatic
       ansible.builtin.copy:
         dest: /etc/dnf/automatic.conf
@@ -37,30 +40,24 @@
           reboot = when-needed
       notify: Restart timer for automatic updates
       when: ansible_distribution == "Fedora"
-
-
 # Reference: https://github.com/dev-sec/ansible-collection-hardening/blob/3172a43202b3390558e1e5fb986e508bca185bec/roles/ssh_hardening/tasks/hardening.yml#L30
 - name: Get openssh-version
   ansible.builtin.command: ssh -V
   register: sshd_version_raw
   changed_when: false
   check_mode: false
-
 - name: Parse openssh-version
   ansible.builtin.set_fact:
     sshd_version: "{{ sshd_version_raw.stderr | regex_replace('.*_([0-9]*.[0-9]).*', '\\1') }}"
-
 # Thanks https://github.com/dev-sec/ansible-collection-hardening/blob/3172a43202b3390558e1e5fb986e508bca185bec/roles/ssh_hardening/tasks/crypto_kex.yml
 - name: Set kex according to openssh-version if openssh >= 9.2
   ansible.builtin.set_fact:
     base_ssh_kex_algorithms: "{{ base_ssh_kex_algorithms_92 }}"
   when: sshd_version is version('9.2', '>=')
-
 - name: Set kex according to openssh-version if openssh >= 9.9
   ansible.builtin.set_fact:
     base_ssh_kex_algorithms: "{{ base_ssh_kex_algorithms_99 }}"
   when: sshd_version is version('9.9', '>=')
-
 - name: Configure sshd for Fedora
   when: ansible_distribution == "Fedora"
   block:
@@ -73,8 +70,6 @@
         group: root
         mode: "0644"
       notify: restart_sshd
-
-
     - name: Set ssh crypto-policies
       ansible.builtin.template:
         src: "{{ base_opensshserver_server_template_file }}"
@@ -83,7 +78,6 @@
         group: root
         mode: "0644"
       notify: Reboot system
-
 - name: Install Debian packages
   tags: debian
   ansible.builtin.apt:
@@ -93,7 +87,6 @@
       - ufw
     state: present
   when: ansible_distribution == "debian" or inventory_hostname in groups["debian-lxc"]
-
 - name: Setup Debian LXC container
   tags: debian,lxc
   when: inventory_hostname in groups["debian-lxc"]
@@ -103,19 +96,16 @@
         name: "{{ username }}"
         shell: /bin/bash
         groups: sudo
-
     - name: Add ssh authorized key for {{ username }}
       ansible.posix.authorized_key:
         user: "{{ username }}"
         state: present
         key: "{{ lookup('url', 'https://codeberg.org/arsann.keys', split_lines=False) }}"
-
     - name: Allow passwordless sudo for {{ username }}
       ansible.builtin.copy:
         dest: "/etc/sudoers.d/{{ username }}"
         content: "{{ username }} ALL=(ALL) NOPASSWD:ALL"
         mode: "0440"
-
     - name: Generate sshd_config from template
       tags: ssh
       ansible.builtin.template:
@@ -125,7 +115,6 @@
         group: root
         mode: "0600"
       notify: Restart sshd
-
     - name: Limit access to ssh port
       tags: ufw
       community.general.ufw:
@@ -133,14 +122,12 @@
         src: 192.168.10.0/24
         port: "22"
         proto: tcp
-
     - name: Deny other incoming traffic and enable UFW
       tags: ufw
       community.general.ufw:
         state: enabled
         policy: deny
         direction: incoming
-
     - name: Disable ufw IPv6
       tags: ufw
       ansible.builtin.lineinfile:
