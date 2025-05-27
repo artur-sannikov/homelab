@@ -10,7 +10,6 @@
     - authentik/redis/data
     - authentik/media
     - authentik/certs
-
 - name: Generate authentik.env from template
   ansible.builtin.template:
     src: "{{ authentik_env_template_file }}"
@@ -18,7 +17,6 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
-
 - name: Generate authentik-postgres.env from template
   ansible.builtin.template:
     src: "{{ authentik_postgres_env_template_file }}"
@@ -26,7 +24,6 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
-
 - name: Create authentik pod
   containers.podman.podman_pod:
     name: authentik
@@ -36,7 +33,6 @@
     infra_name: "authentik-pod"
     ports:
       - "9000:9000"
-
 - name: Create authentik-postgres Quadlet
   containers.podman.podman_container:
     name: authentik-postgres
@@ -62,11 +58,10 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Create authentik-redis Quadlet
   containers.podman.podman_container:
     name: authentik-redis
-    image: docker.io/library/redis:7.4.2
+    image: docker.io/library/redis:8
     state: quadlet
     quadlet_filename: authentik-redis
     quadlet_dir: "{{ quadlet_dir }}"
@@ -87,7 +82,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Create authentik-server Quadlet
   containers.podman.podman_container:
     name: authentik-server
@@ -109,7 +103,6 @@
         Restart=always
         [Install]
         WantedBy=default.target
-
 - name: Create authentik-worker Quadlet
   containers.podman.podman_container:
     name: authentik-worker
@@ -133,7 +126,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Change owner of authentik/{media,certs} directories to 1000:1000
   # authentik-server and authentik-worker run as authentik user with UID 1000
   # inside these containers
@@ -142,7 +134,6 @@
   ansible.builtin.shell: |
     podman unshare chown -R 1000:1000 {{ podman_appdata_dir }}/authentik
   become_user: "{{ podman_user }}"
-
 - name: Open firewalld port for Authentik
   ansible.posix.firewalld:
     port: "9000/tcp"
@@ -151,7 +142,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart Authentik service
   ansible.builtin.systemd_service:
     name: authentik-pod.service
