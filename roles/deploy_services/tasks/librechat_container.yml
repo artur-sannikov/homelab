@@ -10,13 +10,11 @@
     - librechat/logs
     - librechat/mongodb/data
     - librechat/meilisearch/data
-
 - name: Change logs folder permissions to 777
   # See https://github.com/danny-avila/LibreChat/discussions/2141#discussioncomment-8845459
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/librechat/logs"
     mode: "1777"
-
 - name: Create Librechat pod
   containers.podman.podman_pod:
     name: librechat
@@ -26,7 +24,6 @@
     infra_name: "librechat-pod"
     ports:
       - "3080:3080"
-
 - name: Generate librechat.env from template
   ansible.builtin.template:
     src: "{{ librechat_env_template_file }}"
@@ -34,7 +31,6 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
-
 - name: Generate librechat.yaml from template
   ansible.builtin.template:
     src: "{{ librechat_yaml_template_file }}"
@@ -42,7 +38,6 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0644"
-
 - name: Create LibreChat Quadlet
   containers.podman.podman_container:
     name: librechat
@@ -64,11 +59,10 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Create LibreChat-mongodb Quadlet
   containers.podman.podman_container:
     name: librechat-mongodb
-    image: docker.io/mongo:8.0.4
+    image: docker.io/mongo:8.0.9
     state: quadlet
     quadlet_filename: librechat-mongodb
     quadlet_dir: "{{ quadlet_dir }}"
@@ -85,11 +79,10 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Create LibreChat-meilisearch Quadlet
   containers.podman.podman_container:
     name: librechat-meilisearch
-    image: docker.io/getmeili/meilisearch:v1.11
+    image: docker.io/getmeili/meilisearch:v1.12.3
     state: quadlet
     quadlet_filename: librechat-meilisearch
     quadlet_dir: "{{ quadlet_dir }}"
@@ -106,7 +99,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Librechat
   ansible.posix.firewalld:
     port: "3080/tcp"
@@ -115,7 +107,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart Librechat service
   ansible.builtin.systemd_service:
     name: librechat.service
