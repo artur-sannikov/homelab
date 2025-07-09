@@ -58,8 +58,8 @@ See my NixOS repo [here](https://github.com/artur-sannikov/nixos/tree/main/hosts
 
 ## Roadmap
 
-- [ ] Implement Hashicorp Vault/Infiscal or other external secret management to remove my reliance on
-Ansible Vault
+- [ ] Implement Hashicorp Vault/Infisical or other external secret management to remove my reliance on
+Ansible Vault. Update: partially implemented. I now deploy Infisical on a separate VM.
 - [ ] Tailscale deployment
 - [ ] Merge this repo with [my Caddy deployment](https://github.com/artur-sannikov/caddy-ansible)
 
