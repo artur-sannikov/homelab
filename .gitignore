@@ -15,3 +15,6 @@ roles/deploy_services/vars/main.yml
 
 roles/deploy_infisical/vars/main.yaml
 
+# Caddy
+Caddyfile
+roles/reverse_proxy/files/caddy_override.conf

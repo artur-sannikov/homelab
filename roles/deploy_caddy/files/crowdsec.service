@@ -1,0 +1,16 @@
+[Unit]
+Description=Crowdsec agent
+After=network.target remote-fs.target nss-lookup.target
+# Ensure configuration happened:
+ConditionPathExists=/etc/crowdsec/local_api_credentials.yaml
+ConditionPathExists=/etc/crowdsec/online_api_credentials.yaml
+
+[Service]
+Type=notify
+Environment=LC_ALL=C LANG=C
+ExecStartPre=/usr/bin/crowdsec -c /etc/crowdsec/config.yaml -t
+ExecStart=/usr/bin/crowdsec -c /etc/crowdsec/config.yaml -no-api
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
