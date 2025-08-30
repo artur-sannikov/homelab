@@ -1,0 +1,138 @@
+- name: Install go-golang
+  ansible.builtin.apt:
+    name: golang
+    state: present
+- name: Collect info about installed packages
+  ansible.builtin.package_facts:
+    manager: apt
+- name: Install prerequisites for xcaddy
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    update_cache: true
+    state: present
+  loop:
+    - debian-keyring
+    - debian-archive-keyring
+    - apt-transport-https
+- name: Add xcaddy GPG key
+  ansible.builtin.apt_key:
+    url: https://dl.cloudsmith.io/public/caddy/xcaddy/gpg.key
+    state: present
+    keyring: /usr/share/keyrings/caddy-xcaddy-archive-keyring.gpg
+- name: Check that the xcaddy repository file does not already exist
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/caddy-xcaddy.list
+  register: caddy_repo_path
+- name: Add xcaddy repository to sources.list.d
+  when: not caddy_repo_path.stat.exists
+  ansible.builtin.shell: |
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/xcaddy/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-xcaddy.list
+- name: Install xcaddy
+  ansible.builtin.apt:
+    name: xcaddy
+    state: present
+- name: Get golang version
+  ansible.builtin.set_fact:
+    golang_version: "{{ ansible_facts.packages.golang[0].version.split('~')[0].split(':')[1] }}"
+- name: Build xcaddy only if golang_version is >= 1.25
+  # caddy >= 2.10.1 requires go >= 1.25 which is not available on Ubuntu 24.04
+  # Need to update it when Ubuntu 26.04 is out
+  when: golang_version is version(1.25, '>')
+  block:
+    - name: Build xcaddy with modules
+      ansible.builtin.shell: |
+        xcaddy build \
+        --with github.com/caddy-dns/cloudflare \
+        --with github.com/hslatman/caddy-crowdsec-bouncer
+    - name: Move Caddy executable to $PATH
+      ansible.builtin.copy:
+        src: /home/{{ ansible_user }}/caddy
+        remote_src: true
+        dest: /usr/bin/caddy
+        owner: root
+        group: root
+        mode: "0755"
+    - name: Remove original Caddy executable
+      ansible.builtin.file:
+        path: /home/{{ ansible_user }}/caddy
+        state: absent
+- name: Create caddy system group
+  ansible.builtin.group:
+    name: caddy
+    system: true
+- name: Create caddy user
+  ansible.builtin.user:
+    name: caddy
+    group: caddy
+    system: true
+    create_home: true
+    home: /var/lib/caddy
+    shell: /usr/sbin/nologin
+    comment: "Caddy web server"
+- name: Create Caddy config directory
+  ansible.builtin.file:
+    path: /etc/caddy
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+- name: Copy caddy.service
+  ansible.builtin.copy:
+    src: caddy.service
+    dest: /etc/systemd/system/caddy.service
+    owner: root
+    group: root
+    mode: "0644"
+- name: Create caddy.service.d directory to override Caddy systemd
+  ansible.builtin.file:
+    path: /etc/systemd/system/caddy.service.d/
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+- name: Copy caddy.service drop-in
+  ansible.builtin.copy:
+    src: caddy_override.conf
+    dest: /etc/systemd/system/caddy.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+- name: Copy Caddyfile
+  ansible.builtin.copy:
+    src: Caddyfile
+    dest: /etc/caddy/Caddyfile
+    owner: caddy
+    group: caddy
+    mode: "0600"
+- name: Format Caddyfile using caddy fmt
+  ansible.builtin.command: caddy fmt --overwrite /etc/caddy/Caddyfile
+- name: Enable and start Caddy
+  ansible.builtin.systemd_service:
+    name: caddy
+    daemon-reload: true
+    enabled: true
+    state: started
+- name: Install crowdsec
+  ansible.builtin.apt:
+    name: crowdsec
+    state: present
+- name: Register CrowdSec agent
+  ansible.builtin.shell: |
+    cscli lapi register -u {{ lapi_endpoint }}
+  args:
+    creates: /etc/crowdsec/local_api_credentials.yaml
+- name: Copy CrowdSec systemd file
+  ansible.builtin.copy:
+    src: crowdsec.service
+    dest: /etc/systemd/system/crowdsec.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload daemon
+- name: Pause until CrowdSec machine validation
+  ansible.builtin.pause:
+    prompt: "Validate the Caddy Machine in OPNsense"
+- name: Install Caddy CrowdSec collection
+  ansible.builtin.shell: |
+    cscli collections install crowdsecurity/caddy
+  notify: Reload Crowdsec
