@@ -38,7 +38,7 @@ This is my attempt to achieve this for my homelab.
 All the services are deployed via Podman Quadlets.
 
 | Software                                                               | Purpose                          |
-|------------------------------------------------------------------------|----------------------------------|
+| ---------------------------------------------------------------------- | -------------------------------- |
 | [Actual Budget](https://github.com/actualbudget/actual)                | Budgeting                        |
 | [Authentik](https://github.com/goauthentik/authentik)                  | Single-Sign On                   |
 | [Changedetection](https://github.com/dgtlmoon/changedetection.io)      | Detect website changes           |
@@ -59,9 +59,9 @@ See my NixOS repo [here](https://github.com/artur-sannikov/nixos/tree/main/hosts
 ## Roadmap
 
 - [ ] Implement Hashicorp Vault/Infiscal or other external secret management to remove my reliance on
-Ansible Vault
+      Ansible Vault
 - [ ] Tailscale deployment
-- [ ] Merge this repo with [my Caddy deployment](https://github.com/artur-sannikov/caddy-ansible)
+- [x] Merge this repo with [my Caddy deployment](https://github.com/artur-sannikov/caddy-ansible)
 
 ## Availability
 
@@ -71,4 +71,4 @@ on [GitHub](https://github.com/artur-sannikov/homelab).
 ## Thanks
 
 1. [Ansible Collection - devsec.hardening](https://github.com/dev-sec/ansible-collection-hardening/tree/master).
-I used their code to dynamically generate my sshd configuration.
+   I used their code to dynamically generate my sshd configuration.

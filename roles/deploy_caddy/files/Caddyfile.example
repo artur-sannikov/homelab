@@ -1,0 +1,39 @@
+{
+	email admin@example.com
+	crowdsec {
+		api_key 12345
+		api_url http://192.168.1.1:8080/
+	}
+}
+
+homepage.example.com {
+	tls {
+		dns cloudflare {env.CF_API_TOKEN}
+	}
+	# always forward outpost path to actual outpost
+	reverse_proxy /outpost.goauthentik.io/* http://192.168.1.90:9000
+
+	forward_auth http://192.168.1.90:9000 {
+		uri /outpost.goauthentik.io/auth/caddy
+
+		# capitalization of the headers is important, otherwise they will be empty
+		copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
+
+		# optional, in this config trust all private ranges, should probably be set to the outposts IP
+		trusted_proxies private_ranges
+	}
+
+	# actual site configuration below, for example
+	reverse_proxy http://192.168.1.53:3000
+}
+
+*.example.com {
+	tls {
+		dns cloudflare {env.CF_API_TOKEN}
+	}
+
+	@service host service.example.com
+	handle @service {
+		reverse_proxy http://192.168.100.11:5000
+	}
+}

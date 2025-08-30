@@ -1,0 +1,2 @@
+[Service]
+Environment="CF_API_TOKEN=<API_TOKEN>" # I set up my DNS provider token here (i.e. Cloudflare)
