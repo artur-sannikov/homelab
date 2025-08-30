@@ -36,12 +36,13 @@ I also do some SSH hardening and set up an ufw firewall.
    anyDebian-based Debian-based distro.
 5. I use [Ubuntu cloud images](https://cloud-images.ubuntu.com/) to quickly
    bootstrap new virtual machiens on Proxmox.
-6. An `inventory` file which contains the Caddy machine IP, username and the
-   relevant SSH key. For example,
+6. An `inventory.yaml` file. For example,
 
-```
-[caddy]
-192.168.100.100 ansible_user=artur ansible_ssh_private_key_file=~/.ssh/id_ed25519
+```yaml
+all:
+  caddyDMZ-srv:
+    hosts:
+      caddyDMZ: {}
 ```
 
 ### Set up Crowdsec on OPNsense
