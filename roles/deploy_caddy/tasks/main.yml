@@ -111,7 +111,7 @@
     name: caddy
     daemon-reload: true
     enabled: true
-    state: started
+    state: restarted
 - name: Install crowdsec
   ansible.builtin.apt:
     name: crowdsec
