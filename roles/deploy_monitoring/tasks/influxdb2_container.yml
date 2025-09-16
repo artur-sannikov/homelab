@@ -8,7 +8,6 @@
   loop:
     - influxdb2/config
     - influxdb2/data
-
 - name: Copy InfluxDB2 environment file
   ansible.builtin.copy:
     src: "influxdb2.env"
@@ -16,11 +15,10 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
-
 - name: Create InfluxDB2 quadlet
   containers.podman.podman_container:
     name: influxdb2
-    image: docker.io/influxdb:latest
+    image: docker.io/influxdb:2.7.12@sha256:23bc959dcb97f85e1fbc3a739805203eb3bcb779afede002cb205a37e14442bb
     state: quadlet
     quadlet_filename: influxdb2
     quadlet_file_mode: "0644"
@@ -30,7 +28,6 @@
       - "{{ podman_appdata_dir }}/influxdb2/config:/etc/influxdb2:Z"
       - "{{ podman_appdata_dir }}/influxdb2/data:/var/lib/influxdb2:Z"
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - |
         [Service]
@@ -38,7 +35,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for InfluxDB2
   ansible.posix.firewalld:
     port: "8086/tcp"

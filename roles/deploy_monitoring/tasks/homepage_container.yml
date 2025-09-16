@@ -8,7 +8,6 @@
   loop:
     - homepage/config
     - homepage/icons
-
 - name: Copy Homepage environment files
   ansible.builtin.copy:
     src: "homepage.env"
@@ -16,7 +15,6 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
-
 - name: Copy Homepage config files
   ansible.builtin.copy:
     src: "{{ item }}"
@@ -27,11 +25,10 @@
   loop:
     - services.yaml
     - settings.yaml
-
 - name: Create Homepage quadlet
   containers.podman.podman_container:
     name: homepage
-    image: ghcr.io/gethomepage/homepage:latest
+    image: ghcr.io/gethomepage/homepage:v1.4.6@sha256:a1a578fdcfc72754985c3b3b26e4f398a6a782e354d10cf2b156ecbf06d252e9
     state: quadlet
     quadlet_filename: homepage
     quadlet_file_mode: "0644"
@@ -52,7 +49,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Homepage
   ansible.posix.firewalld:
     port: "3002/tcp"
@@ -61,7 +57,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart homepage service
   ansible.builtin.systemd_service:
     name: homepage.service

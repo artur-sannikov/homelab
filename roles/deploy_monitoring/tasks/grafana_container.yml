@@ -8,7 +8,6 @@
   loop:
     - grafana/postgres
     - grafana/data
-
 - name: Copy Grafana environment files
   ansible.builtin.copy:
     src: "{{ item }}"
@@ -19,7 +18,6 @@
   loop:
     - grafana-postgres.env
     - grafana.env
-
 - name: Create Grafana secret for database password
   containers.podman.podman_secret:
     state: present
@@ -27,7 +25,6 @@
     data: "{{ grafana_db_passwd }}"
   become: true
   become_user: "{{ podman_user }}"
-
 - name: Change owner of grafana/data directories to podman_user_id:podman_group_id
   # We need to run Grafana as podman user inside Grafana container
   # Podman is unable to automatically change the owner of directories inside containers
@@ -36,11 +33,10 @@
     podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/grafana/data
   become: true
   become_user: "{{ podman_user }}"
-
 - name: Create grafana-postgres quadlet
   containers.podman.podman_container:
     name: grafana-postgres
-    image: docker.io/postgres:16.3
+    image: docker.io/postgres:16.10@sha256:b477759d38be47671d54a054d832791f8ddb9f0eaf6faf51ed17516087793a66
     state: quadlet
     quadlet_filename: grafana-postgres
     quadlet_file_mode: "0644"
@@ -60,11 +56,10 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Create Grafana quadlet
   containers.podman.podman_container:
     name: grafana
-    image: docker.io/grafana/grafana:latest
+    image: docker.io/grafana/grafana:12.1@sha256:a1701c2180249361737a99a01bc770db39381640e4d631825d38ff4535efa47d
     state: quadlet
     quadlet_filename: grafana
     quadlet_file_mode: "0644"
@@ -82,7 +77,6 @@
     secrets:
       - grafana_db_passwd
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - |
         [Unit]
@@ -94,7 +88,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Grafana
   ansible.posix.firewalld:
     port: "3000/tcp"
