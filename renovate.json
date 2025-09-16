@@ -15,6 +15,7 @@
     "prHourlyLimit": 0,
     "customManagers": [
         {
+            "customType": "regex",
             "description": "Manage container images with Ansible and Podman Quadlets",
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker",
