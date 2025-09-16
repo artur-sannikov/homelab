@@ -41,8 +41,8 @@
 - name: Enable Podman auto-update timer
   ansible.builtin.systemd_service:
     name: podman-auto-update.timer
-    enabled: true
-    state: "started"
+    enabled: false
+    state: "stopped"
     scope: "user"
     daemon_reload: true
   become: true
