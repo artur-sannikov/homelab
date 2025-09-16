@@ -5,7 +5,6 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0755"
-
 - name: Copy Changedetection environment files
   ansible.builtin.copy:
     src: "{{ item }}"
@@ -16,7 +15,6 @@
   loop:
     - changedetection.env
     - chromium-playwright.env
-
 - name: Create changedetection pod
   containers.podman.podman_pod:
     name: changedetection
@@ -26,11 +24,10 @@
     infra_name: "changedetection-pod"
     ports:
       - "5000:5000"
-
 - name: Create chromium-playwright Quadlet
   containers.podman.podman_container:
     name: chromium-playwright
-    image: ghcr.io/browserless/chromium
+    image: ghcr.io/browserless/chromium:v2.34.1@sha256:eeac26dc8da5bad6ff321acc3692d614da9ffc95ba0df7af944ded6649787ce5
     state: quadlet
     quadlet_filename: chromium-playwright
     quadlet_dir: "{{ quadlet_dir }}"
@@ -39,7 +36,6 @@
       - chromium-playwright.env
     shm_size: "2gb"
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - |
         [Service]
@@ -47,11 +43,10 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Create changedetection Quadlet
   containers.podman.podman_container:
     name: changedetection
-    image: ghcr.io/dgtlmoon/changedetection.io
+    image: ghcr.io/dgtlmoon/changedetection.io:0.50.13@sha256:801824f16469f791e1fe3c30ecfbb26544c6daa871ab3392b8886bb41133086f
     state: quadlet
     quadlet_filename: changedetection
     quadlet_dir: "{{ quadlet_dir }}"
@@ -61,7 +56,6 @@
     env_file:
       - changedetection.env
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - |
         [Unit]
@@ -73,7 +67,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Changedetection
   ansible.posix.firewalld:
     port: "5000/tcp"
@@ -82,7 +75,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart Changedetection pod service
   ansible.builtin.systemd_service:
     name: changedetection-pod.service
