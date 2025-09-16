@@ -8,7 +8,6 @@
   loop:
     - infisical/postgres/data
     - infisical/redis/data
-
 - name: Generate infisical.env from template
   ansible.builtin.template:
     src: "{{ infisical_env_template_file }}"
@@ -16,7 +15,6 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
-
 - name: Create Infisical pod
   containers.podman.podman_pod:
     name: infisical
@@ -27,11 +25,10 @@
     infra_name: "infisical-pod"
     ports:
       - "8080:8080"
-
 - name: Create infisical-postgres quadlet
   containers.podman.podman_container:
     name: infisical-postgres
-    image: docker.io/postgres:14-alpine
+    image: docker.io/postgres:14.19-alpine@sha256:95dae26f72fcd8ade5c2f9c6ce491e2e24de768a34e73b971edf3b9e8e08a5e5
     state: quadlet
     quadlet_filename: infisical-postgres
     quadlet_file_mode: "0644"
@@ -53,11 +50,10 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Create infisical-redis quadlet
   containers.podman.podman_container:
     name: infisical-redis
-    image: docker.io/library/redis:7.4.2
+    image: docker.io/library/redis:8.2.1@sha256:acb90ced0bd769b7c04cb4c32c4494ba7b3e0ee068bdbfff0eeb0d31c2a21078
     state: quadlet
     quadlet_filename: infisical-redis
     quadlet_file_mode: "0644"
@@ -80,11 +76,10 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Create infisical-backend quadlet
   containers.podman.podman_container:
     name: infisical-backend
-    image: docker.io/infisical/infisical:latest-postgres # Use Google mirror
+    image: docker.io/infisical/infisical:latest-postgres
     state: quadlet
     quadlet_filename: infisical-backend
     quadlet_file_mode: "0644"
@@ -105,7 +100,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Infisical
   ansible.posix.firewalld:
     port: "8080/tcp"
@@ -114,7 +108,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart infisical-pod service
   ansible.builtin.systemd_service:
     name: infisical-pod.service
