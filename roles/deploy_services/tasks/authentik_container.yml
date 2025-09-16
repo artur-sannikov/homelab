@@ -36,7 +36,7 @@
 - name: Create authentik-postgres Quadlet
   containers.podman.podman_container:
     name: authentik-postgres
-    image: docker.io/library/postgres:16.6
+    image: docker.io/library/postgres:16.10@sha256:b477759d38be47671d54a054d832791f8ddb9f0eaf6faf51ed17516087793a66
     state: quadlet
     quadlet_filename: authentik-postgres
     quadlet_dir: "{{ quadlet_dir }}"
@@ -61,7 +61,7 @@
 - name: Create authentik-redis Quadlet
   containers.podman.podman_container:
     name: authentik-redis
-    image: docker.io/library/redis:8
+    image: docker.io/redis:8.2.1@sha256:acb90ced0bd769b7c04cb4c32c4494ba7b3e0ee068bdbfff0eeb0d31c2a21078
     state: quadlet
     quadlet_filename: authentik-redis
     quadlet_dir: "{{ quadlet_dir }}"
@@ -85,7 +85,7 @@
 - name: Create authentik-server Quadlet
   containers.podman.podman_container:
     name: authentik-server
-    image: ghcr.io/goauthentik/server:latest
+    image: ghcr.io/goauthentik/server:2025.8.3@sha256:d4747a324d489d0436eb91cf02301d5a47bac455efad0e0ac56b3c193991067d
     state: quadlet
     quadlet_filename: authentik-server
     quadlet_dir: "{{ quadlet_dir }}"
@@ -95,7 +95,6 @@
     env_file:
       - authentik.env
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - "Exec=server"
       - |
@@ -117,7 +116,6 @@
     env_file:
       - authentik.env
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - "Exec=worker"
       - |
