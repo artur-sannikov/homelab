@@ -8,7 +8,6 @@
   loop:
     - stirling-pdf/logs
     - stirling-pdf/extraConfigs
-
 - name: Generate stirling-pdf.env from template
   ansible.builtin.template:
     src: "{{ stirling_pdf_env_template_file }}"
@@ -16,11 +15,10 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
-
 - name: Create Stirling-PDF Quadlet
   containers.podman.podman_container:
     name: stirling-pdf
-    image: ghcr.io/stirling-tools/s-pdf:latest
+    image: ghcr.io/stirling-tools/s-pdf:1.3.2@sha256:ae74a9f00f374e628c484c2f4bb96c08406a3e8b8cb3825ea821df9dd8a7fdd7
     state: quadlet
     quadlet_filename: stirling-pdf
     quadlet_dir: "{{ quadlet_dir }}"
@@ -41,7 +39,6 @@
       - SETUID
       - SETGID
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - |
         [Service]
@@ -49,7 +46,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Stirling-PDF
   ansible.posix.firewalld:
     port: "8080/tcp"
@@ -58,7 +54,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart Stirling-PDF service
   ansible.builtin.systemd_service:
     name: stirling-pdf.service

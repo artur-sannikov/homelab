@@ -5,7 +5,6 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0755"
-
 - name: Copy FreshRSS environment file
   ansible.builtin.copy:
     src: freshrss.env
@@ -13,11 +12,10 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
-
 - name: Create FreshRSS Quadlet
   containers.podman.podman_container:
     name: freshrss
-    image: docker.io/freshrss/freshrss:latest
+    image: docker.io/freshrss/freshrss:1.27.0@sha256:2b53d2708fc755aab499a96e865be5ae6deeafb99e855e235e8870b4013c56cd
     state: quadlet
     quadlet_filename: freshrss
     quadlet_dir: "{{ quadlet_dir }}"
@@ -28,7 +26,6 @@
     env_file:
       - freshrss.env
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - |
         [Service]
@@ -36,7 +33,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for FreshRSS
   ansible.posix.firewalld:
     port: "8089/tcp"
@@ -45,7 +41,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart FreshRSS service
   ansible.builtin.systemd_service:
     name: freshrss.service

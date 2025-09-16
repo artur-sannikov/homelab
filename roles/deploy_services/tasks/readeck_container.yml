@@ -4,11 +4,10 @@
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
-
 - name: Create readeck Quadlet
   containers.podman.podman_container:
     name: readeck
-    image: codeberg.org/readeck/readeck:latest
+    image: codeberg.org/readeck/readeck:0.20.3@sha256:432cc2026f9dca3c33ce331f52c225287a2fa91a3c1dce8a4b0b7e9de4185c2f
     state: quadlet
     quadlet_filename: readeck
     quadlet_dir: "{{ quadlet_dir }}"
@@ -17,7 +16,6 @@
     volumes:
       - "{{ podman_appdata_dir }}/readeck/data:/readeck:Z"
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - |
         [Service]
@@ -25,7 +23,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Readeck
   ansible.posix.firewalld:
     port: "8000/tcp"
@@ -34,7 +31,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart Readeck service
   ansible.builtin.systemd_service:
     name: readeck.service

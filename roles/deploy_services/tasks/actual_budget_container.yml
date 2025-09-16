@@ -16,7 +16,6 @@
     volumes:
       - "{{ podman_appdata_dir }}/actual-budget/data:/data:Z"
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - |
         [Service]
