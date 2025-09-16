@@ -41,7 +41,7 @@
 - name: Create LibreChat Quadlet
   containers.podman.podman_container:
     name: librechat
-    image: ghcr.io/danny-avila/librechat:latest
+    image: ghcr.io/danny-avila/librechat:v0.7.9@sha256:7d7c54a1daa1feba3185f14a4e16672d3aed11c3b523887c88c10560c0f3a776
     state: quadlet
     quadlet_filename: librechat
     quadlet_dir: "{{ quadlet_dir }}"
@@ -62,7 +62,7 @@
 - name: Create LibreChat-mongodb Quadlet
   containers.podman.podman_container:
     name: librechat-mongodb
-    image: docker.io/mongo:8.0.12
+    image: docker.io/mongo:8.0.13@sha256:cf340b1e5283843c63eb12999922f20c463ae31285f746d30f05dcc21cd1d47c
     state: quadlet
     quadlet_filename: librechat-mongodb
     quadlet_dir: "{{ quadlet_dir }}"
@@ -82,7 +82,7 @@
 - name: Create LibreChat-meilisearch Quadlet
   containers.podman.podman_container:
     name: librechat-meilisearch
-    image: docker.io/getmeili/meilisearch:v1.12.3
+    image: docker.io/getmeili/meilisearch:v1.21.0@sha256:38e0ae3cfd2f319461f321c79a1d9320143a2258ee0e2f567bc9441d79dcff5f
     state: quadlet
     quadlet_filename: librechat-meilisearch
     quadlet_dir: "{{ quadlet_dir }}"
