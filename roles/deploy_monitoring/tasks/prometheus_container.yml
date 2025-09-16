@@ -8,7 +8,6 @@
   loop:
     - prometheus/config
     - prometheus/data
-
 - name: Change owner of prometheus/{config,data} directories to podman_user_id:podman_group_id
   # We need to run Prometheus as podman user inside Prometheus container (same as Grafana)
   # Podman is unable to automatically change the owner of directories inside containers
@@ -17,7 +16,6 @@
     podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/config;
     podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/data
   become_user: "{{ podman_user }}"
-
 - name: Copy Prometheus config file
   ansible.builtin.copy:
     src: prometheus.yaml
@@ -25,11 +23,10 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0644"
-
 - name: Create Prometheus quadlet
   containers.podman.podman_container:
     name: prometheus
-    image: docker.io/prom/prometheus:latest
+    image: docker.io/prom/prometheus:v3.5.0@sha256:63805ebb8d2b3920190daf1cb14a60871b16fd38bed42b857a3182bc621f4996
     state: quadlet
     quadlet_filename: prometheus
     quadlet_dir: "{{ quadlet_dir }}"
@@ -41,7 +38,6 @@
       - "{{ podman_appdata_dir }}/prometheus/config/prometheus.yaml:/etc/prometheus/prometheus.yaml:Z,ro"
       - "{{ podman_appdata_dir }}/prometheus/data:/prometheus:Z"
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - "Exec=--config.file=/etc/prometheus/prometheus.yaml"
       - |
@@ -50,7 +46,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Prometheus
   ansible.posix.firewalld:
     port: "9090/tcp"

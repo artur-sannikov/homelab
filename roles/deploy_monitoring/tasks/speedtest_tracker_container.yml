@@ -5,7 +5,6 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0755"
-
 - name: Copy Speedtest-tracker environment files
   ansible.builtin.copy:
     src: "speedtest-tracker.env"
@@ -13,11 +12,10 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0600"
-
 - name: Create Speedtest-tracker Quadlet
   containers.podman.podman_container:
     name: speedtest-tracker
-    image: lscr.io/linuxserver/speedtest-tracker:latest
+    image: lscr.io/linuxserver/speedtest-tracker:1.6.6@sha256:f63b6f58da10ce6d33312e09a1550888165d48cdb38bf916eb00b4e88ae93b58
     state: quadlet
     quadlet_filename: speedtest-tracker
     quadlet_file_mode: "0644"
@@ -29,7 +27,6 @@
     env_file:
       - speedtest-tracker.env
     quadlet_options:
-      - "AutoUpdate=registry"
       - "NoNewPrivileges=true"
       - |
         [Service]
@@ -37,7 +34,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Speedtest-tracker
   ansible.posix.firewalld:
     port: "8080/tcp"
@@ -46,7 +42,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart Speedtest-tracker service
   ansible.builtin.systemd_service:
     name: speedtest-tracker.service
