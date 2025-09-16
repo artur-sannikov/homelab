@@ -4,11 +4,10 @@
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
-
 - name: Create Actual Buget Quadlet
   containers.podman.podman_container:
     name: actual-budget
-    image: docker.io/actualbudget/actual-server:latest
+    image: docker.io/actualbudget/actual-server:25.8.0@sha256:3d7fb08d3b405426e8625013a5ed95f5015e6c04d0f044e2e3fe7d7b7a41951b
     state: quadlet
     quadlet_filename: actual-budget
     quadlet_dir: "{{ quadlet_dir }}"
@@ -25,7 +24,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Actual Budget
   ansible.posix.firewalld:
     port: "5006/tcp"
@@ -34,7 +32,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart Actual Budget service
   ansible.builtin.systemd_service:
     name: actual-budget.service
