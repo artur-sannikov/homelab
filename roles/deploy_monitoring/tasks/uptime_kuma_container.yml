@@ -5,11 +5,10 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0755"
-
 - name: Create uptime-kuma quadlet
   containers.podman.podman_container:
     name: uptime-kuma
-    image: docker.io/louislam/uptime-kuma:1
+    image: docker.io/louislam/uptime-kuma:1.23.16@sha256:431fee3be822b04861cf0e35daf4beef6b7cb37391c5f26c3ad6e12ce280fe18
     state: quadlet
     quadlet_filename: uptime-kuma
     quadlet_file_mode: "0644"
@@ -26,7 +25,6 @@
       - |
         [Install]
         WantedBy=default.target
-
 - name: Open firewalld port for Uptime Kuma
   ansible.posix.firewalld:
     port: "3001/tcp"
@@ -35,7 +33,6 @@
     state: enabled
   notify:
     - Reload firewalld
-
 - name: Restart Uptime Kuma service
   ansible.builtin.systemd_service:
     name: uptime-kuma.service
