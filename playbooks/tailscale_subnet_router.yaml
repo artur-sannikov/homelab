@@ -1,5 +1,5 @@
 - name: Deploy Tailscale subnet router
-  hosts: tailscale-subnet-router
+  hosts: tailscale_subnet_router
   become: true
   pre_tasks:
     - name: Enable IPv4 forwarding
