@@ -1,6 +1,5 @@
----
 - name: Deploy Infisical
-  hosts: infisical
+  hosts: infisical_srv
   become: true
   roles:
     - base

@@ -1,6 +1,5 @@
----
 - name: Deploy services
-  hosts: services
+  hosts: services_srv
   become: true
   roles:
     - base
