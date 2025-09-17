@@ -1,5 +1,5 @@
 - name: Deploy caddy
-  hosts: caddyDMZ
+  hosts: caddyDMZ_srv
   become: true
   roles:
     - base

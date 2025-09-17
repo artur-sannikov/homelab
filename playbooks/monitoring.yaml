@@ -1,6 +1,5 @@
----
 - name: Deploy monitoring server
-  hosts: monitoring-srv
+  hosts: monitoring_srv
   become: true
   roles:
     - base
