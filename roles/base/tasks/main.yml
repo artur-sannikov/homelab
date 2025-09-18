@@ -86,10 +86,10 @@
       - sudo
       - ufw
     state: present
-  when: ansible_distribution == "debian" or inventory_hostname in groups["debian-lxc"]
+  when: ansible_distribution == "debian" or inventory_hostname in groups["debian_lxc"]
 - name: Setup Debian LXC container
   tags: debian,lxc
-  when: inventory_hostname in groups["debian-lxc"]
+  when: inventory_hostname in groups["debian_lxc"]
   block:
     - name: Create user
       ansible.builtin.user:
