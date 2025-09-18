@@ -30,6 +30,11 @@
       "matchPackageNames": ["docker.io/redis"],
       "matchUpdateTypes": ["major"],
       "enabled": false
+    },
+    {
+      "matchUpdateTypes": ["digest", "patch", "minor"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
     }
   ]
 }
