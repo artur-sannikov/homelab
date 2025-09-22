@@ -9,4 +9,3 @@
   ansible.builtin.systemd:
     name: caddy
     state: reloaded
-    daemon_reload: yes
