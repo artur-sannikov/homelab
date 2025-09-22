@@ -60,6 +60,34 @@ See my NixOS
 repo
 [here](https://github.com/artur-sannikov/nixos/tree/main/hosts/homelab-services).
 
+### Bitwarden and ansible-vault
+
+[This article](https://theorangeone.net/posts/ansible-vault-bitwarden/)
+explains how to retrieve ansible-vault password from Bitwarden.
+
+Add to ansible.cfg:
+
+```conf
+[defaults]
+vault_password_file = ./vault-pass.sh
+```
+
+Then `./vault-pass.sh`:
+
+```bash
+#!/usr/bin/env bash
+
+set -e
+
+bw get password "ansible-vault password"
+```
+
+Before running playbook, run
+
+```bash
+export BW_SESSION=$(bw unlock --raw)
+```
+
 #### caddy reverse proxy
 
 See details in `roles/deploy_caddy/README.md`.
@@ -75,8 +103,8 @@ See details in `roles/deploy_caddy/README.md`.
 
 ## Availability
 
-The repo is available on [Codeberg](https://codeberg.org/arsann/homelab) and is mirrored
-on [GitHub](https://github.com/artur-sannikov/homelab).
+The repo is available on [Codeberg](https://codeberg.org/arsann/homelab) and is
+mirrored on [GitHub](https://github.com/artur-sannikov/homelab).
 
 ## Thanks
 
