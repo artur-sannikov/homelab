@@ -43,21 +43,21 @@
 # Reference: https://github.com/dev-sec/ansible-collection-hardening/blob/3172a43202b3390558e1e5fb986e508bca185bec/roles/ssh_hardening/tasks/hardening.yml#L30
 - name: Get openssh-version
   ansible.builtin.command: ssh -V
-  register: sshd_version_raw
+  register: base_sshd_version_raw
   changed_when: false
   check_mode: false
 - name: Parse openssh-version
   ansible.builtin.set_fact:
-    sshd_version: "{{ sshd_version_raw.stderr | regex_replace('.*_([0-9]*.[0-9]).*', '\\1') }}"
+    base_sshd_version: "{{ base_sshd_version_raw.stderr | regex_replace('.*_([0-9]*.[0-9]).*', '\\1') }}"
 # Thanks https://github.com/dev-sec/ansible-collection-hardening/blob/3172a43202b3390558e1e5fb986e508bca185bec/roles/ssh_hardening/tasks/crypto_kex.yml
 - name: Set kex according to openssh-version if openssh >= 9.2
   ansible.builtin.set_fact:
     base_ssh_kex_algorithms: "{{ base_ssh_kex_algorithms_92 }}"
-  when: sshd_version is version('9.2', '>=')
+  when: base_sshd_version is version('9.2', '>=')
 - name: Set kex according to openssh-version if openssh >= 9.9
   ansible.builtin.set_fact:
     base_ssh_kex_algorithms: "{{ base_ssh_kex_algorithms_99 }}"
-  when: sshd_version is version('9.9', '>=')
+  when: base_sshd_version is version('9.9', '>=')
 - name: Configure sshd for Fedora
   when: ansible_distribution == "Fedora"
   block:
