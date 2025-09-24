@@ -36,7 +36,7 @@
 - name: Create grafana-postgres quadlet
   containers.podman.podman_container:
     name: grafana-postgres
-    image: docker.io/postgres:16.10@sha256:b477759d38be47671d54a054d832791f8ddb9f0eaf6faf51ed17516087793a66
+    image: docker.io/postgres:16.10@sha256:20faf48bc8152dd4923673608ee2ecfabd140208ad94036aa7a764e388046653
     state: quadlet
     quadlet_filename: grafana-postgres
     quadlet_file_mode: "0644"
