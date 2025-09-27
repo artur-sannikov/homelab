@@ -6,5 +6,6 @@
     name: crowdsec
     state: reloaded
 - name: Reload Caddy
-  ansible.builtin.shell: |
-    caddy reload -c /etc/caddy/Caddyfile
+  ansible.builtin.systemd:
+    name: caddy
+    state: reloaded

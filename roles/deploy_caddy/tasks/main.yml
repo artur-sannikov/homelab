@@ -22,28 +22,33 @@
 - name: Check that the xcaddy repository file does not already exist
   ansible.builtin.stat:
     path: /etc/apt/sources.list.d/caddy-xcaddy.list
-  register: caddy_repo_path
+  register: deploy_caddy_caddy_repo_path
 - name: Add xcaddy repository to sources.list.d
-  when: not caddy_repo_path.stat.exists
-  ansible.builtin.shell: |
-    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/xcaddy/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-xcaddy.list
+  when: not deploy_caddy_caddy_repo_path.stat.exists
+  ansible.builtin.get_url:
+    url: https://dl.cloudsmith.io/public/caddy/xcaddy/debian.deb.txt
+    dest: /etc/apt/sources.list.d/caddy-xcaddy.list
+    mode: "0644"
 - name: Install xcaddy
   ansible.builtin.apt:
     name: xcaddy
     state: present
 - name: Get golang version
   ansible.builtin.set_fact:
-    golang_version: "{{ ansible_facts.packages.golang[0].version.split('~')[0].split(':')[1] }}"
-- name: Build xcaddy only if golang_version is >= 1.25
+    deploy_caddy_golang_version: "{{ ansible_facts.packages.golang[0].version.split('~')[0].split(':')[1] }}"
+- name: Build xcaddy only if Go is >= 1.25
   # caddy >= 2.10.1 requires go >= 1.25 which is not available on Ubuntu 24.04
   # Need to update it when Ubuntu 26.04 is out
-  when: golang_version is version(1.25, '>')
+  when: deploy_caddy_golang_version is version(1.25, '>=')
   block:
     - name: Build xcaddy with modules
       ansible.builtin.shell: |
         xcaddy build \
         --with github.com/caddy-dns/cloudflare \
         --with github.com/hslatman/caddy-crowdsec-bouncer
+      args:
+        chdir: /home/{{ ansible_user }}
+        creates: /home/{{ ansible_user }}/caddy
     - name: Move Caddy executable to $PATH
       ansible.builtin.copy:
         src: /home/{{ ansible_user }}/caddy
@@ -104,14 +109,16 @@
     owner: caddy
     group: caddy
     mode: "0600"
+  notify: Reload Caddy
 - name: Format Caddyfile using caddy fmt
   ansible.builtin.command: caddy fmt --overwrite /etc/caddy/Caddyfile
-- name: Enable and start Caddy
+  changed_when: false
+- name: Enable and start caddy
   ansible.builtin.systemd_service:
     name: caddy
     daemon-reload: true
     enabled: true
-    state: restarted
+    state: started
 - name: Install crowdsec
   ansible.builtin.apt:
     name: crowdsec
@@ -129,10 +136,24 @@
     group: root
     mode: "0644"
   notify: Reload daemon
+- name: Disable Promethus in CrowdSec
+  ansible.builtin.replace:
+    path: /etc/crowdsec/config.yaml
+    regexp: '^(prometheus:\s*\n\s*enabled:\s*)true'
+    replace: '\1false'
 - name: Pause until CrowdSec machine validation
   ansible.builtin.pause:
     prompt: "Validate the Caddy Machine in OPNsense"
+- name: Check if Caddy CrowdSec collection is installed
+  ansible.builtin.command: cscli collections list
+  register: deploy_caddy_caddy_crowdsec_collection
+  changed_when: false
 - name: Install Caddy CrowdSec collection
-  ansible.builtin.shell: |
+  ansible.builtin.command: |
     cscli collections install crowdsecurity/caddy
   notify: Reload Crowdsec
+  changed_when: "'crowdsecurity/caddy' not in deploy_caddy_caddy_crowdsec_collection.stdout"
+- name: Upgrade Caddy CrowdSec collection
+  ansible.builtin.command: |
+    cscli collection upgrade crowdsecsecurity/caddy
+  changed_when: false
