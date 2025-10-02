@@ -30,18 +30,14 @@
           buildInputs = with pkgs; [
             python313
             python313Packages.ansible
+            python313Packages.ansible-core
             infisicalsdk
+            ansible-lint
             python313Packages.virtualenv
           ];
           shellHook = ''
-            if [ ! -d .venv ]; then
-              python3 -m venv .venv
-              source .venv/bin/activate
-              pip install --upgrade pip
-            else
-              source .venv/bin/activate
-            fi;
-            ansible-galaxy collection install artis3n.tailscale
+            export ANSIBLE_COLLECTIONS_PATH="$PWD/ansible_collections"
+            ansible-galaxy install -r requirements.yaml
           '';
         };
       }
