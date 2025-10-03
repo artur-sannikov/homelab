@@ -28,7 +28,7 @@
 - name: Create infisical-postgres quadlet
   containers.podman.podman_container:
     name: infisical-postgres
-    image: docker.io/postgres:14.19-alpine@sha256:34ac98969774c40be02a286e1794f0cbafbd0800e4fd595a17577f56ea7e3698
+    image: docker.io/postgres:14.19-alpine@sha256:49f7dcce1efddd8d86ae3f37dcba206b5655d9fac3d3872d2823177fd6c1e7fa
     state: quadlet
     quadlet_filename: infisical-postgres
     quadlet_file_mode: "0644"
