@@ -33,7 +33,7 @@
     },
     {
       "matchUpdateTypes": ["digest", "patch", "minor"],
-      "matchCurrentVersion": "!/^0/",
+      "matchCurrentVersion": "!/^v?0/",
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true,
