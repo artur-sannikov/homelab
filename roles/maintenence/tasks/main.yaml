@@ -1,3 +1,4 @@
+---
 - name: Update APT packages on Debian/Ubuntu
   ansible.builtin.apt:
     name: "*"
@@ -5,6 +6,23 @@
     state: latest
     autoremove: true
   when: ansible_os_family == "Debian" or ansible_os_family == "Zorin OS"
+
+- name: Update Flatpaks
+  ansible.builtin.command: flatpak update --noninteractive
+  register: flatpak_update_output
+  changed_when: "'app/' in flatpak_update_output.stdout"
+  when: ansible_os_family == "Zorin OS"
+
+- name: Check if reboot required
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: reboot_required_file
+
+- name: Reboot if required
+  ansible.builtin.reboot:
+  when:
+    - reboot_required_file.stat.exists
+    - ansible_os_family == "Debian" or ansible_os_family == "Zorin OS"
 
 - name: Update DNF packages on Fedora
   ansible.builtin.dnf5:
@@ -16,9 +34,3 @@
   ansible.builtin.dnf5:
     autoremove: true
   when: ansible_os_family == "RedHat"
-
-- name: Update Flatpaks
-  ansible.builtin.command: flatpak update --noninteractive
-  register: flatpak_update_output
-  changed_when: "'app/' in flatpak_update_output.stdout"
-  when: ansible_os_family == "Zorin OS"
