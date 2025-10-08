@@ -82,7 +82,7 @@
 - name: Create LibreChat-meilisearch Quadlet
   containers.podman.podman_container:
     name: librechat-meilisearch
-    image: docker.io/getmeili/meilisearch:v1.22.2@sha256:328dc1698cc6f54bb811b8030ff864c6345144cded5ac89b6ab23fe9f747d723
+    image: docker.io/getmeili/meilisearch:v1.22.3@sha256:14ef9f50add5243fb8dfd13b60df82a76f3c653f0f03b8fee7b5464ab2f0f303
     state: quadlet
     quadlet_filename: librechat-meilisearch
     quadlet_dir: "{{ quadlet_dir }}"
