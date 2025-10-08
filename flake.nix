@@ -17,12 +17,6 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          config.allowUnfreePredicate =
-            pkgs:
-            builtins.elem (nixpkgs.lib.getName pkgs) [
-              # Remove when updated with MIT license
-              "infisicalsdk"
-            ];
         };
       in
       {

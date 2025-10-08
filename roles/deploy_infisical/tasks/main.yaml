@@ -1,3 +1,4 @@
+---
 - name: Create folders for Infisical data
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
