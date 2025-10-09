@@ -3,6 +3,7 @@
   "extends": ["config:recommended"],
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Renovate Dashboard",
+  "baseBranchPatterns": ["devel"],
   "assignees": ["artur"],
   "labels": ["renovate"],
   "configMigration": true,
