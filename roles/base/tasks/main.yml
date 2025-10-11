@@ -1,3 +1,4 @@
+---
 - name: Install Fedora packages
   tags: fedora
   ansible.builtin.dnf5:
