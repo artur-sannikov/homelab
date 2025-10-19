@@ -7,7 +7,7 @@
 - name: Create readeck Quadlet
   containers.podman.podman_container:
     name: readeck
-    image: codeberg.org/readeck/readeck:0.20.3@sha256:432cc2026f9dca3c33ce331f52c225287a2fa91a3c1dce8a4b0b7e9de4185c2f
+    image: codeberg.org/readeck/readeck:0.20.4@sha256:cdf849394ca420e9f1fc5ed9e0f7062c231321bcbad8ee813525a434fce7c04b
     state: quadlet
     quadlet_filename: readeck
     quadlet_dir: "{{ quadlet_dir }}"
