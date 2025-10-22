@@ -1,3 +1,4 @@
+---
 - name: Create folder for Uptime Kuma data files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/uptime-kuma/data"
@@ -17,6 +18,8 @@
       - "3001:3001"
     volumes:
       - "{{ podman_appdata_dir }}/uptime-kuma/data:/app/data:Z"
+    cap_add:
+      - NET_RAW
     quadlet_options:
       - "NoNewPrivileges=true"
       - |
