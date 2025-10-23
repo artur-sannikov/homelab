@@ -9,7 +9,7 @@
 - name: Create uptime-kuma quadlet
   containers.podman.podman_container:
     name: uptime-kuma
-    image: docker.io/louislam/uptime-kuma:2.0.1@sha256:60e6fe0c481b452633cef1a47c1096633b36e6871c5cd97ec61039de1706e1f3
+    image: docker.io/louislam/uptime-kuma:2.0.2@sha256:4c364ef96aaddac7ec4c85f5e5f31c3394d35f631381ccbbf93f18fd26ac7cba
     state: quadlet
     quadlet_filename: uptime-kuma
     quadlet_file_mode: "0644"
