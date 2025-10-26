@@ -1,9 +1,11 @@
+---
 - name: Create folders for Actual Budget data files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/actual-budget/data"
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
+    mode: "0750"
 - name: Create Actual Buget Quadlet
   containers.podman.podman_container:
     name: actual-budget
@@ -31,13 +33,3 @@
     state: enabled
   notify:
     - Reload firewalld
-- name: Restart Actual Budget service
-  ansible.builtin.systemd_service:
-    name: actual-budget.service
-    state: "restarted"
-    scope: "user"
-    daemon_reload: true
-    enabled: true
-  become_user: "{{ podman_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"

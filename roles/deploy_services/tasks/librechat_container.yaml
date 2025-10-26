@@ -108,13 +108,3 @@
     state: enabled
   notify:
     - Reload firewalld
-- name: Restart Librechat service
-  ansible.builtin.systemd_service:
-    name: librechat.service
-    state: "restarted"
-    scope: "user"
-    daemon_reload: true
-    enabled: true
-  become_user: "{{ podman_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"

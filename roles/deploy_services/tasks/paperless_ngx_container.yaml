@@ -145,13 +145,3 @@
     state: enabled
   notify:
     - Reload firewalld
-- name: Restart Paperless-ngx pod service
-  ansible.builtin.systemd_service:
-    name: paperless-ngx-pod.service
-    state: "restarted"
-    scope: "user"
-    daemon_reload: true
-    enabled: true
-  become_user: "{{ podman_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"

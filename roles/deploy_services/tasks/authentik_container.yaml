@@ -1,3 +1,4 @@
+---
 - name: Create folder for FreshRSS data
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
@@ -140,13 +141,3 @@
     state: enabled
   notify:
     - Reload firewalld
-- name: Restart Authentik service
-  ansible.builtin.systemd_service:
-    name: authentik-pod.service
-    state: "restarted"
-    scope: "user"
-    daemon_reload: true
-    enabled: true
-  become_user: "{{ podman_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"
