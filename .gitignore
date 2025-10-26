@@ -7,11 +7,13 @@ host_vars/
 files/public_keys/ansible.pub
 roles/deploy_monitoring/files/prometheus.yaml
 roles/deploy_monitoring/vars/main.yml
+roles/deploy_monitoring/vars/main.yaml
 roles/deploy_monitoring/files/homepage.env
 roles/deploy_monitoring/files/settings.yaml
 roles/deploy_monitoring/files/services.yaml
 roles/deploy_monitoring/files/speedtest-tracker.env
 roles/deploy_services/vars/main.yml
+roles/deploy_services/vars/main.yaml
 
 roles/deploy_infisical/vars/main.yaml
 
