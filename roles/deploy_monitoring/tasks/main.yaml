@@ -1,0 +1,10 @@
+---
+- include_tasks: podman_user_info.yaml
+- include_tasks: speedtest_tracker_container.yaml
+- include_tasks: uptime_kuma_container.yaml
+- include_tasks: homepage_container.yaml
+- include_tasks: monitoring_pod.yaml
+- include_tasks: grafana_container.yaml
+- include_tasks: influxdb2_container.yaml
+- include_tasks: prometheus_container.yaml
+- include_tasks: restart_monitoring_pod.yaml
