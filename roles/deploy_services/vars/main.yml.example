@@ -12,7 +12,6 @@ paperless_ngx_env_template_file: paperless-ngx.env.j2
 
 ### Librechat ###
 HUGGINGFACE_TOKEN:
-OPENAI_API_KEY:
 OPENROUTER_KEY:
 CREDS_KEY:
 CREDS_IV:
