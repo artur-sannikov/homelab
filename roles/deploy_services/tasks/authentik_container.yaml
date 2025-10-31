@@ -8,7 +8,6 @@
     mode: "0755"
   loop:
     - authentik/postgres/data
-    - authentik/redis/data
     - authentik/media
     - authentik/certs
 - name: Generate authentik.env from template
@@ -53,30 +52,6 @@
     healthcheck_timeout: 10s
     quadlet_options:
       - "NoNewPrivileges=true"
-      - |
-        [Service]
-        Restart=always
-      - |
-        [Install]
-        WantedBy=default.target
-- name: Create authentik-redis Quadlet
-  containers.podman.podman_container:
-    name: authentik-redis
-    image: docker.io/redis:8.2.2@sha256:4521b581dbddea6e7d81f8fe95ede93f5648aaa66a9dacd581611bf6fe7527bd
-    state: quadlet
-    quadlet_filename: authentik-redis
-    quadlet_dir: "{{ quadlet_dir }}"
-    pod: authentik.pod
-    volumes:
-      - "{{ podman_appdata_dir }}/authentik/redis/data:/data:Z"
-    health_cmd: "redis-cli ping | grep PONG"
-    health_startup_interval: 30s
-    health_startup_retries: 5
-    healthcheck_start_period: 20s
-    healthcheck_timeout: 10s
-    quadlet_options:
-      - "NoNewPrivileges=true"
-      - "Exec=--save 60 1 --loglevel warning"
       - |
         [Service]
         Restart=always
