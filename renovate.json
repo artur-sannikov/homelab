@@ -37,6 +37,12 @@
       "enabled": true
     },
     {
+      "matchPackageNames": ["docker.io/mongo"],
+      "matchUpdateTypes": ["digest"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
       "matchPackageNames": ["docker.io/redis"],
       "matchUpdateTypes": ["major"],
       "enabled": false
