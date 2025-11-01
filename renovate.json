@@ -28,6 +28,11 @@
       "enabled": false
     },
     {
+      "matchPackageNames": ["docker.io/mongo"],
+      "matchUpdateTypes": ["minor", "major"],
+      "enabled": false
+    },
+    {
       "matchUpdateTypes": ["digest", "patch", "minor"],
       "matchCurrentVersion": "!/^v?0/",
       "automerge": true,
@@ -37,11 +42,6 @@
     },
     {
       "matchPackageNames": ["docker.io/getmeili/meilisearch"],
-      "matchCurrentVersion": "v1.12.3",
-      "enabled": false
-    },
-    {
-      "matchPackageNames": ["docker.io/mongo"],
       "matchUpdateTypes": ["minor", "major"],
       "enabled": false
     },
