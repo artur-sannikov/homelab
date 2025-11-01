@@ -31,7 +31,11 @@
       "matchPackageNames": ["docker.io/getmeili/meilisearch"],
       "enabled": false
     },
-
+    {
+      "matchPackageNames": ["docker.io/mongo"],
+      "matchUpdateTypes": ["digest", "patch"],
+      "enabled": true
+    },
     {
       "matchPackageNames": ["docker.io/redis"],
       "matchUpdateTypes": ["major"],
