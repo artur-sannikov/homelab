@@ -33,8 +33,8 @@
     },
     {
       "matchPackageNames": ["docker.io/mongo"],
-      "matchUpdateTypes": ["digest", "patch"],
-      "enabled": true
+      "matchUpdateTypes": ["minor", "major"],
+      "enabled": false
     },
     {
       "matchPackageNames": ["docker.io/mongo"],
