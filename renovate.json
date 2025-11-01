@@ -29,6 +29,7 @@
     },
     {
       "matchPackageNames": ["docker.io/getmeili/meilisearch"],
+      "matchCurrentVersion": "v1.12.3",
       "enabled": false
     },
     {
