@@ -15,7 +15,7 @@
 - name: Create Speedtest-tracker Quadlet
   containers.podman.podman_container:
     name: speedtest-tracker
-    image: lscr.io/linuxserver/speedtest-tracker:1.6.8@sha256:35e6700501de3f5621ea3afec87ae7330c113cfacf67671620575fc5a960ed4b
+    image: lscr.io/linuxserver/speedtest-tracker:1.6.10@sha256:30d1ee91e7cd39da7cfcc95fa1fa8b33f7ce9f1e51a2cdd6eccd14c856f75517
     state: quadlet
     quadlet_filename: speedtest-tracker
     quadlet_file_mode: "0644"
@@ -42,14 +42,3 @@
     state: enabled
   notify:
     - Reload firewalld
-- name: Restart Speedtest-tracker service
-  ansible.builtin.systemd_service:
-    name: speedtest-tracker.service
-    state: "restarted"
-    scope: "user"
-    daemon_reload: true
-    enabled: true
-  become: true
-  become_user: "{{ podman_user }}"
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ __user_info.uid }}"

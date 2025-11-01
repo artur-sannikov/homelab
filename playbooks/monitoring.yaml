@@ -1,6 +1,8 @@
 - name: Deploy monitoring server
   hosts: monitoring_srv
   become: true
+  vars_files:
+    - ../secrets.yaml
   roles:
     - base
     - install_podman
