@@ -28,6 +28,11 @@
       "enabled": false
     },
     {
+      "matchPackageNames": ["docker.io/getmeili/meilisearch"],
+      "enabled": false
+    },
+
+    {
       "matchPackageNames": ["docker.io/redis"],
       "matchUpdateTypes": ["major"],
       "enabled": false
