@@ -13,16 +13,19 @@
   changed_when: "'app/' in flatpak_update_output.stdout"
   when: ansible_os_family == "Zorin OS"
 
-- name: Check if reboot required
-  ansible.builtin.stat:
-    path: /var/run/reboot-required
-  register: reboot_required_file
-
 - name: Reboot if required
-  ansible.builtin.reboot:
   when:
-    - reboot_required_file.stat.exists
     - ansible_os_family == "Debian" or ansible_os_family == "Zorin OS"
+  block:
+    - name: Check if reboot required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required_file
+
+    - name: Reboot if required
+      ansible.builtin.reboot:
+      when:
+        - reboot_required_file.stat.exists
 
 - name: Update DNF packages on Fedora
   ansible.builtin.dnf5:
