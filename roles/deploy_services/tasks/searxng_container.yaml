@@ -1,0 +1,69 @@
+---
+- name: Load Infisical secrets
+  ansible.builtin.include_tasks: ../roles/common/tasks/infisical.yaml
+- name: Extract SEARXNG_SECRET
+  ansible.builtin.set_fact:
+    services_searxng_secret: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'SEARXNG_SECRET')
+          | first
+        ).value
+      }}
+  no_log: true
+- name: Generate SearXNG environment file from template
+  ansible.builtin.template:
+    src: "{{ searxng_env_template_file }}"
+    dest: "{{ quadlet_dir }}/searxng.env"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+- name: Create folders for SearXNG
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/searxng/{{ item }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0750"
+  loop:
+    - config
+    - data
+- name: Generate SearXNG settings.yml from template
+  ansible.builtin.template:
+    src: "{{ searxng_settings_yml_template_file }}"
+    dest: "{{ podman_appdata_dir }}/searxng/config/settings.yml"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0600"
+- name: Create SearXNG quadlet
+  containers.podman.podman_container:
+    name: searxng
+    image: ghcr.io/searxng/searxng:2025.11.7-b9b46431b@sha256:5a5d0e69819757e3fa23392a687c63851250bc13d2486a1f1711804b1691dc12
+    state: quadlet
+    quadlet_filename: searxng
+    quadlet_file_mode: "0644"
+    quadlet_dir: "{{ quadlet_dir }}"
+    ports:
+      - "8888:8080"
+    volumes:
+      - "{{ podman_appdata_dir }}/searxng/config:/etc/searxng:Z"
+      - "{{ podman_appdata_dir }}/searxng/data:/var/cache/searxng:Z"
+    env_file:
+      - searxng.env
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+- name: Open firewalld port for SearXNG
+  ansible.posix.firewalld:
+    port: "8888/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
