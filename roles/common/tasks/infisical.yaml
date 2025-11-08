@@ -1,0 +1,14 @@
+---
+- name: Read all secrets from Infisical
+  ansible.builtin.set_fact:
+    infisical_secrets_raw: >-
+      {{ lookup(
+          'infisical.vault.read_secrets',
+          universal_auth_client_id=universal_auth_client_id,
+          universal_auth_client_secret=universal_auth_client_secret,
+          project_id=project_id,
+          path='/',
+          env_slug='prod',
+          url=infisical_url
+      ) }}
+  no_log: true
