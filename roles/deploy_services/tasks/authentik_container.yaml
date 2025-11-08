@@ -1,5 +1,5 @@
 ---
-- name: Create folder for FreshRSS data
+- name: Create folder for Authentik data
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
     state: directory
