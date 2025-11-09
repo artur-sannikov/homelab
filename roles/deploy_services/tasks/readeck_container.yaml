@@ -1,9 +1,11 @@
+---
 - name: Create folders for Readeck data files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/readeck/data"
     state: directory
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
+    mode: "0750"
 - name: Create readeck Quadlet
   containers.podman.podman_container:
     name: readeck
