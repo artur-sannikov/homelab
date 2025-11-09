@@ -1,4 +1,7 @@
 ---
+- name: Set service name variable
+  ansible.builtin.set_fact:
+    service_name: uptime-kuma
 - name: Create folder for Uptime Kuma data files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/uptime-kuma/data"
@@ -28,6 +31,7 @@
       - |
         [Install]
         WantedBy=default.target
+  notify: Restart service
 - name: Open firewalld port for Uptime Kuma
   ansible.posix.firewalld:
     port: "3001/tcp"

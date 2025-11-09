@@ -1,3 +1,7 @@
+---
+- name: Set service name variable
+  ansible.builtin.set_fact:
+    service_name: speedtest-tracker
 - name: Create folder for Speedtest-tracker config files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/speedtest-tracker/config"
@@ -34,6 +38,7 @@
       - |
         [Install]
         WantedBy=default.target
+  notify: Restart service
 - name: Open firewalld port for Speedtest-tracker
   ansible.posix.firewalld:
     port: "8080/tcp"

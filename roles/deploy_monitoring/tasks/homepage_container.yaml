@@ -1,3 +1,7 @@
+---
+- name: Set service name variable
+  ansible.builtin.set_fact:
+    service_name: homepage
 - name: Create folders for Homepage config files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
@@ -49,6 +53,7 @@
       - |
         [Install]
         WantedBy=default.target
+  notify: Restart service
 - name: Open firewalld port for Homepage
   ansible.posix.firewalld:
     port: "3002/tcp"

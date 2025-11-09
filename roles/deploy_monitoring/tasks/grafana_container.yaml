@@ -1,3 +1,4 @@
+---
 - name: Create folders for Grafana container config files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
