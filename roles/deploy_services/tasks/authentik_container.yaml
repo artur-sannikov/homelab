@@ -1,4 +1,7 @@
 ---
+- name: Set service name variable
+  ansible.builtin.set_fact:
+    service_name: authentik-pod
 - name: Create folder for Authentik data
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
@@ -58,6 +61,7 @@
       - |
         [Install]
         WantedBy=default.target
+  notify: Restart service
 - name: Create authentik-server Quadlet
   containers.podman.podman_container:
     name: authentik-server
@@ -78,6 +82,7 @@
         Restart=always
         [Install]
         WantedBy=default.target
+  notify: Restart service
 - name: Create authentik-worker Quadlet
   containers.podman.podman_container:
     name: authentik-worker
@@ -100,14 +105,15 @@
       - |
         [Install]
         WantedBy=default.target
+  notify: Restart service
 # - name: Change owner of authentik/{media,certs} directories to 1000:1000
-  # authentik-server and authentik-worker run as authentik user with UID 1000
-  # inside these containers
-  # Podman is unable to automatically change owner of the directories inside the containers
-  # so we need to run podman unshare to run chown inside Podman's user namespace
-  # ansible.builtin.shell: |
-  #   podman unshare chown -R 1000:1000 {{ podman_appdata_dir }}/authentik
-  # become_user: "{{ podman_user }}"
+# authentik-server and authentik-worker run as authentik user with UID 1000
+# inside these containers
+# Podman is unable to automatically change owner of the directories inside the containers
+# so we need to run podman unshare to run chown inside Podman's user namespace
+# ansible.builtin.shell: |
+#   podman unshare chown -R 1000:1000 {{ podman_appdata_dir }}/authentik
+# become_user: "{{ podman_user }}"
 - name: Open firewalld port for Authentik
   ansible.posix.firewalld:
     port: "9000/tcp"

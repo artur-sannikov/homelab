@@ -77,6 +77,8 @@
       - |
         [Install]
         WantedBy=default.target
+  notify:
+    - Restart service
 - name: Create paperless-ngx-postgres Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-postgres
@@ -105,6 +107,8 @@
       - |
         [Install]
         WantedBy=default.target
+  notify:
+    - Restart service
 - name: Create paperless-ngx Quadlet
   containers.podman.podman_container:
     name: paperless-ngx
@@ -137,6 +141,8 @@
       - |
         [Install]
         WantedBy=default.target
+  notify:
+    - Restart service
 - name: Open firewalld port for Paperless-ngx
   ansible.posix.firewalld:
     port: "8001/tcp"

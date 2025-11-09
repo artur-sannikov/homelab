@@ -1,3 +1,7 @@
+---
+- name: Set service name variable
+  ansible.builtin.set_fact:
+    service_name: changedetection
 - name: Create folder for Changedetection data
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/changedetection/datastore"
@@ -43,6 +47,8 @@
       - |
         [Install]
         WantedBy=default.target
+  notify:
+    - Restart service
 - name: Create changedetection Quadlet
   containers.podman.podman_container:
     name: changedetection
@@ -67,6 +73,8 @@
       - |
         [Install]
         WantedBy=default.target
+  notify:
+    - Restart service
 - name: Open firewalld port for Changedetection
   ansible.posix.firewalld:
     port: "5000/tcp"
