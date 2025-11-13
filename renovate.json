@@ -33,6 +33,10 @@
       "enabled": false
     },
     {
+      "matchPackageNames": ["ghcr.io/searxng/searxng"],
+      "versioning": "regex:^(?<major>\\d{4})\\.(?<minor>\\d{1,2})\\.(?<patch>\\d{1,2})(?:-(?<build>[0-9a-fA-F]+))?$"
+    },
+    {
       "matchUpdateTypes": ["digest", "patch", "minor"],
       "matchCurrentVersion": "!/^v?0/",
       "automerge": true,
