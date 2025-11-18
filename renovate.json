@@ -1,11 +1,19 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended"
+  ],
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Renovate Dashboard",
-  "baseBranchPatterns": ["devel"],
-  "assignees": ["artur"],
-  "labels": ["renovate"],
+  "baseBranchPatterns": [
+    "devel"
+  ],
+  "assignees": [
+    "artur"
+  ],
+  "labels": [
+    "renovate"
+  ],
   "configMigration": true,
   "prHourlyLimit": 0,
   "customManagers": [
@@ -14,7 +22,9 @@
       "description": "Manage container images with Ansible and Podman Quadlets",
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker",
-      "fileMatch": ["\\.ya?ml$"],
+      "managerFilePatterns": [
+        "/\\.ya?ml$/"
+      ],
       "matchStrings": [
         "(?<indentation>^\\s*)image:\\s*(?<depName>[a-zA-Z0-9./_-]+)(?::(?<currentValue>[a-zA-Z0-9._-]+))?(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
       ],
@@ -23,21 +33,36 @@
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["docker.io/postgres"],
-      "matchUpdateTypes": ["major"],
+      "matchPackageNames": [
+        "docker.io/postgres"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "enabled": false
     },
     {
-      "matchPackageNames": ["docker.io/mongo"],
-      "matchUpdateTypes": ["minor", "major"],
+      "matchPackageNames": [
+        "docker.io/mongo"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "major"
+      ],
       "enabled": false
     },
     {
-      "matchPackageNames": ["ghcr.io/searxng/searxng"],
+      "matchPackageNames": [
+        "ghcr.io/searxng/searxng"
+      ],
       "versioning": "regex:^(?<major>\\d{4})\\.(?<minor>\\d{1,2})\\.(?<patch>\\d{1,2})(?:-(?<build>[0-9a-fA-F]+))?$"
     },
     {
-      "matchUpdateTypes": ["digest", "patch", "minor"],
+      "matchUpdateTypes": [
+        "digest",
+        "patch",
+        "minor"
+      ],
       "matchCurrentVersion": "!/^v?0/",
       "automerge": true,
       "automergeType": "pr",
@@ -45,19 +70,32 @@
       "ignoreTests": true
     },
     {
-      "matchPackageNames": ["docker.io/getmeili/meilisearch"],
-      "matchUpdateTypes": ["minor", "major"],
+      "matchPackageNames": [
+        "docker.io/getmeili/meilisearch"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "major"
+      ],
       "enabled": false
     },
     {
-      "matchPackageNames": ["docker.io/mongo"],
-      "matchUpdateTypes": ["digest"],
+      "matchPackageNames": [
+        "docker.io/mongo"
+      ],
+      "matchUpdateTypes": [
+        "digest"
+      ],
       "automerge": true,
       "automergeType": "pr"
     },
     {
-      "matchPackageNames": ["docker.io/redis"],
-      "matchUpdateTypes": ["major"],
+      "matchPackageNames": [
+        "docker.io/redis"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "enabled": false
     }
   ]
