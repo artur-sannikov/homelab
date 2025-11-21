@@ -1,0 +1,5 @@
+---
+- name: Remove enterprise repository
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/pbs-enterprise.sources
+    state: absent
