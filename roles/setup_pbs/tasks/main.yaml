@@ -3,3 +3,12 @@
   ansible.builtin.file:
     path: /etc/apt/sources.list.d/pbs-enterprise.sources
     state: absent
+- name: Add no-subscription repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/proxmox.sources
+    content: |
+      Types: deb
+      URIs: http://download.proxmox.com/debian/pbs
+      Suites: trixie
+      Components: pbs-no-subscription
+      Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
