@@ -1,0 +1,7 @@
+- name: Reauth Tailscale clients
+  hosts: pbs
+  roles:
+    - role: artis3n.tailscale.machine
+      vars:
+        tailscale_authkey: "{{ lookup('env', 'TAILSCALE_KEY') }}"
+        tailscale_args: "--force-reauth"
