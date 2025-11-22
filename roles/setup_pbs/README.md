@@ -1,4 +1,4 @@
-# Set up Proxmox Backup Server
+# Set Up Proxmox Backup Server
 
 Currently, very limited Ansible set up is available for Proxmox Backup Server
 (PBS). Collection
@@ -8,7 +8,9 @@ dependencies when setting up the server.
 
 Below are my notes on things to set up after installing PBS.
 
-# What to set up manually
+# What to Set Up Manually
+
+## Users
 
 Create Admin user account:
 
@@ -16,11 +18,195 @@ Create Admin user account:
 proxmox-backup-manager user create artur@pbs
 ```
 
-In the GUI "Configuration - Access Control" select the user and change the
-password.
+As a `root` user, in the GUI "Configuration - Access Control" select the user
+and change the password.
 
 Add Admin access to the user account:
 
 ```shell
 proxmox-backup-manager acl update / Admin  --auth-id artur@pbs
+```
+
+Create backupUser account:
+
+```shell
+proxmox-backup-manager user create backupUser@pbs
+```
+
+As a `root` user, in the GUI "Configuration - Access Control" select the user
+and change the password.
+
+After creating datastores (see below), give access:
+
+```shell
+proxmox-backup-manager acl update /datastore/pve-datastore DatastoreAdmin \
+  --auth-id backupUser@pbs
+
+proxmox-backup-manager acl update /datastore/pve-etc DatastoreAdmin \
+  --auth-id backupUser@pbs
+```
+
+### API Keys
+
+I am backing up the configuration of Proxmox hosts and I use API keys to do
+this.
+
+```shell
+# For node 1
+proxmox-backup-manager user generate-token backupUser@pbs pve1-etc
+# For node 2
+proxmox-backup-manager user generate-token backupUser@pbs pve2-etc
+```
+
+Copy both API keys!
+
+On Proxmox Backup Server add permissions to access the datastore created below.
+
+```shell
+set +H
+proxmox-backup-manager acl update /datastore/pve-etc DatastoreBackup \
+  --auth-id "backupUser@pbs!pve1-etc"
+
+proxmox-backup-manager acl update /datastore/pve-etc DatastoreBackup \
+  --auth-id "backupUser@pbs!pve2-etc"
+set -H
+```
+
+`set +H` is required to disable history expansion (causes issue with `!pve1`)
+
+## Datastores
+
+Ansible playbook creates several mount points:
+
+- `/mnt/pve-datastore`: for Proxmox VMs and LXC containers.
+- `/mnt/pve-etc`: for Proxmox `/etc/` directory (host settings).
+
+Now create datastores:
+
+```shell
+proxmox-backup-manager datastore create pve-datastore /mnt/pve-datastore \
+  --gc-schedule "*-*-* 13:00:00" --keep-daily 7 --keep-weekly 4 \
+  --keep-monthly 6 --keep-last 5 --prune-schedule "*-*-* 17:00:00"
+
+proxmox-backup-manager datastore create pve-etc /mnt/pve-etc \
+  --gc-schedule "*-*-* 14:00:00" --keep-daily 7 --keep-weekly 4 \
+  --keep-monthly 12 --keep-last 24 --prune-schedule "*-*-* 18:00:00"
+```
+
+### Verify Jobs
+
+To add verify jobs:
+
+```shell
+proxmox-backup-manager verify-job create pve-datastore-verify \
+  --store pve-datastore --outdated-after 30 --schedule daily \
+  --ignore-verified true
+
+proxmox-backup-manager verify-job create pve-etc-verify \
+  --store pve-etc --outdated-after 30 --schedule daily \
+  --ignore-verified true
+```
+
+## Certificates
+
+Add ACME account. Let's Encrypt does not use email anymore, so put any email
+address:
+
+```shell
+proxmox-backup-manager acme account register letsencrypt enc@proton.me
+
+# Select https://acme-v02.api.letsencrypt.org/directory
+# Agree to ToS
+```
+
+On Cloudflare, create an API token with this permission:
+
+- Zone - DNS - Edit
+
+Create a file with this content to set up Cloudflare DNS:
+
+```txt
+#/root/token
+CF_Account_ID=<your_account_id>
+CF_Token=<token_from_above>
+CF_Zone_ID=<domain_zone_id>
+```
+
+Run:
+
+```shell
+proxmox-backup-manager acme plugin add dns cloudflare --api cf --data ./token
+rm ./token
+```
+
+I could not find any information about how to do it via CLI. In web-UI, go to
+Configuration &#8594; Certificates. Add ACME, set Challenge type to DNS, select
+the plugin created above, input your domain. Click OK and then Order
+Certificates Now.
+
+## Proxmox Backup Client to Backup Proxmox Host
+
+It is possible to backup and Linux file/directory with `proxmox-backup-server`
+client (installed by default on Proxmox VE).
+
+I adapted a script from
+[Proxmox forum](https://forum.proxmox.com/threads/is-there-a-way-to-backup-the-pve-host-to-the-proxmox-backup-server-pbs.157945/).
+
+1. Place the content below to the file `/usr/local/sbin/pve-backup.sh`.
+2. Set the environment variables in the `/root/pve-backup.env`.
+3. Restrict `pve-backup.env` permissions `chmod 640 /root/pve-backup.env`.
+4. Make the script executable: `chmod u+x /usr/local/sbin/pve-backup.sh`.
+5. You can get the value for PBS_FINGERPRINT by running
+   `proxmox-backup-manager cert info | grep Fingerprint`
+6. To generate a backup encryption key run
+
+```shell
+proxmox-backup-client key create /root/pve-etc.key --kdf none
+```
+
+The encryption key is not password-protected to allow automation. Save it to a
+password manager and keep it safe!
+
+```
+# /root/pve-backup.env
+export PBS_REPOSITORY=backupUser@pbs!<API TOKEN NAME>@<PBS HOST>:<DATASTORE>
+export PBS_PASSWORD=<API TOKEN>
+export PBS_FINGERPRINT=<PBS HOST FINGERPRINT>
+```
+
+```bash
+#!/bin/bash
+if [ -f /root/pve-backup.env ] ; then
+        source /root/pve-backup.env
+else
+        echo "File /root/pve-backup.env missing" > /dev/stderr
+        exit 1
+fi
+
+/usr/bin/proxmox-backup-client backup etc.pxar:/etc \
+        --crypt-mode encrypt \
+        --keyfile /root/pve-etc.key \
+        --backup-type host \
+        --skip-lost-and-found \
+        --include-dev /etc/pve
+```
+
+5. Run `crontab -e`. I suggest using healthchecks.io to monitor failed jobs.
+
+```
+8 20 * * * /usr/local/sbin/pve-backup.sh && curl -fsS -m 10 --retry 5 -o /dev/null <healthchecks.io link>
+```
+
+### Restore with Proxmox Backup Client
+
+```shell
+# Create directory for restore
+mkdir restore
+
+# Show snapshots
+proxmox-backup-client snapshot list host/pve1 --repository backupUser@pbs@<PBS_IP>:pve-etc
+
+# Restore
+proxmox-backup-client restore --repository backupUser@pbs@<PBS_IP>:pve-etc \
+  <snaphot_id from previous command> etc.pxar restore/
 ```
