@@ -44,6 +44,10 @@ proxmox-backup-manager acl update /datastore/pve-datastore DatastoreAdmin \
 
 proxmox-backup-manager acl update /datastore/pve-etc DatastoreAdmin \
   --auth-id backupUser@pbs
+
+# For S3
+proxmox-backup-manager acl update /datastore/PBS-B2-EU-CENTRAL DatastoreAdmin \
+  --auth-id backupUser@pbs
 ```
 
 ### API Keys
@@ -85,12 +89,63 @@ Now create datastores:
 
 ```shell
 proxmox-backup-manager datastore create pve-datastore /mnt/pve-datastore \
-  --gc-schedule "*-*-* 13:00:00" --keep-daily 7 --keep-weekly 4 \
-  --keep-monthly 6 --keep-last 5 --prune-schedule "*-*-* 17:00:00"
+  --gc-schedule "*-*-* 13:00:00"
 
 proxmox-backup-manager datastore create pve-etc /mnt/pve-etc \
-  --gc-schedule "*-*-* 14:00:00" --keep-daily 7 --keep-weekly 4 \
-  --keep-monthly 12 --keep-last 24 --prune-schedule "*-*-* 18:00:00"
+  --gc-schedule "*-*-* 14:00:00"
+```
+
+Add prune jobs:
+
+```shell
+proxmox-backup-manager prune-job create pve-datastore-prune \
+  --store pve-datastore --keep-daily 7 --keep-weekly 4 \
+  --keep-monthly 12 --keep-last 5 --schedule "*-*-* 17:00:00"
+
+proxmox-backup-manager prune-job create pve-etc-prune \
+  --store pve-etc --keep-daily 7 --keep-weekly 4 \
+  --keep-monthly 12 --keep-last 24 --schedule "*-*-* 17:30:00"
+```
+
+### S3 Storage
+
+PBS 4 added support for S3-compatible storage. Before starting, add a disk
+for S3 cache. My server is running on TrueNAS Scale, so it's a matter of
+adding a new zvol to the virtual machine. Then create an ext4 file system
+on the drive and mount it at `/mnt/s3-cache` (via `/etc/fstab`).
+
+You will need
+`keyID` and `applicationKey` from Backblaze. For more info, see [Creating and
+Managing Application
+Keys](https://help.backblaze.com/hc/en-us/articles/360052129034-Creating-and-Managing-Application-Keys).
+You **have** to select "Allow listing all bucket names including bucket
+creation dates".
+
+To add a Backblaze S3 storage run
+
+```shell
+proxmox-backup-manager s3 endpoint create pbs-backblaze \
+  --access-key <keyID> --secret-key <applicationKey> \
+  --endpoint 's3.{{region}}.backblazeb2.com' \
+  --region 'eu-central-003' \
+  --path-style true \
+  --provider-quirks skip-if-none-match-header
+```
+
+Now create a datastore
+
+```shell
+proxmox-backup-manager datastore create PBS-B2-EU-CENTRAL /mnt/s3-cache \
+  --backend type=s3,client=pbs-backblaze,bucket=<your_bucket> \
+  --gc-schedule "*-*-* 14:00:00"
+```
+
+Add prune job
+
+```shell
+proxmox-backup-manager prune-job create pbs-b2-eu-central-prune  \
+  --store PBS-B2-EU-CENTRAL --keep-daily 7 --keep-weekly 4 \
+  --keep-monthly 12 --keep-last 5 --schedule "*-*-* 17:00:00"
 ```
 
 ### Verify Jobs
@@ -104,6 +159,10 @@ proxmox-backup-manager verify-job create pve-datastore-verify \
 
 proxmox-backup-manager verify-job create pve-etc-verify \
   --store pve-etc --outdated-after 30 --schedule daily \
+  --ignore-verified true
+
+proxmox-backup-manager verify-job create pve-b2-eu-central-verify \
+  --store PBS-B2-EU-CENTRAL --outdated-after 30 --schedule 'Wed,Sat 18:00:00' \
   --ignore-verified true
 ```
 

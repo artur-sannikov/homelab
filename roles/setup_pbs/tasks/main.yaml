@@ -41,3 +41,18 @@
     owner: root
     group: root
     mode: "0755"
+
+- name: Create mount point for S3 cache
+  ansible.builtin.file:
+    path: /mnt/s3-cache
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Mount S3 cache
+  ansible.posix.mount:
+    path: /mnt/s3-cache
+    src: /dev/vdb
+    fstype: ext4
+    state: present
