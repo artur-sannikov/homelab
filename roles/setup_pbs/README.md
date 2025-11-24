@@ -166,6 +166,18 @@ proxmox-backup-manager verify-job create pve-b2-eu-central-verify \
   --ignore-verified true
 ```
 
+### Sync Job
+
+For the S3-backed storage create a pull sync jobs for encrypted off-site
+backups.
+
+```shell
+proxmox-backup-manager sync-job create backblaze  --store PBS-B2-EU-CENTRAL \
+  --remote-store pve-datastore --verified-only true --encrypted-only true \
+  --schedule 21:00 --remove-vanished --sync-direction pull \
+  --owner backupUser@pbs
+```
+
 ## Certificates
 
 Add ACME account. Let's Encrypt does not use email anymore, so put any email
