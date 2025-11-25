@@ -107,6 +107,18 @@ proxmox-backup-manager prune-job create pve-etc-prune \
   --keep-monthly 12 --keep-last 24 --schedule "*-*-* 17:30:00"
 ```
 
+Add verify jobs
+
+```
+proxmox-backup-manager verify-job create pve-datastore-verify \
+  --store pve-datastore --outdated-after 30 --schedule daily \
+  --ignore-verified true
+
+proxmox-backup-manager verify-job create pve-etc-verify \
+  --store pve-etc --outdated-after 30 --schedule daily \
+  --ignore-verified true
+```
+
 ### S3 Storage
 
 PBS 4 added support for S3-compatible storage. Before starting, add a disk
@@ -159,25 +171,13 @@ proxmox-backup-manager prune-job create pbs-b2-eu-central-prune  \
   --keep-monthly 12 --keep-last 5 --schedule "*-*-* 17:00:00"
 ```
 
-### Verify Jobs
-
-To add verify jobs:
+Add verify jobs:
 
 ```shell
-proxmox-backup-manager verify-job create pve-datastore-verify \
-  --store pve-datastore --outdated-after 30 --schedule daily \
-  --ignore-verified true
-
-proxmox-backup-manager verify-job create pve-etc-verify \
-  --store pve-etc --outdated-after 30 --schedule daily \
-  --ignore-verified true
-
 proxmox-backup-manager verify-job create pve-b2-eu-central-verify \
   --store PBS-B2-EU-CENTRAL --outdated-after 30 --schedule 'Wed,Sat 18:00:00' \
   --ignore-verified true
 ```
-
-### Sync Job
 
 For the S3-backed storage create a pull sync jobs for encrypted off-site
 backups.
