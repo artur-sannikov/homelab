@@ -50,6 +50,9 @@ proxmox-backup-manager acl update /datastore/PBS-B2-EU-CENTRAL DatastoreAdmin \
   --auth-id backupUser@pbs
 ```
 
+> [!NOTE]
+> If the permissions do not update in the GUI, reboot the server.
+
 ### API Keys
 
 I am backing up the configuration of Proxmox hosts and I use API keys to do
