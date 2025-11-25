@@ -56,3 +56,10 @@
     src: /dev/vdb
     fstype: ext4
     state: present
+
+- name: Mount Hetzner S3 cache
+  ansible.posix.mount:
+    path: /mnt/hetzner-s3-cache
+    src: /dev/vdc
+    fstype: ext4
+    state: present

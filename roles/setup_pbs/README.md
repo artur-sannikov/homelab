@@ -127,7 +127,13 @@ proxmox-backup-manager verify-job create pve-etc-verify \
 PBS 4 added support for S3-compatible storage. Before starting, add a disk
 for S3 cache. My server is running on TrueNAS Scale, so it's a matter of
 adding a new zvol to the virtual machine. Then create an ext4 file system
-on the drive and mount it at `/mnt/s3-cache` (via `/etc/fstab`).
+on the drive. The mounting is done via Ansible.
+
+To create an ext4 file system run:
+
+```shell
+mkfs.ext4 /dev/<disk>
+```
 
 You will need
 `keyID` and `applicationKey` from Backblaze. For more info, see [Creating and
