@@ -121,15 +121,26 @@ Keys](https://help.backblaze.com/hc/en-us/articles/360052129034-Creating-and-Man
 You **have** to select "Allow listing all bucket names including bucket
 creation dates".
 
+Create a file `s3-cache` with content:
+
+```
+KEYID=<keyID>
+APPKEY=<applicationKey>
+```
+
 To add a Backblaze S3 storage run
 
 ```shell
+source ./s3-cache
+
 proxmox-backup-manager s3 endpoint create pbs-backblaze \
-  --access-key <keyID> --secret-key <applicationKey> \
+  --access-key $KEYID --secret-key $APPKEY \
   --endpoint 's3.{{region}}.backblazeb2.com' \
   --region 'eu-central-003' \
   --path-style true \
   --provider-quirks skip-if-none-match-header
+
+rm ./s3-cache
 ```
 
 Now create a datastore
