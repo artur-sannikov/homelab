@@ -42,7 +42,7 @@
 - name: Create SearXNG quadlet
   containers.podman.podman_container:
     name: searxng
-    image: ghcr.io/searxng/searxng:2025.11.28-c4abf40e6@sha256:782d8ab73c432e4f8ff5f40044bc55f444906dde2aec5f9e35c27fc169b4673a
+    image: ghcr.io/searxng/searxng:2025.11.29-c954e71f8@sha256:0124d32d77e0c7360d0b85f5d91882d1837e6ceb243c82e190f5d7e9f1401334
     state: quadlet
     quadlet_filename: searxng
     quadlet_file_mode: "0644"
