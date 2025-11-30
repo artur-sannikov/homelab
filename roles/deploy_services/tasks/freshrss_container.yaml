@@ -35,8 +35,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Open firewalld port for FreshRSS
   ansible.posix.firewalld:
     port: "8089/tcp"

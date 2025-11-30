@@ -49,14 +49,13 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Create changedetection Quadlet
   containers.podman.podman_container:
     name: changedetection
     image: ghcr.io/dgtlmoon/changedetection.io:0.51.4@sha256:99cf11f04b5d1f1300b5b68f17dc22e76bdb5d6695d7e6590d2df92eca8fb339
     state: quadlet
     quadlet_filename: changedetection
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: changedetection.pod
     volumes:
@@ -75,8 +74,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Open firewalld port for Changedetection
   ansible.posix.firewalld:
     port: "5000/tcp"

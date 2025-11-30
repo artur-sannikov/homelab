@@ -29,8 +29,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Open firewalld port for Actual Budget
   ansible.posix.firewalld:
     port: "5006/tcp"
