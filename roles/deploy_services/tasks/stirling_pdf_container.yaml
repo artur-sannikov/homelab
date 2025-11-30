@@ -22,7 +22,7 @@
 - name: Create Stirling-PDF Quadlet
   containers.podman.podman_container:
     name: stirling-pdf
-    image: ghcr.io/stirling-tools/s-pdf:1.5.0@sha256:bfe2b8dd378c4f3d5fc1d2fc7649a357d0916b3a713022aa70ac3f08d6302cbc
+    image: ghcr.io/stirling-tools/s-pdf:2.0.2@sha256:af9942975d39b953a008aaa1bb2bbb23330d725d8aeda835eb53de3715e42e36
     state: quadlet
     quadlet_filename: stirling-pdf
     quadlet_dir: "{{ quadlet_dir }}"
