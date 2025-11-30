@@ -24,6 +24,7 @@
     name: librechat
     state: quadlet
     quadlet_filename: librechat
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     infra_name: "librechat-pod"
     ports:
@@ -48,6 +49,7 @@
     image: ghcr.io/danny-avila/librechat:v0.8.0@sha256:adcb326f43a971b53df0fbca5f4769c8e56fafbdf834c9dd8c7e4924788f0152
     state: quadlet
     quadlet_filename: librechat
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: librechat.pod
     volumes:
@@ -71,6 +73,7 @@
     image: docker.io/mongo:8.0.15@sha256:f4d54619262ae3bc6a0a8efbebcef970b87b8ad70697479a75ce308a6f400158
     state: quadlet
     quadlet_filename: librechat-mongodb
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: librechat.pod
     volumes:
@@ -93,6 +96,7 @@
     image: docker.io/getmeili/meilisearch:v1.12.3@sha256:4acfcbbb9e089aa1aac838cfda3fba7f07aaaef044c23da8acbe0ab741400dac
     state: quadlet
     quadlet_filename: librechat-meilisearch
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: librechat.pod
     volumes:

@@ -24,6 +24,7 @@
     name: changedetection
     state: quadlet
     quadlet_filename: changedetection
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     infra_name: "changedetection-pod"
     ports:
@@ -34,6 +35,7 @@
     image: ghcr.io/browserless/chromium:v2.38.2@sha256:d5583d92f135c541667fca63bc7210cf51122c1317335374aa64b191fbaa0ef2
     state: quadlet
     quadlet_filename: chromium-playwright
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: changedetection.pod
     env_file:
