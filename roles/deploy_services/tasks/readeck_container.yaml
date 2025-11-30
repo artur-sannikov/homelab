@@ -29,8 +29,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Open firewalld port for Readeck
   ansible.posix.firewalld:
     port: "8000/tcp"

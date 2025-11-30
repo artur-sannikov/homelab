@@ -65,8 +65,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Create LibreChat-mongodb Quadlet
   containers.podman.podman_container:
     name: librechat-mongodb
@@ -88,8 +86,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Create LibreChat-meilisearch Quadlet
   containers.podman.podman_container:
     name: librechat-meilisearch
@@ -111,8 +107,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Open firewalld port for Librechat
   ansible.posix.firewalld:
     port: "3080/tcp"

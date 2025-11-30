@@ -51,7 +51,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify: Restart service
 - name: Open firewalld port for Stirling-PDF
   ansible.posix.firewalld:
     port: "8080/tcp"
