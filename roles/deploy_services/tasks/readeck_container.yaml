@@ -15,6 +15,7 @@
     image: codeberg.org/readeck/readeck:0.21.3@sha256:9828f8266130928efb859544bc167e3d9b238a139eb31a1f2428245bc51fb5d0
     state: quadlet
     quadlet_filename: readeck
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     ports:
       - "8000:8000"
@@ -28,8 +29,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Open firewalld port for Readeck
   ansible.posix.firewalld:
     port: "8000/tcp"
