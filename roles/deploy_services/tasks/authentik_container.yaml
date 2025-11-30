@@ -63,7 +63,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify: Restart service
 - name: Create authentik-server Quadlet
   containers.podman.podman_container:
     name: authentik-server
@@ -85,7 +84,6 @@
         Restart=always
         [Install]
         WantedBy=default.target
-  notify: Restart service
 - name: Create authentik-worker Quadlet
   containers.podman.podman_container:
     name: authentik-worker
@@ -109,7 +107,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify: Restart service
 # - name: Change owner of authentik/{media,certs} directories to 1000:1000
 # authentik-server and authentik-worker run as authentik user with UID 1000
 # inside these containers
