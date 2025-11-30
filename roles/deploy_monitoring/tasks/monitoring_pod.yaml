@@ -1,8 +1,10 @@
+---
 - name: Create monitoring pod
   containers.podman.podman_pod:
     name: monitoring
     state: quadlet
     quadlet_filename: monitoring
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     infra_name: "monitoring-pod"
     ports:
