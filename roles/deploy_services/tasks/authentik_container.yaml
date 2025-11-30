@@ -107,14 +107,16 @@
       - |
         [Install]
         WantedBy=default.target
-# - name: Change owner of authentik/{media,certs} directories to 1000:1000
-# authentik-server and authentik-worker run as authentik user with UID 1000
-# inside these containers
-# Podman is unable to automatically change owner of the directories inside the containers
-# so we need to run podman unshare to run chown inside Podman's user namespace
-# ansible.builtin.shell: |
-#   podman unshare chown -R 1000:1000 {{ podman_appdata_dir }}/authentik
-# become_user: "{{ podman_user }}"
+- name: Change owner of authentik/{media,certs} directories to 1000:1000
+  # authentik-server and authentik-worker run as authentik user with UID 1000
+  # inside these containers
+  # Podman is unable to automatically change owner of the directories inside the containers
+  # so we need to run podman unshare to run chown inside Podman's user namespace
+  ansible.builtin.shell: |
+    podman unshare chown -R 1000:1000 {{ podman_appdata_dir }}/authentik
+  changed_when: true
+  become: true
+  become_user: "{{ podman_user }}"
 - name: Open firewalld port for Authentik
   ansible.posix.firewalld:
     port: "9000/tcp"
