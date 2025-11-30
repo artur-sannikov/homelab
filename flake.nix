@@ -28,6 +28,7 @@
             infisicalsdk
             ansible-lint
             python313Packages.virtualenv
+            renovate
           ];
           shellHook = ''
             export ANSIBLE_COLLECTIONS_PATH="$PWD/ansible_collections"

@@ -1,0 +1,6 @@
+---
+- name: Set up Proxmox Backup server
+  hosts: pbs
+  gather_facts: true
+  roles:
+    - setup_pbs

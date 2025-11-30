@@ -1,0 +1,7 @@
+---
+- name: Install Tailscale
+  hosts: pbs
+  roles:
+    - role: artis3n.tailscale.machine
+      vars:
+        tailscale_authkey: "{{ lookup('ansible.builtin.env', 'TAILSCALE_KEY') }}"

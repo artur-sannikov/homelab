@@ -92,6 +92,10 @@ export BW_SESSION=$(bw unlock --raw)
 
 See details in `roles/deploy_caddy/README.md`.
 
+### Proxmox Backup Server
+
+See details in `roles/setup_pbs/README.md`.
+
 ## Roadmap
 
 - [ ] Implement Hashicorp Vault/Infisical or other external secret management

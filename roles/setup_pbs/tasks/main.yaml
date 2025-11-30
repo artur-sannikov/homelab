@@ -1,0 +1,65 @@
+---
+- name: Remove enterprise repository
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/pbs-enterprise.sources
+    state: absent
+- name: Add no-subscription repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/proxmox.sources
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      Types: deb
+      URIs: http://download.proxmox.com/debian/pbs
+      Suites: trixie
+      Components: pbs-no-subscription
+      Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+# This config is a bit different from other servers for more stability
+- name: Copy hardened sshd_config
+  ansible.builtin.copy:
+    src: "{{ sshd_config_path }}"
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: "0644"
+    validate: "sshd -t -f %s"
+  notify: Restart sshd
+
+- name: Create datastore mount point for Proxmox VMs and LXCs
+  ansible.builtin.file:
+    path: /mnt/pve-datastore
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create datastore mount point for Proxmox /etc/ directory
+  ansible.builtin.file:
+    path: /mnt/pve-etc
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create mount point for S3 cache
+  ansible.builtin.file:
+    path: /mnt/s3-cache
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Mount S3 cache
+  ansible.posix.mount:
+    path: /mnt/s3-cache
+    src: /dev/vdb
+    fstype: ext4
+    state: present
+
+- name: Mount Hetzner S3 cache
+  ansible.posix.mount:
+    path: /mnt/hetzner-s3-cache
+    src: /dev/vdc
+    fstype: ext4
+    state: present
