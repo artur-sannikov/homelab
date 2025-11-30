@@ -32,6 +32,7 @@
     name: authentik
     state: quadlet
     quadlet_filename: authentik
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     infra_name: "authentik-pod"
     ports:
@@ -42,6 +43,7 @@
     image: docker.io/postgres:16.11@sha256:cf2a05fe40887b721e4b3dbac8fd32673c08292dcc8ba6b62b52b7f640433bd0
     state: quadlet
     quadlet_filename: authentik-postgres
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: authentik.pod
     volumes:
@@ -68,6 +70,7 @@
     image: ghcr.io/goauthentik/server:2025.10.2@sha256:8322e449feefcc2416f0401038d5a1a28552c4403b079a59d3b4d978d8f3f530
     state: quadlet
     quadlet_filename: authentik-server
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: authentik.pod
     volumes:
@@ -89,6 +92,7 @@
     image: ghcr.io/goauthentik/server:2025.10.2@sha256:8322e449feefcc2416f0401038d5a1a28552c4403b079a59d3b4d978d8f3f530
     state: quadlet
     quadlet_filename: authentik-worker
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: authentik.pod
     volumes:

@@ -25,6 +25,7 @@
     image: ghcr.io/stirling-tools/s-pdf:2.0.2@sha256:af9942975d39b953a008aaa1bb2bbb23330d725d8aeda835eb53de3715e42e36
     state: quadlet
     quadlet_filename: stirling-pdf
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     ports:
       - "8080:8080"
