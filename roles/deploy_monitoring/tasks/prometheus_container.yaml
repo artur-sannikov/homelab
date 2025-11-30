@@ -16,7 +16,9 @@
   ansible.builtin.shell: |
     podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/config;
     podman unshare chown -R {{ podman_user_id }}:{{ podman_group_id }} {{ podman_appdata_dir }}/prometheus/data
+  become: true
   become_user: "{{ podman_user }}"
+  changed_when: true
 - name: Copy Prometheus config file
   ansible.builtin.copy:
     src: prometheus.yaml
@@ -30,6 +32,7 @@
     image: docker.io/prom/prometheus:v3.7.3@sha256:49214755b6153f90a597adcbff0252cc61069f8ab69ce8411285cd4a560e8038
     state: quadlet
     quadlet_filename: prometheus
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: monitoring.pod
     user: "{{ podman_user_id }}"
