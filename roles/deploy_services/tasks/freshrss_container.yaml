@@ -19,6 +19,7 @@
     image: docker.io/freshrss/freshrss:1.27.1@sha256:9a56be99f3927cc8fab4c6bbd5723ae098824792d4d98a84007a95eb64e8f905
     state: quadlet
     quadlet_filename: freshrss
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     ports:
       - "8089:80"
@@ -34,8 +35,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Open firewalld port for FreshRSS
   ansible.posix.firewalld:
     port: "8089/tcp"

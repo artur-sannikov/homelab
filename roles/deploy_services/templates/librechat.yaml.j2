@@ -13,6 +13,8 @@ interface:
   privacyPolicy:
     externalUrl: 'https://librechat.ai/privacy-policy'
     openNewTab: true
+    fileSearch: true
+    webSearch: true
 
 endpoints:
   custom:
@@ -27,3 +29,7 @@ endpoints:
       # Recommended: Drop the stop parameter from the request as Openrouter models use a variety of stop tokens.
       dropParams: ["stop"]
       modelDisplayLabel: "OpenRouter"
+
+webSearch:
+  searxngInstanceUrl: "${SEARXNG_INSTANCE_URL}"
+  safeSearch: 0

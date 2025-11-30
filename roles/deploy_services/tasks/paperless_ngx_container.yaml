@@ -47,6 +47,7 @@
     name: paperless-ngx
     state: quadlet
     quadlet_filename: paperless-ngx
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     infra_name: "paperless-ngx-pod"
     ports:
@@ -57,6 +58,7 @@
     image: docker.io/redis:8.4.0@sha256:43355efd22490e31ca14b9d569367d05121e2be61fd8e47937563ae2a80952ae
     state: quadlet
     quadlet_filename: paperless-ngx-redis
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: paperless-ngx.pod
     volumes:
@@ -77,14 +79,13 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Create paperless-ngx-postgres Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-postgres
     image: docker.io/postgres:18.1@sha256:5ec39c188013123927f30a006987c6b0e20f3ef2b54b140dfa96dac6844d883f
     state: quadlet
     quadlet_filename: paperless-ngx-postgres
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: paperless-ngx.pod
     volumes:
@@ -107,14 +108,13 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Create paperless-ngx Quadlet
   containers.podman.podman_container:
     name: paperless-ngx
     image: ghcr.io/paperless-ngx/paperless-ngx:2.20.0@sha256:8ffd737c69a569bbdadc118e7f54b0b1050ffac2868fdf9e390a68cb7c82a79d
     state: quadlet
     quadlet_filename: paperless-ngx
+    quadlet_file_mode: "0644"
     quadlet_dir: "{{ quadlet_dir }}"
     pod: paperless-ngx.pod
     volumes:
@@ -141,8 +141,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify:
-    - Restart service
 - name: Open firewalld port for Paperless-ngx
   ansible.posix.firewalld:
     port: "8001/tcp"

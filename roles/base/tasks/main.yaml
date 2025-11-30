@@ -70,7 +70,7 @@
         owner: root
         group: root
         mode: "0644"
-      notify: restart_sshd
+      notify: Restart sshd
     - name: Set ssh crypto-policies
       ansible.builtin.template:
         src: "{{ base_opensshserver_server_template_file }}"
