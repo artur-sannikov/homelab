@@ -31,7 +31,6 @@
       - |
         [Install]
         WantedBy=default.target
-  notify: Restart service
 - name: Open firewalld port for Uptime Kuma
   ansible.posix.firewalld:
     port: "3001/tcp"
