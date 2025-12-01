@@ -1,4 +1,39 @@
 ---
+- name: Load Infisical secrets
+  ansible.builtin.include_tasks: ../roles/common/tasks/infisical.yaml
+- name: Extract PAPERLESS_DB_PASSWORD
+  ansible.builtin.set_fact:
+    services_paperless_db_password: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'PAPERLESS_DB_PASSWORD')
+          | first
+        ).value
+      }}
+  no_log: true
+- name: Extract PAPERLESS_SECRET_KEY
+  ansible.builtin.set_fact:
+    services_paperless_secret_key: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'PAPERLESS_SECRET_KEY')
+          | first
+        ).value
+      }}
+  no_log: true
+- name: Extract DOMAIN
+  ansible.builtin.set_fact:
+    services_domain: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'DOMAIN')
+          | first
+        ).value
+      }}
+  no_log: true
 - name: Create folders for Paperless-ngx config files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
@@ -27,14 +62,14 @@
   containers.podman.podman_secret:
     state: present
     name: paperless_db_paperless_passwd
-    data: "{{ paperless_db_paperless_passwd }}"
+    data: "{{ services_paperless_db_password }}"
   become: true
   become_user: "{{ podman_user }}"
 - name: Create Paperless-ngx secret paperless_secret_key
   containers.podman.podman_secret:
     state: present
     name: paperless_secret_key
-    data: "{{ paperless_secret_key }}"
+    data: "{{ services_paperless_secret_key }}"
   become: true
   become_user: "{{ podman_user }}"
 - name: Generate paperless-ngx.env from template
