@@ -1,7 +1,4 @@
 ---
-- name: Set service name variable
-  ansible.builtin.set_fact:
-    service_name: searxng
 - name: Load Infisical secrets
   ansible.builtin.include_tasks: ../roles/common/tasks/infisical.yaml
 - name: Extract SEARXNG_SECRET
