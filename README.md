@@ -88,9 +88,16 @@ Before running playbook, run
 export BW_SESSION=$(bw unlock --raw)
 ```
 
-#### caddy reverse proxy
+### caddy reverse proxy
 
 See details in `roles/deploy_caddy/README.md`.
+
+### Tailscale deployment
+
+1. `export TAILSCALE_KEY=<tailscale_key>`.
+2. `ansible-playbook playbooks/install_tailscale.yaml`.
+3. To reauth a Tailscale node run the first command and then
+   `ansible-playbook playbooks/reauth_tailscale.yaml`.
 
 ### Proxmox Backup Server
 
@@ -106,7 +113,7 @@ See details in `roles/deploy_services/README.md`.
       to remove my reliance on
       Ansible Vault. Update: partially implemented. I now deploy Infisical on
       a separate VM.
-- [ ] Tailscale deployment
+- [x] Tailscale deployment
 - [x] Merge this repo with [my Caddy deployment](https://github.com/artur-sannikov/caddy-ansible)
 
 ## Availability
