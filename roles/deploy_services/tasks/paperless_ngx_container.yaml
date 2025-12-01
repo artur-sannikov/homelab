@@ -28,12 +28,14 @@
     state: present
     name: paperless_db_paperless_passwd
     data: "{{ paperless_db_paperless_passwd }}"
+  become: true
   become_user: "{{ podman_user }}"
 - name: Create Paperless-ngx secret paperless_secret_key
   containers.podman.podman_secret:
     state: present
     name: paperless_secret_key
     data: "{{ paperless_secret_key }}"
+  become: true
   become_user: "{{ podman_user }}"
 - name: Generate paperless-ngx.env from template
   ansible.builtin.template:
