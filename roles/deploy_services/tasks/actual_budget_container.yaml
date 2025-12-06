@@ -12,7 +12,7 @@
 - name: Create Actual Buget Quadlet
   containers.podman.podman_container:
     name: actual-budget
-    image: docker.io/actualbudget/actual-server:25.11.0@sha256:8f72d73e68958566850325c1f9fe780a4477340979969bd6979649dc519723ab
+    image: docker.io/actualbudget/actual-server:25.12.0@sha256:7f38b450cc3b7523dd5377792895e58b9cf333769e5a27f89e643b6f5fc60565
     state: quadlet
     quadlet_filename: actual-budget
     quadlet_file_mode: "0644"
