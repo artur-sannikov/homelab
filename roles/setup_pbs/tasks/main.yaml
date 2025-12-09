@@ -50,16 +50,10 @@
     group: root
     mode: "0755"
 
-- name: Mount S3 cache
-  ansible.posix.mount:
-    path: /mnt/s3-cache
-    src: /dev/vdb
-    fstype: ext4
-    state: present
-
 - name: Mount Hetzner S3 cache
   ansible.posix.mount:
     path: /mnt/hetzner-s3-cache
-    src: /dev/vdc
+    src: /dev/vdb
+    opts: "nofail"
     fstype: ext4
     state: present
