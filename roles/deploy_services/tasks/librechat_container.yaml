@@ -46,7 +46,7 @@
 - name: Create LibreChat Quadlet
   containers.podman.podman_container:
     name: librechat
-    image: ghcr.io/danny-avila/librechat:v0.8.0@sha256:adcb326f43a971b53df0fbca5f4769c8e56fafbdf834c9dd8c7e4924788f0152
+    image: ghcr.io/danny-avila/librechat:v0.8.1@sha256:36cf6811bc2461ada6879ab299ce32efebfe8b8e0155334161935d72747b9a2e
     state: quadlet
     quadlet_filename: librechat
     quadlet_file_mode: "0644"
