@@ -114,11 +114,11 @@ Add verify jobs
 
 ```
 proxmox-backup-manager verify-job create pve-datastore-verify \
-  --store pve-datastore --outdated-after 30 --schedule daily \
+  --store pve-datastore --outdated-after 30 --schedule 9,17:00 \
   --ignore-verified true
 
 proxmox-backup-manager verify-job create pve-etc-verify \
-  --store pve-etc --outdated-after 30 --schedule daily \
+  --store pve-etc --outdated-after 30 --schedule 9,17:00 \
   --ignore-verified true
 ```
 
