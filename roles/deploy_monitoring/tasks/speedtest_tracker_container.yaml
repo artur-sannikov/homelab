@@ -19,7 +19,7 @@
 - name: Create Speedtest-tracker Quadlet
   containers.podman.podman_container:
     name: speedtest-tracker
-    image: lscr.io/linuxserver/speedtest-tracker:1.12.4@sha256:d5bf824d613212795e5505fbb4245b847f30d1a4d4d4f0bafbfd78f6e7fc8381
+    image: lscr.io/linuxserver/speedtest-tracker:1.13.0@sha256:c465535377c8200558f675cc0ba1d5ecf7c4cf30f2cc2af1a0cb777a42192d3d
     state: quadlet
     quadlet_filename: speedtest-tracker
     quadlet_file_mode: "0644"
