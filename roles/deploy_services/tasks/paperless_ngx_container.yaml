@@ -119,7 +119,7 @@
 - name: Create paperless-ngx-postgres Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-postgres
-    image: docker.io/postgres:18.1@sha256:bfe50b2b0ddd9b55eadedd066fe24c7c6fe06626185b73358c480ea37868024d
+    image: docker.io/postgres:18.1@sha256:0a9d07c16184b6bf34cb405ddf22eb312da2fc1ef6639e62434a500587675f79
     state: quadlet
     quadlet_filename: paperless-ngx-postgres
     quadlet_file_mode: "0644"
