@@ -301,3 +301,28 @@ proxmox-backup-client snapshot list host/pve1 --repository backupUser@pbs@<PBS_I
 proxmox-backup-client restore --repository backupUser@pbs@<PBS_IP>:pve-etc \
   <snaphot_id from previous command> etc.pxar restore/
 ```
+
+## Notifications
+
+You can add a notifications target. I'm using the Migadu service.
+
+First, read in your password into an environment variable `PASSWORD`.
+
+```shell
+read -s PASSWORD
+```
+
+Next, run the command to add the notification target:
+
+```shell
+proxmox-backup-manager notification endpoint smtp create migadu \
+  --from-address pbs@<your_domain> --server smtp.migadu.com --port 465 \
+  --password $PASSWORD --mailto admin@<your_domain> \
+  --username admin@<your_domain>
+```
+
+Test that the email can be received successfully:
+
+```shell
+proxmox-backup-manager notification target test migadu
+```
