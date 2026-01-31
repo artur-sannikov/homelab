@@ -327,3 +327,13 @@ Test that the email can be received successfully:
 ```shell
 proxmox-backup-manager notification target test migadu
 ```
+
+Next, create a notification matchers.
+
+```shell
+proxmox-backup-manager notification matcher update default-matcher --disable
+
+proxmox-backup-manager notification matcher create errors \
+  --match-severity warning,error --target migadu \
+  --comment "Notify about warning or errors"
+```
