@@ -92,7 +92,7 @@
 - name: Create paperless-ngx-redis Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-redis
-    image: docker.io/redis:8.4.0@sha256:3906b477e4b60250660573105110c28bfce93b01243eab37610a484daebceb04
+    image: docker.io/redis:8.4.0@sha256:73dad4271642c5966db88db7a7585fae7cf10b685d1e48006f31e0294c29fdd7
     state: quadlet
     quadlet_filename: paperless-ngx-redis
     quadlet_file_mode: "0644"
@@ -119,7 +119,7 @@
 - name: Create paperless-ngx-postgres Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-postgres
-    image: docker.io/postgres:18.1@sha256:38d5c9d522037d8bf0864c9068e4df2f8a60127c6489ab06f98fdeda535560f9
+    image: docker.io/postgres:18.1@sha256:5773fe724c49c42a7a9ca70202e11e1dff21fb7235b335a73f39297d200b73a2
     state: quadlet
     quadlet_filename: paperless-ngx-postgres
     quadlet_file_mode: "0644"
@@ -148,7 +148,7 @@
 - name: Create paperless-ngx Quadlet
   containers.podman.podman_container:
     name: paperless-ngx
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.2@sha256:8cbd8ce3ef1857bd144026a7e7192d0889188352b5271631e42ff069ccceeb74
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.5@sha256:665f2f5cc5482ea2e44f90a7fa170908aaeb95d8d3c70e17f746de8fcb81f644
     state: quadlet
     quadlet_filename: paperless-ngx
     quadlet_file_mode: "0644"
