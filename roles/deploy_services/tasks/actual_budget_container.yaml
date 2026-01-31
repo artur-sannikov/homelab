@@ -1,7 +1,4 @@
 ---
-- name: Set service name variable
-  ansible.builtin.set_fact:
-    service_name: actual-budget
 - name: Create folders for Actual Budget data files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/actual-budget/data"

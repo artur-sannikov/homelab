@@ -1,7 +1,4 @@
 ---
-- name: Set service name variable
-  ansible.builtin.set_fact:
-    service_name: librechat-pod
 - name: Create folders for Librechat config and data files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
