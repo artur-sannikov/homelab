@@ -1,7 +1,4 @@
 ---
-- name: Set service name variable
-  ansible.builtin.set_fact:
-    service_name: changedetection
 - name: Create folder for Changedetection data
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/changedetection/datastore"

@@ -1,7 +1,4 @@
 ---
-- name: Set service name variable
-  ansible.builtin.set_fact:
-    service_name: authentik-pod
 - name: Create folder for Authentik data
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
