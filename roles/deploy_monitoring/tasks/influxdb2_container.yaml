@@ -18,7 +18,7 @@
 - name: Create InfluxDB2 quadlet
   containers.podman.podman_container:
     name: influxdb2
-    image: docker.io/influxdb:2.8.0@sha256:47d5ee97ca868e0d669db8ec37bdb72373d11a1fdd16e6ee712447a865d4d119
+    image: docker.io/influxdb:2.8.0@sha256:8e911da5f7b482230e61fe4bad9af0697d97a75e087f19f5f0ddfee62c2bd686
     state: quadlet
     quadlet_filename: influxdb2
     quadlet_file_mode: "0644"
