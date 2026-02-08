@@ -1,0 +1,16 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=Forgejo runner
+After=network.target
+
+[Service]
+Type=simple
+User={{ forgejo_runner__user }}
+Group={{ forgejo_runner__group }}
+WorkingDirectory={{ forgejo_runner__user_home }}
+ExecStart={{ forgejo_runner__full_executable_path }} {{ forgejo_runner__mode }}
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

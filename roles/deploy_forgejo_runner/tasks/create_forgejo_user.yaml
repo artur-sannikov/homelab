@@ -1,0 +1,17 @@
+---
+- name: "Create Forgejo runner Group"
+  become: true
+  ansible.builtin.group:
+    name: "{{ forgejo_runner__group }}"
+    system: true
+    state: "present"
+
+- name: "Create Forgejo runner user"
+  become: true
+  ansible.builtin.user:
+    name: "{{ forgejo_runner__user }}"
+    comment: "Forgejo runner user"
+    group: "{{ forgejo_runner__group }}"
+    home: "{{ forgejo_runner__user_home }}"
+    shell: "/usr/sbin/nologin"
+    system: true
