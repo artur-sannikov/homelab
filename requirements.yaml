@@ -6,3 +6,9 @@ collections:
     version: 1.2.0
   - name: infisical.vault
     version: 1.2.0
+
+roles:
+  - name: geerlingguy.docker
+    version: 8.0.0
+  - name: geerlingguy.pip
+    version: 3.1.2

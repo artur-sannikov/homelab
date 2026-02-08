@@ -1,0 +1,2 @@
+---
+forgejo_runner__releases_latest: "https://code.forgejo.org/api/v1/repos/forgejo/runner/releases?limit=1"

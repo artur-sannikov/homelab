@@ -1,0 +1,16 @@
+---
+- name: "Restart forgejo-runner"
+  listen: "systemctl restart forgejo-runner"
+  become: true
+  ansible.builtin.systemd:
+    name: "forgejo-runner"
+    state: "restarted"
+  when: ansible_facts['service_mgr'] == "systemd"
+
+- name: "Reload systemd"
+  listen: "systemctl daemon-reload"
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: ansible_facts['service_mgr'] == "systemd"
+  notify: "systemctl restart forgejo-runner"
