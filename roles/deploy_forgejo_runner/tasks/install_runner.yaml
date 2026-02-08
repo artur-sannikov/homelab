@@ -1,0 +1,73 @@
+---
+- name: Install Forgejo block
+  when: (forgejo_runner__active_version.stdout[1:] != forgejo_runner__version_target)
+  become: true
+  block:
+    - name: Info what we do
+      ansible.builtin.debug:
+        msg: "Updating forgejo Runner {{ forgejo_runner__active_version.stdout[1:] }} to {{ forgejo_runner__version_target }}"
+        verbosity: 1
+
+    - name: Create temporary folder
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: _runner
+      register: _runner_tmp
+
+    - name: Download forgejo-runner binary
+      ansible.builtin.get_url:
+        url: "{{ forgejo_runner__dl_url }}/{{ forgejo_runner__filename }}"
+        dest: "{{ _runner_tmp.path }}/{{ forgejo_runner__filename }}"
+        mode: "0755"
+        owner: "{{ forgejo_runner__user }}"
+        group: "{{ forgejo_runner__group }}"
+
+    - name: Download forgejo-runner.asc file
+      ansible.builtin.get_url:
+        url: "{{ forgejo_runner__dl_url }}/{{ forgejo_runner__filename }}.asc"
+        dest: "{{ _runner_tmp.path }}/{{ forgejo_runner__filename }}.asc"
+        mode: "0644"
+        owner: "{{ forgejo_runner__user }}"
+        group: "{{ forgejo_runner__group }}"
+
+    - name: Check forgejo runner gpg key
+      ansible.builtin.command: "gpg --list-keys 0x{{ forgejo_runner__gpg_id }}"
+      register: _forgejo_runner_gpg_key_status
+      changed_when: false
+      become: false
+      failed_when: _forgejo_runner_gpg_key_status.rc not in (0, 2)
+
+    - name: Print gpg key status on verbosity
+      ansible.builtin.debug:
+        msg: "{{ _forgejo_runner_gpg_key_status.stdout }}"
+        verbosity: 1
+
+    - name: Forgejo gpg key
+      when:
+        - forgejo_runner_gpg_key is not defined or forgejo_runner_gpg_key | length == 0
+      block:
+        - name: Import forgejo gpg key
+          ansible.builtin.command: "gpg --keyserver keys.openpgp.org --recv {{ forgejo_runner__gpg_id }}"
+          register: _forgejo_runner_import_key
+          changed_when: '"imported: 1" in _forgejo_runner_import_key.stderr'
+          when: '_forgejo_runner_gpg_key_status.rc != 0 or "expired" in _forgejo_runner_gpg_key_status.stdout'
+
+    - name: Check archive signature
+      ansible.builtin.command: "gpg --verify  {{ _runner_tmp.path }}/{{ forgejo_runner__filename }}.asc {{ _runner_tmp.path }}/{{ forgejo_runner__filename }}"
+      changed_when: false
+      register: _runner_signature
+
+    - name: Copy verifyed forgejo runner binary
+      ansible.builtin.copy:
+        src: "{{ _runner_tmp.path }}/{{ forgejo_runner__filename }}"
+        dest: "{{ forgejo_runner__full_executable_path }}"
+        mode: "0755"
+        owner: "root"
+        group: "root"
+        remote_src: true
+      when: not  _runner_signature.failed
+
+    - name: Verification Failed
+      ansible.builtin.fail:
+        msg: Signature verification of forgejo runner failed
+      when: _runner_signature.failed

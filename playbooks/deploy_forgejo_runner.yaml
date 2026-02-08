@@ -1,0 +1,12 @@
+---
+- name: Deploy Forgejo runner
+  hosts: forgejo_runner_srv
+  become: true
+  vars:
+    docker_users:
+      - forgejo_runner
+  roles:
+    - base
+    - geerlingguy.pip
+    - geerlingguy.docker
+    - deploy_forgejo_runner
