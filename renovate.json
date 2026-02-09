@@ -8,9 +8,6 @@
   "labels": ["renovate"],
   "configMigration": true,
   "prHourlyLimit": 0,
-  "nix": {
-    "enabled": true
-  },
   "customManagers": [
     {
       "customType": "regex",
