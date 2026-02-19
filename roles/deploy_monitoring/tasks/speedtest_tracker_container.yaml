@@ -1,7 +1,4 @@
 ---
-- name: Set service name variable
-  ansible.builtin.set_fact:
-    service_name: speedtest-tracker
 - name: Create folder for Speedtest-tracker config files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/speedtest-tracker/config"
@@ -19,7 +16,7 @@
 - name: Create Speedtest-tracker Quadlet
   containers.podman.podman_container:
     name: speedtest-tracker
-    image: lscr.io/linuxserver/speedtest-tracker:1.12.4@sha256:d5bf824d613212795e5505fbb4245b847f30d1a4d4d4f0bafbfd78f6e7fc8381
+    image: lscr.io/linuxserver/speedtest-tracker:1.13.9@sha256:00f1b34ec10863d15ef5d3ea3b0bb10efbb64758a418ddbeee7ce25859b149c3
     state: quadlet
     quadlet_filename: speedtest-tracker
     quadlet_file_mode: "0644"

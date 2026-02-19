@@ -1,0 +1,10 @@
+---
+forgejo_runner__version: "latest"
+forgejo_runner__user: "forgejo_runner"
+forgejo_runner__group: "forgejo_runner"
+forgejo_runner__user_home: "/var/lib/forgejo-runner"
+forgejo_runner__full_executable_path: "/usr/local/bin/forgejo_runner"
+forgejo_runner__gpg_id: 'EB114F5E6C0DC2BCDD183550A4B61A2DC5923710'
+forgejo_runner__git_repo: 'https://code.forgejo.org/forgejo/runner'
+forgejo_runner__mode: "daemon"
+forgejo_runner__runner_label: "ubuntu-latest"

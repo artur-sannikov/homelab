@@ -1,7 +1,4 @@
 ---
-- name: Set service name variable
-  ansible.builtin.set_fact:
-    service_name: changedetection
 - name: Create folder for Changedetection data
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/changedetection/datastore"
@@ -32,7 +29,7 @@
 - name: Create chromium-playwright Quadlet
   containers.podman.podman_container:
     name: chromium-playwright
-    image: ghcr.io/browserless/chromium:v2.38.3@sha256:e5b4f5b6e1306647eeb4b415cec7844dd0058b00d353e04cedacaf24906b6f28
+    image: ghcr.io/browserless/chromium:v2.40.0@sha256:6891566b8f3e6e512e493ecdf95d44e5a4efbfb1b5eb7da04135e5a48170bc72
     state: quadlet
     quadlet_filename: chromium-playwright
     quadlet_file_mode: "0644"

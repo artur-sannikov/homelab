@@ -8,14 +8,14 @@
       - firewalld
       - qemu-guest-agent
     state: present
-  when: ansible_distribution == "Fedora"
+  when: ansible_facts["distribution"] == "Fedora"
 - name: Enable and start FirewallD
   ansible.builtin.systemd_service:
     name: firewalld
     state: "started"
     daemon_reload: true
     enabled: true
-  when: ansible_distribution == "Fedora"
+  when: ansible_facts["distribution"] == "Fedora"
 - name: Enable QEMU guest agent
   ansible.builtin.systemd_service:
     state: started
@@ -28,7 +28,7 @@
         name: dnf5-automatic.timer
         state: started
         enabled: true
-      when: ansible_distribution == "Fedora"
+      when: ansible_facts["distribution"] == "Fedora"
     - name: Creating configuration file for dnf5-automatic
       ansible.builtin.copy:
         dest: /etc/dnf/automatic.conf
@@ -40,7 +40,7 @@
           apply_updates = yes
           reboot = when-needed
       notify: Restart timer for automatic updates
-      when: ansible_distribution == "Fedora"
+      when: ansible_facts["distribution"] == "Fedora"
 # Reference: https://github.com/dev-sec/ansible-collection-hardening/blob/3172a43202b3390558e1e5fb986e508bca185bec/roles/ssh_hardening/tasks/hardening.yml#L30
 - name: Get openssh-version
   ansible.builtin.command: ssh -V
@@ -60,7 +60,7 @@
     base_ssh_kex_algorithms: "{{ base_ssh_kex_algorithms_99 }}"
   when: base_sshd_version is version('9.9', '>=')
 - name: Configure sshd for Fedora
-  when: ansible_distribution == "Fedora"
+  when: ansible_facts["distribution"] == "Fedora"
   block:
     - name: Generate sshd_config from template
       tags: fedora,ssh
@@ -84,10 +84,11 @@
   ansible.builtin.apt:
     update_cache: true
     name:
+      - gpg
       - sudo
       - ufw
     state: present
-  when: ansible_distribution == "debian" or inventory_hostname in groups["debian_lxc"]
+  when: ansible_facts["distribution"] == "Debian" or inventory_hostname in groups["debian_lxc"]
 - name: Setup Debian LXC container
   tags: debian,lxc
   when: inventory_hostname in groups["debian_lxc"]

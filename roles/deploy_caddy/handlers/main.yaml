@@ -1,3 +1,4 @@
+---
 - name: Reload daemon
   ansible.builtin.systemd_service:
     daemon_reload: true
@@ -6,6 +7,6 @@
     name: crowdsec
     state: reloaded
 - name: Reload Caddy
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: caddy
     state: reloaded

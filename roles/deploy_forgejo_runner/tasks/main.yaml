@@ -1,0 +1,20 @@
+---
+- name: Create Forgejo runner user
+  ansible.builtin.import_tasks:
+    file: create_forgejo_user.yaml
+
+- name: Set runner version
+  ansible.builtin.import_tasks:
+    file: set_runner_version.yaml
+
+- name: Install runner
+  ansible.builtin.import_tasks:
+    file: install_runner.yaml
+
+- name: Configure runner
+  ansible.builtin.import_tasks:
+    file: configure_runner.yaml
+
+- name: Configure systemd service
+  ansible.builtin.import_tasks:
+    file: systemd.yaml
