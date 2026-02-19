@@ -247,7 +247,7 @@ I adapted a script from
 2. Set the environment variables in the `/root/pve-backup.env`.
 3. Restrict `pve-backup.env` permissions `chmod 640 /root/pve-backup.env`.
 4. Make the script executable: `chmod u+x /usr/local/sbin/pve-backup.sh`.
-5. You can get the value for PBS_FINGERPRINT by running
+5. Optional: you can get the value for PBS_FINGERPRINT by running
    `proxmox-backup-manager cert info | grep Fingerprint`
 6. To generate a backup encryption key run
 
@@ -262,7 +262,8 @@ password manager and keep it safe!
 # /root/pve-backup.env
 export PBS_REPOSITORY=backupUser@pbs!<API TOKEN NAME>@<PBS HOST>:<DATASTORE>
 export PBS_PASSWORD=<API TOKEN>
-export PBS_FINGERPRINT=<PBS HOST FINGERPRINT>
+<!-- Optional: if using FQDN for PBS HOST, the fingerprint is not required -->
+<!-- export PBS_FINGERPRINT=<PBS HOST FINGERPRINT> -->
 ```
 
 ```bash
@@ -325,4 +326,14 @@ Test that the email can be received successfully:
 
 ```shell
 proxmox-backup-manager notification target test migadu
+```
+
+Next, create a notification matchers.
+
+```shell
+proxmox-backup-manager notification matcher update default-matcher --disable
+
+proxmox-backup-manager notification matcher create errors \
+  --match-severity warning,error --target migadu \
+  --comment "Notify about warning or errors"
 ```

@@ -29,7 +29,7 @@
 - name: Create infisical-postgres quadlet
   containers.podman.podman_container:
     name: infisical-postgres
-    image: docker.io/postgres:14.20-alpine@sha256:14f02666642586a64d6fae8ef42d479fd76456a77c73ae8a626b8fe323b76d22
+    image: docker.io/postgres:14.21-alpine@sha256:0197f365d4245fffa3988018ab1a5040b4ba79b572b21c2c82695d7b68692ff0
     state: quadlet
     quadlet_filename: infisical-postgres
     quadlet_file_mode: "0644"
@@ -54,7 +54,7 @@
 - name: Create infisical-redis quadlet
   containers.podman.podman_container:
     name: infisical-redis
-    image: docker.io/redis:8.4.0@sha256:73dad4271642c5966db88db7a7585fae7cf10b685d1e48006f31e0294c29fdd7
+    image: docker.io/redis:8.6.0@sha256:7b6fb55d8b0adcd77269dc52b3cfffe5f59ca5d43dec3c90dbe18aacce7942e1
     state: quadlet
     quadlet_filename: infisical-redis
     quadlet_file_mode: "0644"
@@ -80,7 +80,7 @@
 - name: Create infisical-backend quadlet
   containers.podman.podman_container:
     name: infisical-backend
-    image: docker.io/infisical/infisical:latest-postgres@sha256:36438985877fb5ab99c76ee1a9c73611e44d8518b44a77304b5d4c05451f8c62
+    image: docker.io/infisical/infisical:v0.158.2@sha256:908db93e6ba2b6eeb46224fc63a521e51b7d24153de5de7c86019a6ae9915eec
     state: quadlet
     quadlet_filename: infisical-backend
     quadlet_file_mode: "0644"

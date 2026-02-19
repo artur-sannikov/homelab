@@ -1,7 +1,4 @@
 ---
-- name: Set service name variable
-  ansible.builtin.set_fact:
-    service_name: uptime-kuma
 - name: Create folder for Uptime Kuma data files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/uptime-kuma/data"
@@ -12,7 +9,7 @@
 - name: Create uptime-kuma quadlet
   containers.podman.podman_container:
     name: uptime-kuma
-    image: docker.io/louislam/uptime-kuma:2.0.2@sha256:4c364ef96aaddac7ec4c85f5e5f31c3394d35f631381ccbbf93f18fd26ac7cba
+    image: docker.io/louislam/uptime-kuma:2.1.1@sha256:e4045dc9b2b96a5503be7372e3b648104ba7153e452974c2247c66178389ac39
     state: quadlet
     quadlet_filename: uptime-kuma
     quadlet_file_mode: "0644"

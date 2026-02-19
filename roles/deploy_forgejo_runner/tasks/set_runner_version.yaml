@@ -1,0 +1,31 @@
+---
+- name: "Check forgejo runner installed version"
+  ansible.builtin.shell: "set -eo pipefail; {{ forgejo_runner__full_executable_path }} --version | cut -d' ' -f 3"
+  args:
+    executable: /bin/bash
+  register: forgejo_runner__active_version
+  changed_when: false
+  failed_when: false
+
+- name: "Determine 'latest' forgejo runner version release"
+  when: forgejo_runner__version == "latest"
+  block:
+    - name: "Get latest forgejo runner release metadata"
+      ansible.builtin.uri:
+        url: "{{ forgejo_runner__releases_latest }}"
+        return_content: true
+      register: forgejo_runner__remote_metadata
+      become: false
+
+    - name: "Set fact latest forgejo runner release"
+      ansible.builtin.set_fact:
+        forgejo_runner__remote_version: "{{ forgejo_runner__remote_metadata.json.0.tag_name[1:] }}"
+
+    - name: "Set forgejo runner version target (latest)"
+      ansible.builtin.set_fact:
+        forgejo_runner__version_target: "{{ forgejo_runner__remote_version }}"
+
+- name: "Generate forgejo runner download URL"
+  ansible.builtin.set_fact:
+    forgejo_runner__filename: "forgejo-runner-{{ forgejo_runner__version_target }}-linux-amd64"
+    forgejo_runner__dl_url: "{{ forgejo_runner__git_repo }}/releases/download/v{{ forgejo_runner__version_target }}"
