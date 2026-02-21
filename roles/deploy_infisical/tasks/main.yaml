@@ -80,7 +80,7 @@
 - name: Create infisical-backend quadlet
   containers.podman.podman_container:
     name: infisical-backend
-    image: docker.io/infisical/infisical:v0.158.2@sha256:908db93e6ba2b6eeb46224fc63a521e51b7d24153de5de7c86019a6ae9915eec
+    image: docker.io/infisical/infisical:v0.158.5@sha256:8874c4f57604ef9049f790f7d7445362c0e0370bd3dff8f4d4e391c1ade7c726
     state: quadlet
     quadlet_filename: infisical-backend
     quadlet_file_mode: "0644"
