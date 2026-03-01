@@ -305,7 +305,10 @@ proxmox-backup-client restore --repository backupUser@pbs@<PBS_IP>:pve-etc \
 
 ## Notifications
 
-You can add a notifications target. I'm using the Migadu service.
+You can add notifications targets. I'm using [Migadu](https://www.migadu.com/)
+for SMTP and [ntfy.sh](https://ntfy.sh).
+
+### SMTP
 
 First, read in your password into an environment variable `PASSWORD`.
 
@@ -328,12 +331,66 @@ Test that the email can be received successfully:
 proxmox-backup-manager notification target test migadu
 ```
 
-Next, create a notification matchers.
+### ntfy.sh
+
+Create an account on ntfy.sh (or your self-hosted instance). From the web-UI,
+"Subscribe to a topic". Create some random name for the topic, that is not
+easily discoverable. There is not password protection on the main instance but
+you should be able to set up [access
+tokens](https://docs.ntfy.sh/config/#access-tokens) on a self-hosted instance.
+
+First, read in your topic name into an environment variable `TOPIC`, i.e.,
+random string after `https://ntfy.sh/`.
+
+```shell
+read -s TOPIC
+```
+
+We will need a base64 version of `TOPIC` for the setup.
+
+```shell
+TOPIC_BASE64=$(echo -n $TOPIC | base64)
+```
+
+All headers and the body of the POST request should also be in base64:
+
+```shell
+echo -n "yes" | base64
+# eWVz
+
+echo -n "{{ title }}" | base64
+# e3sgdGl0bGUgfX0=
+
+echo -n "{{ message }}" | base64
+# e3sgbWVzc2FnZSB9fQ==
+```
+
+Next, run the command to add the notification target:
+
+```shell
+proxmox-backup-manager notification endpoint webhook create ntfy --method post \
+  --url "https://ntfy.sh/{{ secrets.topic }}" \
+  --header name=Markdown,value=eWVz \
+  --header name=X-Title,value=e3sgdGl0bGUgfX0= --body e3sgbWVzc2FnZSB9fQ== \
+  --secret name=topic,value=$TOPIC_BASE64
+```
+
+Test that the notification can be received successfully:
+
+```shell
+proxmox-backup-manager notification target test ntfy
+```
+
+### Notification Matchers
+
+Create notification matchers. Here I set the target to both `migadu` and
+`ntfy` because I want to receive notifications on both, but you can adjust as
+per your needs.
 
 ```shell
 proxmox-backup-manager notification matcher update default-matcher --disable
 
 proxmox-backup-manager notification matcher create errors \
-  --match-severity warning,error --target migadu \
-  --comment "Notify about warning or errors"
+  --match-severity unknown,warning,error --target migadu --target ntfy \
+  --comment "Notify about unknown, warnings or errors"
 ```
