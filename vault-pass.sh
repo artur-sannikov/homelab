@@ -2,4 +2,4 @@
 
 set -e
 
-bw get password "ansible-vault password"
+rbw get "ansible-vault"
