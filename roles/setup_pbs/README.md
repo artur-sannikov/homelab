@@ -394,3 +394,10 @@ proxmox-backup-manager notification matcher create errors \
   --match-severity unknown,warning,error --target migadu --target ntfy \
   --comment "Notify about unknown, warnings or errors"
 ```
+
+### Sources
+
+1. [Webhook notification in Proxmox Backup Server
+   docs](https://pbs.proxmox.com/docs/notifications.html#webhook)
+2. [`proxmox-backup-manager`
+   documentation](https://pbs.proxmox.com/docs/proxmox-backup-manager/man1.html)
