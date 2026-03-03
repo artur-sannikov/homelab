@@ -24,5 +24,7 @@ ansible_collections/
 Caddyfile
 roles/reverse_proxy/files/caddy_override.conf
 
+.direnv
+
 # Ansible roles from Ansible Galaxy
 geerlingguy*/
