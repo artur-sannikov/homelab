@@ -316,13 +316,19 @@ First, read in your password into an environment variable `PASSWORD`.
 read -s PASSWORD
 ```
 
+Also the domain:
+
+```shell
+read -s DOMAIN
+```
+
 Next, run the command to add the notification target:
 
 ```shell
 proxmox-backup-manager notification endpoint smtp create migadu \
-  --from-address pbs@<your_domain> --server smtp.migadu.com --port 465 \
-  --password $PASSWORD --mailto admin@<your_domain> \
-  --username admin@<your_domain>
+  --from-address pbs@$DOMAIN --server smtp.migadu.com --port 465 \
+  --password $PASSWORD --mailto admin@$DOMAIN \
+  --username admin@$DOMAIN
 ```
 
 Test that the email can be received successfully:
