@@ -46,7 +46,7 @@ proxmox-backup-manager acl update /datastore/pve-etc DatastoreAdmin \
   --auth-id backupUser@pbs
 
 # For S3
-proxmox-backup-manager acl update /datastore/PBS-B2-EU-CENTRAL DatastoreAdmin \
+proxmox-backup-manager acl update /datastore/PBS-HETZNER-HEL1 DatastoreAdmin \
   --auth-id backupUser@pbs
 ```
 
@@ -135,56 +135,71 @@ To create an ext4 file system run:
 mkfs.ext4 /dev/<disk>
 ```
 
-You will need
-`keyID` and `applicationKey` from Backblaze. For more info, see [Creating and
-Managing Application
-Keys](https://help.backblaze.com/hc/en-us/articles/360052129034-Creating-and-Managing-Application-Keys).
-You **have** to select "Allow listing all bucket names including bucket
-creation dates".
+On Hetzner, go to your project and create a bucket under "Storage/Object
+Storage".
 
-Create a file `s3-cache` with content:
+You will need `Access Key` and `Secret Key` from Hetzner. Under the project, go
+to "Security/S3 Credentials" and generate an S3 credential for the bucket. They
+all allow access to all buckets on the project, but I still keep them separate
+so that I can just delete one key in case of compromise.
+
+Hetzner allows to [set S3
+policies](https://docs.hetzner.com/storage/object-storage/faq/s3-credentials/#what-is-my-object-storage-user-id),
+but to restrict access but this needs to be figured out.
+
+> [!tip]
+> For better security, use different projects for different purposes (e.g.,
+> different types of backup).
+
+For more info, see
+[here](https://docs.hetzner.com/storage/object-storage/faq/s3-credentials#how-do-i-restrict-access-per-key).
+
+Create a file `s3-credentials` with content:
 
 ```
-KEYID=<keyID>
-APPKEY=<applicationKey>
+#/root/s3-credentials
+ACCESS_KEY=<keyID>
+SECRET_KEY=<applicationKey>
 ```
 
-To add a Backblaze S3 storage run
+To add a Hetzner S3 storage run:
 
 ```shell
-source ./s3-cache
+source ./s3-credentials
 
-proxmox-backup-manager s3 endpoint create pbs-backblaze \
-  --access-key $KEYID --secret-key $APPKEY \
-  --endpoint 's3.{{region}}.backblazeb2.com' \
-  --region 'eu-central-003' \
+proxmox-backup-manager s3 endpoint create pbs-hetzner \
+  --access-key $ACCESS_KEY--secret-key $SECRET_KEY \
+  --endpoint '{{region}}.your-objectstorage.com' \
+  --region 'hel1' \
   --path-style true \
   --provider-quirks skip-if-none-match-header
 
-rm ./s3-cache
+rm ./s3-credentials
 ```
 
-Now create a datastore
+Now create a datastore:
 
 ```shell
-proxmox-backup-manager datastore create PBS-B2-EU-CENTRAL /mnt/s3-cache \
-  --backend type=s3,client=pbs-backblaze,bucket=<your_bucket> \
+export BUCKET=<your_bucket>
+
+proxmox-backup-manager datastore create PBS-HETZNER-HEL1 /mnt/hetzner-s3-cache \
+  --backend type=s3,client=pbs-hetzner,bucket=$BUCKET \
   --gc-schedule "*-*-* 14:00:00"
 ```
 
 Add prune job
 
 ```shell
-proxmox-backup-manager prune-job create pbs-b2-eu-central-prune  \
-  --store PBS-B2-EU-CENTRAL --keep-daily 7 --keep-weekly 4 \
-  --keep-monthly 12 --keep-last 5 --schedule "*-*-* 17:00:00"
+proxmox-backup-manager prune-job create pbs-hetzner-hel1-prune  \
+  --store PBS-HETZNER-HEL1 --keep-daily 7 --keep-weekly 4 --keep-monthly 12 \
+  --keep-last 5 --schedule "*-*-* 17:00:00"
 ```
 
 Add verify jobs:
 
 ```shell
-proxmox-backup-manager verify-job create pve-b2-eu-central-verify \
-  --store PBS-B2-EU-CENTRAL --outdated-after 30 --schedule 'Wed,Sat 18:00:00' \
+proxmox-backup-manager verify-job create pbs-hetzner-hel1-verify \
+  --store PBS-HETZNER-HEL1 --outdated-after 30 --schedule 'Wed,Sat 18:00:00' \
   --ignore-verified true
 ```
 
@@ -192,7 +207,7 @@ For the S3-backed storage create a pull sync jobs for encrypted off-site
 backups.
 
 ```shell
-proxmox-backup-manager sync-job create backblaze  --store PBS-B2-EU-CENTRAL \
+proxmox-backup-manager sync-job create hetzner --store PBS-HETZNER-HEL1 \
   --remote-store pve-datastore --verified-only true --encrypted-only true \
   --schedule 21:00 --remove-vanished --sync-direction pull \
   --owner backupUser@pbs
