@@ -79,14 +79,10 @@ Then `./vault-pass.sh`:
 
 set -e
 
-bw get password "ansible-vault password"
+rbw get "ansible-vault"
 ```
 
-Before running playbook, run
-
-```bash
-export BW_SESSION=$(bw unlock --raw)
-```
+If `rbw` does not have a password cached, it will ask you.
 
 ### caddy reverse proxy
 
