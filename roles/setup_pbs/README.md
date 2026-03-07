@@ -27,14 +27,17 @@ Add Admin access to the user account:
 proxmox-backup-manager acl update / Admin  --auth-id artur@pbs
 ```
 
+Read backupUser password into an environment variable:
+
+```shell
+read -s backupUserPassword
+```
+
 Create backupUser account:
 
 ```shell
-proxmox-backup-manager user create backupUser@pbs
+proxmox-backup-manager user create backupUser@pbs --password $backupUserPassword
 ```
-
-As a `root` user, in the GUI "Configuration - Access Control" select the user
-and change the password.
 
 After creating datastores (see below), give access:
 
