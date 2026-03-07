@@ -1,5 +1,38 @@
 # Set Up Proxmox Virtual Environment
 
+## Setup Proxmox Community Repositories
+
+Disable enterprise repo:
+
+```shell
+cat <<EOF > /etc/apt/sources.list.d/pve-enterprise.sources
+Types: deb
+URIs: https://enterprise.proxmox.com/debian/pve
+Suites: trixie
+Components: pve-enterprise
+Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+Enabled: false
+EOF
+```
+
+Enable community repo:
+
+```shell
+cat <<EOF > /etc/apt/sources.list.d/proxmox.sources
+Types: deb
+URIs: http://download.proxmox.com/debian/pve
+Suites: trixie
+Components: pve-no-subscription
+Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+EOF
+```
+
+Reload and update:
+
+```shell
+apt update && apt upgrade -y
+```
+
 ## Notifications
 
 The sad part is that currently there is no dedicated CLI tool like
