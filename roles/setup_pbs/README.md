@@ -171,7 +171,7 @@ To add a Hetzner S3 storage run:
 source ./s3-credentials
 
 proxmox-backup-manager s3 endpoint create pbs-hetzner \
-  --access-key $ACCESS_KEY--secret-key $SECRET_KEY \
+  --access-key $ACCESS_KEY --secret-key $SECRET_KEY \
   --endpoint '{{region}}.your-objectstorage.com' \
   --region 'hel1' \
   --path-style true \
