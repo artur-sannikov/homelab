@@ -54,6 +54,24 @@ pvesh create /storage --storage pbs-limited --type pbs \
 > The `--fingerprint` parameter might is required if you are not using FQDN,
 > but an IP-address. Get it from the PBS dashboard's "Show Fingerprint".
 
+## Add Backup to PBS
+
+```
+export SCHEDULE=22:30
+pvesh create /cluster/backup --schedule $SCHEDULE --vmid 8001 --vmid 100 \
+  --storage pbs-limited --mode snapshot
+```
+
+> [!warning]
+> Running `pvesh create /cluster/backup` several times creates an identical
+> backup job with a different id. It's a better idea to just use the Web-UI to
+> set everything up.
+
+> [!tip]
+> To delete the backup job get a list of jobs `pvesh get /cluster/backup` and
+> then delete one or more of them `pvesh delete /cluster/backup/<id>`. There is
+> no way to distinguish between them other than id.
+
 ## Notifications
 
 The sad part is that currently there is no dedicated CLI tool like
