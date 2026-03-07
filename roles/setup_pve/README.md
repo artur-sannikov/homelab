@@ -33,6 +33,27 @@ Reload and update:
 apt update && apt upgrade -y
 ```
 
+## Add Storage
+
+### Proxmox Backup Server
+
+Read in the server's address and `backupUser`'s password:
+
+```shell
+read -s SERVER
+read -s PASSWORD
+```
+
+```shell
+pvesh create /storage --storage pbs-limited --type pbs \
+  --datastore pve-datastore --server $SERVER --username backupUser@pbs
+  --password $PASSWORD
+```
+
+> [!note]
+> The `--fingerprint` parameter might is required if you are not using FQDN,
+> but an IP-address. Get it from the PBS dashboard's "Show Fingerprint".
+
 ## Notifications
 
 The sad part is that currently there is no dedicated CLI tool like
