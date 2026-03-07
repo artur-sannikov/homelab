@@ -43,3 +43,9 @@ You can follow the
 
 Perhaps, one option is to use a series of `cat` commands to write the options
 directly into the files, or use dedicated `ansible` roles to do that.
+
+## Sources
+
+1. [Proxmox API Viewer](https://pve.proxmox.com/pve-docs/api-viewer/index.html)
+   contains all the API endpoints for the interaction with the `pvesh` CLI
+   tool.
