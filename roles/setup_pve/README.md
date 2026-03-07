@@ -74,17 +74,102 @@ pvesh create /cluster/backup --schedule $SCHEDULE --vmid 8001 --vmid 100 \
 
 ## Notifications
 
-The sad part is that currently there is no dedicated CLI tool like
-`proxmox-backup-manager` to set everything up.
+You can add notifications targets. I'm using [Migadu](https://www.migadu.com/)
+for SMTP and [ntfy.sh](https://ntfy.sh).
 
-You can follow the
-[docs](https://pve.proxmox.com/pve-docs/chapter-notifications.html).
+### SMTP
 
-Perhaps, one option is to use a series of `cat` commands to write the options
-directly into the files, or use dedicated `ansible` roles to do that.
+First, read in your password into an environment variable `PASSWORD`.
+
+```shell
+read -s PASSWORD
+```
+
+Also the domain:
+
+```shell
+read -s DOMAIN
+```
+
+Next, run the command to add the notification target:
+
+```shell
+pvesh create /cluster/notifications/endpoints/smtp --name migadu \
+  --from-address proxmox@$DOMAIN --server smtp.migadu.com --mode tls \
+  --username admin@$DOMAIN --password $PASSWORD --mailto-user root@pam
+```
+
+> [!note]
+> `--mailto-user` is root@pam which has an associated email address, to which
+> the emails arrive.
+
+Test that the email can be received successfully:
+
+```shell
+pvesh create /cluster/notifications/targets/migadu/test
+```
+
+### ntfy.sh
+
+For more info see `roles/setup_pbs/README.md`.
+
+```shell
+read -s TOPIC
+```
+
+We will need a base64 version of `TOPIC` for the setup.
+
+```shell
+TOPIC_BASE64=$(echo -n $TOPIC | base64)
+```
+
+All headers and the body of the POST request should also be in base64:
+
+```shell
+echo -n "yes" | base64
+# eWVz
+
+echo -n "{{ title }}" | base64
+# e3sgdGl0bGUgfX0=
+
+echo -n "{{ message }}" | base64
+# e3sgbWVzc2FnZSB9fQ==
+```
+
+Next, run the command to add the notification target:
+
+```shell
+pvesh create /cluster/notifications/endpoints/webhook --name ntfy --method post \
+  --url "https://ntfy.sh/{{ secrets.topic }}" \
+  --header name=Markdown,value=eWVz \
+  --header name=X-Title,value=e3sgdGl0bGUgfX0= --body e3sgbWVzc2FnZSB9fQ== \
+  --secret name=topic,value=$TOPIC_BASE64
+```
+
+Test that the notification can be received successfully:
+
+```shell
+pvesh create /cluster/notifications/targets/ntfy/test
+```
+
+### Notification Matchers
+
+Create notification matchers. Here I set the target to both `migadu` and `ntfy`
+because I want to receive notifications on both, but you can adjust as per your
+needs.
+
+```shell
+pvesh set /cluster/notifications/matchers/default-matcher --disable true
+
+pvesh create /cluster/notifications/matchers --name errors \
+  --match-severity unknown,warning,error --target migadu --target ntfy \
+  --comment "Notify about unknown, warnings or errors"
+```
 
 ## Sources
 
 1. [Proxmox API Viewer](https://pve.proxmox.com/pve-docs/api-viewer/index.html)
    contains all the API endpoints for the interaction with the `pvesh` CLI
    tool.
+2. [Proxmox
+   Notifications](https://pve.proxmox.com/pve-docs/chapter-notifications.html).
