@@ -1,6 +1,6 @@
 ---
 - name: Install Tailscale
-  hosts: pbs,services_srv,monitoring_srv,infisical_srv
+  hosts: pbs,pbs_novi,services_srv,monitoring_srv,infisical_srv,pulse
   roles:
     - role: artis3n.tailscale.machine
       vars:
