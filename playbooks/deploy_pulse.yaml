@@ -1,0 +1,8 @@
+---
+- name: Deploy Pulse
+  hosts: pulse_srv
+  become: true
+  roles:
+    - base
+    - install_podman
+    - deploy_pulse
