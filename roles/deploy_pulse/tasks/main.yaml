@@ -1,0 +1,36 @@
+---
+- name: Create folders for Proxmox Pulse
+  ansible.builtin.file:
+    path: "{{ podman_appdata_dir }}/pulse/data"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+    mode: "0750"
+- name: Create Pulse quadlet
+  containers.podman.podman_container:
+    name: pulse
+    image: docker.io/rcourtman/pulse:5.1.21@sha256:dccb244a28386a1610815cd6f5d88fb8d5543c4f026980d1cd91d1a0c62062d3
+    state: quadlet
+    quadlet_filename: pulse
+    quadlet_file_mode: "0644"
+    quadlet_dir: "{{ quadlet_dir }}"
+    ports:
+      - "7655:7655"
+    volumes:
+      - "{{ podman_appdata_dir }}/pulse/data:/data:Z"
+    quadlet_options:
+      - "NoNewPrivileges=true"
+      - |
+        [Service]
+        Restart=always
+      - |
+        [Install]
+        WantedBy=default.target
+- name: Open firewalld port for Pulse
+  ansible.posix.firewalld:
+    port: "7655/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  notify:
+    - Reload firewalld
