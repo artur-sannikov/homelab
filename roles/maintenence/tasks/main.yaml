@@ -38,7 +38,3 @@
   ansible.builtin.dnf5:
     autoremove: true
   when: ansible_facts["os_family"] == "RedHat"
-
-- name: Update pikvm
-  ansible.builtin.command: pikvm-update
-  when: inventory_hostname == "pikvm"
