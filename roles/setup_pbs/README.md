@@ -15,7 +15,8 @@ Below are my notes on things to set up after installing PBS.
 Create Admin user account:
 
 ```shell
-proxmox-backup-manager user create artur@pbs
+read -s arturPassword
+proxmox-backup-manager user create artur@pbs --password $arturPassword
 ```
 
 As a `root` user, in the GUI "Configuration - Access Control" select the user
@@ -27,13 +28,13 @@ Add Admin access to the user account:
 proxmox-backup-manager acl update / Admin  --auth-id artur@pbs
 ```
 
-Read backupUser password into an environment variable:
+Read `backupUser` password into an environment variable:
 
 ```shell
 read -s backupUserPassword
 ```
 
-Create backupUser account:
+Create `backupUser` account:
 
 ```shell
 proxmox-backup-manager user create backupUser@pbs --password $backupUserPassword
@@ -84,6 +85,30 @@ set -H
 
 `set +H` is required to disable history expansion (causes issue with `!pve1`)
 
+Now create API key for each PVE node for the `backupUser` user.
+
+```shell
+# For node 1
+proxmox-backup-manager user generate-token backupUser@pbs pve1
+# For node 2
+proxmox-backup-manager user generate-token backupUser@pbs pve2
+```
+
+```shell
+set +H
+proxmox-backup-manager acl update /datastore/pve-datastore DatastoreBackup \
+  --auth-id "backupUser@pbs!pve1"
+proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
+  --auth-id "backupUser@pbs!pve1"
+
+proxmox-backup-manager acl update /datastore/pve-datastore DatastoreBackup \
+  --auth-id "backupUser@pbs!pve2"
+proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
+  --auth-id "backupUser@pbs!pve2"
+
+set -H
+```
+
 ## Datastores
 
 Ansible playbook creates several mount points:
@@ -123,6 +148,82 @@ proxmox-backup-manager verify-job create pve-datastore-verify \
 proxmox-backup-manager verify-job create pve-etc-verify \
   --store pve-etc --outdated-after 30 --schedule 9,17:00 \
   --ignore-verified true
+```
+
+### Remote Proxmox Backup Server
+
+To sync backups to an off-site Proxmox Backup Server, create a user on a local
+PBS instance specific for this job:
+
+```shell
+read -s PULL_USER_PASSWORD
+proxmox-backup-manager user create remote-pull-user@pbs \
+  --password $PULL_USER_PASSWORD
+```
+
+Add a **TOTP** from the Web-GUI.
+
+Add an API token:
+
+```shell
+proxmox-backup-manager user generate-token remote-pull-user@pbs \
+  offsite-token-novi
+```
+
+Add the required permissions:
+
+```shell
+# User
+proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
+  --auth-id remote-pull-user@pbs
+
+proxmox-backup-manager acl update /datastore/pve-etc DatastoreReader \
+  --auth-id remote-pull-user@pbs
+
+# API token
+set +H
+proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
+  --auth-id "remote-pull-user@pbs!offsite-token-novi"
+proxmox-backup-manager acl update /datastore/pve-etc DatastoreReader \
+  --auth-id "remote-pull-user@pbs!offsite-token-novi"
+set -H
+```
+
+Now, on the off-site system:
+
+```shell
+proxmox-backup-manager acl update /datastore/pve-backup DatastoreAdmin \
+  --auth-id backupUser@pbs
+
+proxmox-backup-manager acl update /datastore/pve-etc DatastoreAdmin \
+  --auth-id backupUser@pbs
+
+# 'home' is the name of the remote that we will create
+proxmox-backup-manager acl update /remote/home RemoteAdmin \
+  --auth-id backupUser@pbs
+```
+
+Add a remote on the off-site system:
+
+```shell
+read -s AUTH_TOKEN # remote-pull-user@pbs!offsite-token-novi
+export HOST=<local_pbs_host>
+
+proxmox-backup-manager remote create home \
+  --auth-id 'remote-pull-user@pbs!offsite-token-novi' --host $HOST \
+  --password $AUTH_TOKEN
+```
+
+Add sync jobs:
+
+```shell
+proxmox-backup-manager sync-job create pve-datastore-sync --store pve-backup \
+  --remote-store pve-datastore --remote home --encrypted-only --schedule 21:00 \
+  --sync-direction pull  --owner backupUser@pbs
+
+proxmox-backup-manager sync-job create pve-etc-sync --store pve-etc \
+  --remote-store pve-etc --remote home --encrypted-only --schedule 23:00 \
+  --sync-direction pull  --owner backupUser@pbs
 ```
 
 ### S3 Storage
@@ -419,9 +520,12 @@ proxmox-backup-manager notification matcher create errors \
   --comment "Notify about unknown, warnings or errors"
 ```
 
-### Sources
+## Sources
 
 1. [Webhook notification in Proxmox Backup Server
    docs](https://pbs.proxmox.com/docs/notifications.html#webhook)
 2. [`proxmox-backup-manager`
    documentation](https://pbs.proxmox.com/docs/proxmox-backup-manager/man1.html)
+3. [Stop Giving PVE Full Access! (Secure Proxmox Backup
+   Setup)](https://www.youtube.com/watch?v=HDRGAfJZPSs) - Lawrence Systems
+   video.
