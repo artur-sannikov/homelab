@@ -37,17 +37,23 @@ apt update && apt upgrade -y
 
 ### Proxmox Backup Server
 
-Read in the server's address and `backupUser`'s password:
+Read in the server's address and `backupUser`'s API token. See
+`setup_pbs/README.md` on how to create it and what permissions to give it.
+
+Each token is per node.
 
 ```shell
 read -s SERVER
 read -s PASSWORD
+read -s ENC_KEY
+export TOKEN_ID=<backupUser@pbs!pve1>
+export NODE=$(hostname)
 ```
 
 ```shell
-pvesh create /storage --storage pbs-limited --type pbs \
-  --datastore pve-datastore --server $SERVER --username backupUser@pbs
-  --password $PASSWORD
+pvesh create /storage --storage pbs-limited-$NODE --type pbs \
+  --datastore pve-datastore --server $SERVER --username $TOKEN_ID \
+  --password $PASSWORD --nodes $NODE --encryption-key $ENC_KEY
 ```
 
 > [!note]
