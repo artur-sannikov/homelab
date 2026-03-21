@@ -38,3 +38,10 @@
   ansible.builtin.dnf5:
     autoremove: true
   when: ansible_facts["os_family"] == "RedHat"
+
+- name: Prune unused podman images, containers, pods, networks and volumes
+  containers.podman.podman_prune:
+    system: true
+    system_all: true # Prunes non-dangling images which occupy a lot of space
+  when: inventory_hostname in groups["podman"]
+  become_user: "{{ podman_user }}"
