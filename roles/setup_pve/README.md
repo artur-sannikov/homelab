@@ -140,22 +140,47 @@ echo -n "{{ title }}" | base64
 
 echo -n "{{ message }}" | base64
 # e3sgbWVzc2FnZSB9fQ==
+
+echo -n "{{ secrets.token }}" | base64
+# e3sgc2VjcmV0cy50b2tlbiB9fQ==
+```
+
+I use API keys to access my ntfy instance.
+
+On your instances create an API key for Proxmox notification.
+
+Create a base64 version of the authorization token secret.
+
+```shell
+read -s AUTHORIZATION_TOKEN # should be '<Bearer <token>'
+AUTHORIZATION_TOKEN_BASE64=$(echo -n $AUTHORIZATION_TOKEN | base64)
 ```
 
 Next, run the command to add the notification target:
 
 ```shell
 pvesh create /cluster/notifications/endpoints/webhook --name ntfy --method post \
-  --url "https://ntfy.sh/{{ secrets.topic }}" \
+  --url "https://ntfy.asannikov.com/{{ secrets.topic }}" \
   --header name=Markdown,value=eWVz \
   --header name=X-Title,value=e3sgdGl0bGUgfX0= --body e3sgbWVzc2FnZSB9fQ== \
-  --secret name=topic,value=$TOPIC_BASE64
+  --header name=Authorization,value=e3sgc2VjcmV0cy50b2tlbiB9fQ== \
+  --secret name=topic,value=$TOPIC_BASE64 \
+  --secret name=token,value=$AUTHORIZATION_TOKEN_BASE64
 ```
 
 Test that the notification can be received successfully:
 
 ```shell
 pvesh create /cluster/notifications/targets/ntfy/test
+```
+
+Unset the environment variables:
+
+```shell
+unset TOPIC
+unset TOPIC_BASE64
+unset AUTHORIZATION_TOKEN
+unset AUTHORIZATION_TOKEN_BASE64
 ```
 
 ### Notification Matchers
