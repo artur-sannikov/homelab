@@ -117,6 +117,8 @@ See details in `roles/deploy_services/README.md`.
 The repo is available on [Codeberg](https://codeberg.org/arsann/homelab) and is
 mirrored on [GitHub](https://github.com/artur-sannikov/homelab).
 
+The GitHub repo is updated every 144 hours.
+
 ## Thanks
 
 1. [Ansible Collection - devsec.hardening](https://github.com/dev-sec/ansible-collection-hardening/tree/master).
