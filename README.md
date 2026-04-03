@@ -114,10 +114,13 @@ See details in `roles/deploy_services/README.md`.
 
 ## Availability
 
-The repo is available on [Codeberg](https://codeberg.org/arsann/homelab) and is
-mirrored on [GitHub](https://github.com/artur-sannikov/homelab).
+The repo is available on my [personal Forgejo
+instance](https://git.asannikov.com/artur/homelab),
+[Codeberg](https://codeberg.org/arsann/homelab) and
+[GitHub](https://github.com/artur-sannikov/homelab).
 
-The GitHub repo is updated every 144 hours.
+The GitHub repo is updated every 144 hours. Codeberg repo is updated every 8
+hours.
 
 ## Thanks
 
