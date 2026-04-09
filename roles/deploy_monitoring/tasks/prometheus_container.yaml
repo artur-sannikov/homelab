@@ -29,7 +29,7 @@
 - name: Create Prometheus quadlet
   containers.podman.podman_container:
     name: prometheus
-    image: docker.io/prom/prometheus:v3.11.0@sha256:dda13e28bf95a5e5ca5b8ed56852006094c1c8e8871d9c9dbeed30aa6e55271f
+    image: docker.io/prom/prometheus:v3.11.1@sha256:759ea6db49103737f2a6f420b0d1632062d8ad99dec086c76db605fd0bf23e15
     state: quadlet
     quadlet_filename: prometheus
     quadlet_file_mode: "0644"
