@@ -92,7 +92,7 @@
 - name: Create paperless-ngx-redis Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-redis
-    image: docker.io/redis:8.6.2@sha256:970b561d234882c50495c69ffae28f94b6ad8d526f91f9b4ccdd8031466e11a2
+    image: docker.io/redis:8.6.2@sha256:1f073813b641755b70b0200da64131bbeeb4ec5b633ca67772229b49820caafa
     state: quadlet
     quadlet_filename: paperless-ngx-redis
     quadlet_file_mode: "0644"
