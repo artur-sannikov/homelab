@@ -8,6 +8,14 @@
   "labels": ["renovate"],
   "configMigration": true,
   "prHourlyLimit": 0,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": "* 0-9 * * *",
+    "automerge": true
+  },
+  "nix": {
+    "enabled": true
+  },
   "customManagers": [
     {
       "customType": "regex",
