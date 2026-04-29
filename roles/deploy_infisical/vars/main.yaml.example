@@ -2,4 +2,7 @@ deploy_infisical_encryption_key: <your_encryption_key>
 deploy_infisical_auth_secret: <your_auth_secret>
 deploy_infisical_postgres_password: infisical
 deploy_infisical_site_url: infisical.example.com
+deploy_infisical_smtp_username: admin@example.com
+deploy_infisical_smtp_password: <your_smpt_password>
+deploy_infisical_smtp_from_address: infisical@example.com
 infisical_env_template_file: infisical.env.j2
