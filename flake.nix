@@ -87,8 +87,9 @@
           in
           pkgs.mkShell {
             shellHook = shellHook + ''
-              export ANSIBLE_COLLECTIONS_PATH="$PWD/ansible_collections"
-              ansible-galaxy install -r requirements.yaml
+              export ANSIBLE_COLLECTIONS_PATH="$PWD/ansible/ansible_collections"
+              export ANSIBLE_ROLES_PATH="$PWD/ansible/roles"
+              ansible-galaxy install -r ansible/requirements.yaml
             '';
 
             buildInputs = enabledPackages ++ [
