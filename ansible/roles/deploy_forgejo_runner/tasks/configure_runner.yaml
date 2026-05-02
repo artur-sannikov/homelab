@@ -6,26 +6,24 @@
 
 - name: Make sure Forgejo runner token is set
   ansible.builtin.fail:
-    msg: "Please set forgejo_runner__token"
-  when: forgejo_runner__token == ''
+    msg: "Please set deploy_forgejo_runner_runner_codeberg_token"
+  when: deploy_forgejo_runner_runner_codeberg_token == ''
 
 - name: Check if website is reachable
   ansible.builtin.uri:
     url: "{{ forgejo_runner__instance_address }}"
     method: GET
 
-- name: Register Forgejo runner
-  become: true
-  ansible.builtin.command:
-    chdir: "{{ forgejo_runner__user_home }}"
-    cmd: "{{ forgejo_runner__full_executable_path }} register --labels '{{forgejo_runner__runner_label }}' --no-interactive --token '{{ forgejo_runner__token }}' --instance '{{ forgejo_runner__instance_address
-      }}' --name '{{ inventory_hostname }}@ansible'"
-    creates: "{{ forgejo_runner__user_home }}/.runner"
+- name: Check if website is reachable
+  ansible.builtin.uri:
+    url: "{{ forgejo_runner__instance_address }}"
+    method: GET
 
-- name: Change owner of config
+- name: Create runner-config.yml from template
   become: true
-  ansible.builtin.file:
-    path: "{{ forgejo_runner__user_home }}/.runner"
+  ansible.builtin.template:
+    src: runner-config.yml.j2
+    dest: "{{ forgejo_runner__user_home }}/runner-config.yml"
     owner: "{{ forgejo_runner__user }}"
     group: "{{ forgejo_runner__group }}"
-    mode: "0644"
+    mode: "0640"

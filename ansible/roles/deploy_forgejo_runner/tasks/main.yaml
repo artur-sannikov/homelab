@@ -1,4 +1,28 @@
 ---
+- name: Load Infisical secrets
+  ansible.builtin.include_tasks: ../roles/common/tasks/infisical.yaml
+- name: Extract CODEBERG_RUNNER_REGISTRATION_TOKEN
+  ansible.builtin.set_fact:
+    deploy_forgejo_runner_runner_codeberg_token: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'CODEBERG_RUNNER_REGISTRATION_TOKEN')
+          | first
+        ).value
+      }}
+  no_log: true
+- name: Extract CODEBERG_RUNNER_REGISTRATION_UUID
+  ansible.builtin.set_fact:
+    deploy_forgejo_runner_runner_codeberg_uuid: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'CODEBERG_RUNNER_REGISTRATION_UUID')
+          | first
+        ).value
+      }}
+  no_log: true
 - name: Create Forgejo runner user
   ansible.builtin.import_tasks:
     file: create_forgejo_user.yaml

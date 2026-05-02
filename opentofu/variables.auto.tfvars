@@ -1,1 +1,1 @@
-codeberg_runner_mac_address = "BC:77:12:54:A6:A2"
+codeberg_runner_mac_address = "BC:24:11:A5:63:A5"

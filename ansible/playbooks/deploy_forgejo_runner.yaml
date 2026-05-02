@@ -5,6 +5,8 @@
   vars:
     docker_users:
       - forgejo_runner
+  vars_files:
+    - ../secrets.yaml
   roles:
     - base
     - geerlingguy.pip

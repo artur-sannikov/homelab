@@ -1,0 +1,55 @@
+log:
+  level: info
+  job_level: info
+
+runner:
+  file: .runner
+  capacity: 1
+  timeout: 3h
+  shutdown_timeout: 3h
+  insecure: false
+  fetch_timeout: 30s
+  fetch_interval: 2s
+  report_interval: 1s
+  labels: ["debian:docker://docker.io/library/node:lts-trixie"]
+
+cache:
+  enabled: true
+  port: 0
+  dir: ""
+  external_server: ""
+  secret: ""
+  host: ""
+  proxy_port: 0
+  actions_cache_url_override: ""
+
+container:
+  network: ""
+  enable_ipv6: false
+  privileged: false
+  options:
+  workdir_parent:
+  valid_volumes: []
+  docker_host: "-"
+  force_pull: false
+  force_rebuild: false
+
+host:
+  # The parent directory of a job's working directory.
+  # If it's empty, $HOME/.cache/act/ will be used.
+  workdir_parent:
+
+server:
+  # A map of connections to one or more Forgejo instances. Example:
+   connections:
+  #   example:
+  #     url: https://example.com/
+  #     uuid: c9e50be9-a7c3-4aee-ba35-624c4ff8c519
+  #     token: 6634bb58be0db23cc013a2e72dd1828ae0257cf
+  #     fetch_interval: 30s
+     codeberg:
+       url: https://codeberg.org/
+       uuid: {{ deploy_forgejo_runner_runner_codeberg_uuid }}
+       token: {{ deploy_forgejo_runner_runner_codeberg_token }}
+       labels:
+         - debian-latest:docker://docker.io/library/node:lts-trixie

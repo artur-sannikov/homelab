@@ -4,12 +4,13 @@ Description=Forgejo runner
 After=network.target
 
 [Service]
-Type=simple
 User={{ forgejo_runner__user }}
 Group={{ forgejo_runner__group }}
 WorkingDirectory={{ forgejo_runner__user_home }}
-ExecStart={{ forgejo_runner__full_executable_path }} {{ forgejo_runner__mode }}
-Restart=always
+ExecStart={{ forgejo_runner__full_executable_path }} {{ forgejo_runner__mode }} -c {{ forgejo_runner__user_home }}/runner-config.yml
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+TimeoutSec=0
 RestartSec=10s
 
 [Install]

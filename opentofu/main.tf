@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_vm" "codeberg-runner" {
   name      = "codeberg-runner"
   node_name = "pve2"
-  # vm_id     = 116
+  vm_id     = 113
 
   template = false
   started  = true
@@ -23,7 +23,6 @@ resource "proxmox_virtual_environment_vm" "codeberg-runner" {
   clone {
     vm_id = "8001"
   }
-
 
   # Boot disk
   disk {
