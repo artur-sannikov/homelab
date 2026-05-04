@@ -1,4 +1,84 @@
 ---
+- name: Load Infisical secrets
+  ansible.builtin.include_tasks: ../roles/common/tasks/infisical.yaml
+- name: Extract LIBRECHAT_OPENROUTER_KEY
+  ansible.builtin.set_fact:
+    services_librechat_openrouter_key: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'LIBRECHAT_OPENROUTER_KEY')
+          | first
+        ).value
+      }}
+  no_log: true
+- name: Extract LIBRECHAT_CREDS_KEY
+  ansible.builtin.set_fact:
+    services_librechat_creds_key: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'LIBRECHAT_CREDS_KEY')
+          | first
+        ).value
+      }}
+  no_log: true
+- name: Extract LIBRECHAT_CREDS_IV
+  ansible.builtin.set_fact:
+    services_librechat_creds_iv: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'LIBRECHAT_CREDS_IV')
+          | first
+        ).value
+      }}
+  no_log: true
+- name: Extract LIBRECHAT_JWT_SECRET
+  ansible.builtin.set_fact:
+    services_librechat_jwt_secret: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'LIBRECHAT_JWT_SECRET')
+          | first
+        ).value
+      }}
+  no_log: true
+- name: Extract LIBRECHAT_JWT_REFRESH_SECRET
+  ansible.builtin.set_fact:
+    services_librechat_jwt_refresh_secret: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'LIBRECHAT_JWT_REFRESH_SECRET')
+          | first
+        ).value
+      }}
+  no_log: true
+- name: Extract LIBRECHAT_MEILI_MASTER_KEY
+  ansible.builtin.set_fact:
+    services_librechat_meili_master_key: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'LIBRECHAT_MEILI_MASTER_KEY')
+          | first
+        ).value
+      }}
+  no_log: true
+  # NOTE: Repeated in other tasks? Improve.
+- name: Extract DOMAIN
+  ansible.builtin.set_fact:
+    services_domain: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'DOMAIN')
+          | first
+        ).value
+      }}
+  no_log: true
 - name: Create folders for Librechat config and data files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
