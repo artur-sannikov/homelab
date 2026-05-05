@@ -1,9 +1,9 @@
 ---
 - name: Update APT packages on Debian/Ubuntu
   ansible.builtin.apt:
-    name: "*"
     update_cache: true
     state: latest
+    upgrade: full
     autoremove: true
   when: ansible_facts["os_family"] == "Debian" or ansible_facts["os_family"] == "Zorin OS"
 
