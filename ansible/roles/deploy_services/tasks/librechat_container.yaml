@@ -68,17 +68,6 @@
       }}
   no_log: true
   # NOTE: Repeated in other tasks? Improve.
-- name: Extract DOMAIN
-  ansible.builtin.set_fact:
-    services_domain: >-
-      {{
-        (
-          infisical_secrets_raw
-          | selectattr('key', 'equalto', 'DOMAIN')
-          | first
-        ).value
-      }}
-  no_log: true
 - name: Create folders for Librechat config and data files
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
@@ -130,7 +119,8 @@
     quadlet_dir: "{{ quadlet_dir }}"
     pod: librechat.pod
     volumes:
-      - "{{ podman_appdata_dir }}/librechat/config/librechat.yaml:/app/librechat.yaml:Z,ro"
+      - "{{ podman_appdata_dir
+        }}/librechat/config/librechat.yaml:/app/librechat.yaml:Z,ro"
       - "{{ podman_appdata_dir }}/librechat/logs:/app/api/logs:Z"
     env_file:
       - librechat.env

@@ -12,3 +12,14 @@
           url=infisical_url
       ) }}
   no_log: true
+- name: Extract DOMAIN
+  ansible.builtin.set_fact:
+    services_domain: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'DOMAIN')
+          | first
+        ).value
+      }}
+  no_log: true
