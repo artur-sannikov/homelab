@@ -1,4 +1,28 @@
 ---
+- name: Load Infisical secrets
+  ansible.builtin.include_tasks: ../roles/common/tasks/infisical.yaml
+- name: Extract AUTHENTIK_POSTGRES_PASSWORD
+  ansible.builtin.set_fact:
+    services_authentik_postgres_password: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'AUTHENTIK_POSTGRES_PASSWORD')
+          | first
+        ).value
+      }}
+  no_log: true
+- name: Extract AUTHENTIK_SECRET_KEY
+  ansible.builtin.set_fact:
+    services_authentik_secret_key: >-
+      {{
+        (
+          infisical_secrets_raw
+          | selectattr('key', 'equalto', 'AUTHENTIK_SECRET_KEY')
+          | first
+        ).value
+      }}
+  no_log: true
 - name: Create folder for Authentik data
   ansible.builtin.file:
     path: "{{ podman_appdata_dir }}/{{ item }}"
@@ -44,7 +68,8 @@
     quadlet_dir: "{{ quadlet_dir }}"
     pod: authentik.pod
     volumes:
-      - "{{ podman_appdata_dir }}/authentik/postgres/data:/var/lib/postgresql/data:Z"
+      - "{{ podman_appdata_dir
+        }}/authentik/postgres/data:/var/lib/postgresql/data:Z"
     env_file:
       - authentik-postgres.env
     health_cmd: "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"
