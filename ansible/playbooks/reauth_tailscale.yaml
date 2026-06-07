@@ -1,5 +1,5 @@
 - name: Reauth Tailscale clients
-  hosts: pbs
+  hosts: pbs,services,monitoring
   roles:
     - role: artis3n.tailscale.machine
       vars:
