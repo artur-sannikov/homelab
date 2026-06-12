@@ -61,7 +61,7 @@
 - name: Create authentik-postgres Quadlet
   containers.podman.podman_container:
     name: authentik-postgres
-    image: docker.io/postgres:16.14@sha256:8b7dc1c828c0937602e3124397b642f344ac9139674aca0754605ff4f25fc00a
+    image: docker.io/postgres:16.14@sha256:ab47a724d0e37131ac950b98ff2beeb3fdb3bfcc592d73c6cc4b4e7626649671
     state: quadlet
     quadlet_filename: authentik-postgres
     quadlet_file_mode: "0644"
