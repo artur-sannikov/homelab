@@ -9,7 +9,7 @@
 - name: Create Pulse quadlet
   containers.podman.podman_container:
     name: pulse
-    image: docker.io/rcourtman/pulse:5.1.34@sha256:5f8a8b117b3271614385d45013574feaec850ad47d3f287cd3aa549b4098e1cb
+    image: docker.io/rcourtman/pulse:5.1.35@sha256:df83108da712b0beb1b351334b77afb1a5926e37a803b7445c5b99420c6564bb
     state: quadlet
     quadlet_filename: pulse
     quadlet_file_mode: "0644"
