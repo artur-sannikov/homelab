@@ -29,7 +29,7 @@
 - name: Create chromium-playwright Quadlet
   containers.podman.podman_container:
     name: chromium-playwright
-    image: ghcr.io/browserless/chromium:v2.52.2@sha256:489361fa81fd8803a6e35f955c1f94007e928f022e84ade3ca90fdab2d6e14e6
+    image: ghcr.io/browserless/chromium:v2.53.0@sha256:edd129f22347e9cda1b2416600571c747c7d7751e240c37869769833feabdf29
     state: quadlet
     quadlet_filename: chromium-playwright
     quadlet_file_mode: "0644"
