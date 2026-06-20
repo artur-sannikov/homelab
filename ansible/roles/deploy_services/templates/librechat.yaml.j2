@@ -33,3 +33,12 @@ endpoints:
 webSearch:
   searxngInstanceUrl: "${SEARXNG_INSTANCE_URL}"
   safeSearch: 0
+
+mcpServers:
+  nixos:
+    url: "http://localhost:8686/mcp"
+    type: "streamable-http"
+
+mcpSettings:
+  allowedDomains:
+    - "http://localhost:8686"
