@@ -125,7 +125,7 @@
     state: present
 - name: Register CrowdSec agent
   ansible.builtin.shell: |
-    cscli lapi register -u {{ lapi_endpoint }}
+    cscli lapi register -u https://192.168.10.1:8080
   args:
     creates: /etc/crowdsec/local_api_credentials.yaml
 - name: Copy CrowdSec systemd file
