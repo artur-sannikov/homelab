@@ -14,3 +14,8 @@ variable "codeberg_runner_mac_address" {
   description = "MAC address of the Codeberg runner"
   type        = string
 }
+
+variable "ssh_public_keys" {
+  description = "SSH keys to add into the VM via cloud-init"
+  type        = list(string)
+}
