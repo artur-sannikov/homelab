@@ -21,7 +21,7 @@ resource "proxmox_virtual_environment_vm" "codeberg-runner" {
   }
 
   clone {
-    vm_id = "8001"
+    vm_id = proxmox_virtual_environment_vm.templates["debian-13-pve2"].vm_id
   }
 
   # Boot disk
