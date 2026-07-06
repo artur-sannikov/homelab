@@ -74,13 +74,11 @@ Copy both API keys!
 On Proxmox Backup Server add permissions to access the datastore created below.
 
 ```shell
-set +H
 proxmox-backup-manager acl update /datastore/pve-etc DatastoreBackup \
-  --auth-id "backupUser@pbs!pve1-etc"
+  --auth-id 'backupUser@pbs!pve1-etc'
 
 proxmox-backup-manager acl update /datastore/pve-etc DatastoreBackup \
-  --auth-id "backupUser@pbs!pve2-etc"
-set -H
+  --auth-id 'backupUser@pbs!pve2-etc'
 ```
 
 `set +H` is required to disable history expansion (causes issue with `!pve1`)
@@ -97,14 +95,14 @@ proxmox-backup-manager user generate-token backupUser@pbs pve2
 ```shell
 set +H
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreBackup \
-  --auth-id "backupUser@pbs!pve1"
+  --auth-id 'backupUser@pbs!pve1'
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
-  --auth-id "backupUser@pbs!pve1"
+  --auth-id 'backupUser@pbs!pve1'
 
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreBackup \
-  --auth-id "backupUser@pbs!pve2"
+  --auth-id 'backupUser@pbs!pve2'
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
-  --auth-id "backupUser@pbs!pve2"
+  --auth-id 'backupUser@pbs!pve2'
 
 set -H
 ```
