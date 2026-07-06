@@ -70,9 +70,11 @@ locals {
       file_name = "fedora.yaml"
       data      = <<-EOF
         #cloud-config
+        package_update: true
+        packages:
+            - qemu-guest-agent
         runcmd:
-            - dnf update
-            - dnf install qemu-guest-agent -y
+            - systemctl enable --now qemu-guest-agent
             - systemctl enable sshd
             - reboot
       EOF
