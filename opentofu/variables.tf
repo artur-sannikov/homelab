@@ -15,6 +15,11 @@ variable "codeberg_runner_mac_address" {
   type        = string
 }
 
+variable "tailscale_subnet_router_mac_address" {
+  description = "MAC address of the Tailscale subnet router"
+  type        = string
+}
+
 variable "ssh_public_keys" {
   description = "SSH keys to add into the VM via cloud-init"
   type        = list(string)

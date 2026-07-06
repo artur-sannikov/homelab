@@ -10,6 +10,9 @@ deploy-pulse:
     cd ansible && ansible-playbook playbooks/deploy_pulse.yaml
 deploy-forgejo-runner:
     cd ansible && ansible-playbook playbooks/deploy_forgejo_runner.yaml
+deploy-tailscale-subnet-router:
+    @bash -c 'if [[ -z "${TAILSCALE_KEY}" ]]; then echo "TAILSCALE_KEY variable is not set."; exit 1; fi'
+    cd ansible && ansible-playbook playbooks/deploy_tailscale_subnet_router.yaml
 
 maintain:
     cd ansible && ansible-playbook -i inventory.yaml playbooks/maintenence.yaml
