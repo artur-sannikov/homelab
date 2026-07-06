@@ -150,6 +150,12 @@ proxmox-backup-manager verify-job create pve-etc-verify \
   --ignore-verified true
 ```
 
+Verify new snapshots after completion
+
+```
+proxmox-backup-manager datastore update pve-datastore --verify-new true
+```
+
 ### Remote Proxmox Backup Server
 
 To sync backups to an off-site Proxmox Backup Server, create a user on a local
