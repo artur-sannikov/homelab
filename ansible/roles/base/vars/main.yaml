@@ -1,3 +1,4 @@
+---
 # SSH
 base_ssh_ciphers:
   - chacha20-poly1305@openssh.com
