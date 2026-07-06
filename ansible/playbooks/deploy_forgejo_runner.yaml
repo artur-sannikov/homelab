@@ -1,6 +1,6 @@
 ---
 - name: Deploy Forgejo runner
-  hosts: forgejo_runner_srv
+  hosts: codeberg_runner_srv
   become: true
   vars:
     docker_users:
