@@ -81,8 +81,6 @@ proxmox-backup-manager acl update /datastore/pve-etc DatastoreBackup \
   --auth-id 'backupUser@pbs!pve2-etc'
 ```
 
-`set +H` is required to disable history expansion (causes issue with `!pve1`)
-
 Now create API key for each PVE node for the `backupUser` user.
 
 ```shell
@@ -93,7 +91,6 @@ proxmox-backup-manager user generate-token backupUser@pbs pve2
 ```
 
 ```shell
-set +H
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreBackup \
   --auth-id 'backupUser@pbs!pve1'
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
@@ -103,8 +100,6 @@ proxmox-backup-manager acl update /datastore/pve-datastore DatastoreBackup \
   --auth-id 'backupUser@pbs!pve2'
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
   --auth-id 'backupUser@pbs!pve2'
-
-set -H
 ```
 
 ## Datastores
