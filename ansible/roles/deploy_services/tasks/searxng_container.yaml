@@ -51,6 +51,12 @@
       - "{{ podman_appdata_dir }}/searxng/data:/var/cache/searxng:Z"
     env_file:
       - searxng.env
+    health_cmd: "wget -q --spider http://localhost:8080/healthz"
+    health_startup_interval: 30s
+    health_startup_retries: 5
+    healthcheck_start_period: 20s
+    healthcheck_timeout: 10s
+    healthcheck_failure_action: "kill"
     quadlet_options:
       - "NoNewPrivileges=true"
       - |
