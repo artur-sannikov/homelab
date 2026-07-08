@@ -68,8 +68,7 @@
     quadlet_dir: "{{ quadlet_dir }}"
     pod: authentik.pod
     volumes:
-      - "{{ podman_appdata_dir
-        }}/authentik/postgres/data:/var/lib/postgresql/data:Z"
+      - "{{ podman_appdata_dir }}/authentik/postgres/data:/var/lib/postgresql/data:Z"
     env_file:
       - authentik-postgres.env
     health_cmd: "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"
@@ -77,6 +76,7 @@
     health_startup_retries: 5
     healthcheck_start_period: 20s
     healthcheck_timeout: 10s
+    healthcheck_failure_action: "kill"
     quadlet_options:
       - "NoNewPrivileges=true"
       - |

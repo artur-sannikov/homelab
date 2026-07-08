@@ -107,6 +107,7 @@
     health_startup_retries: 5
     healthcheck_start_period: 20s
     healthcheck_timeout: 10s
+    healthcheck_failure_action: "kill"
     quadlet_options:
       - "NoNewPrivileges=true"
       - |
@@ -136,6 +137,7 @@
     health_startup_retries: 5
     healthcheck_start_period: 20s
     healthcheck_timeout: 10s
+    healthcheck_failure_action: "kill"
     quadlet_options:
       - "NoNewPrivileges=true"
       - |
@@ -169,6 +171,7 @@
     health_startup_retries: 5
     healthcheck_start_period: 20s
     healthcheck_timeout: 10s
+    healthcheck_failure_action: "kill"
     quadlet_options:
       - "NoNewPrivileges=true"
       - |
