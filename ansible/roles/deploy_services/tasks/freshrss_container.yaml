@@ -25,6 +25,12 @@
       - "8089:80"
     volumes:
       - "{{ podman_appdata_dir }}/freshrss/data:/var/www/FreshRSS/data:Z"
+    health_cmd: "cli/health.php"
+    health_startup_interval: 11s
+    health_startup_retries: 3
+    healthcheck_start_period: 20s
+    healthcheck_timeout: 10s
+    healthcheck_failure_action: "kill"
     env_file:
       - freshrss.env
     quadlet_options:
