@@ -18,6 +18,12 @@
       - "5006:5006"
     volumes:
       - "{{ podman_appdata_dir }}/actual-budget/data:/data:Z"
+    health_cmd: "node scripts/health-check.js"
+    health_startup_interval: 50s
+    health_startup_retries: 3
+    healthcheck_start_period: 20s
+    healthcheck_timeout: 10s
+    healthcheck_failure_action: "kill"
     quadlet_options:
       - "NoNewPrivileges=true"
       - |
