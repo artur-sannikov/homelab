@@ -50,7 +50,7 @@
       "enabled": false
     },
     {
-      "matchPackageNames": ["docker.io/mongo"],
+      "matchPackageNames": ["docker.io/library/mongo"],
       "matchUpdateTypes": ["minor", "major"],
       "enabled": false
     },
