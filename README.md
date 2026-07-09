@@ -119,7 +119,7 @@ instance](https://git.asannikov.com/artur/homelab),
 [Codeberg](https://codeberg.org/arsann/homelab) and
 [GitHub](https://github.com/artur-sannikov/homelab).
 
-The GitHub repo is updated every 144 hours. Codeberg repo is updated every 8
+The GitHub repo is updated every 168 hours. Codeberg repo is updated every 8
 hours.
 
 ## Thanks
