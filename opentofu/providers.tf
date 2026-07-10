@@ -14,6 +14,6 @@ provider "proxmox" {
 
   ssh {
     agent    = true
-    username = "root" # required when using api_token
+    username = "root"
   }
 }
