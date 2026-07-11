@@ -4,7 +4,7 @@ data "infisical_secrets" "pbs_credentials" {
   folder_path  = "/pbs"
 }
 
-resource "proxmox_storage_pbs" "limited" {
+resource "proxmox_storage_pbs" "pbs-limited" {
   id        = "pbs-limited"
   nodes     = ["pve1", "pve2"]
   server    = data.infisical_secrets.pbs_credentials.secrets["PBS_URL"].value
