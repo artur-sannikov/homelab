@@ -83,24 +83,16 @@ proxmox-backup-manager acl update /datastore/pve-etc DatastoreBackup \
 
 Now create API key for each PVE node for the `backupUser` user.
 
-```shell
-# For node 1
-proxmox-backup-manager user generate-token backupUser@pbs pve1
-# For node 2
-proxmox-backup-manager user generate-token backupUser@pbs pve2
-```
+````shell
+# PBS storage is shared across the nodes
+proxmox-backup-manager user generate-token backupUser@pbs pve
 
 ```shell
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreBackup \
-  --auth-id 'backupUser@pbs!pve1'
+  --auth-id 'backupUser@pbs!pve'
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
-  --auth-id 'backupUser@pbs!pve1'
-
-proxmox-backup-manager acl update /datastore/pve-datastore DatastoreBackup \
-  --auth-id 'backupUser@pbs!pve2'
-proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
-  --auth-id 'backupUser@pbs!pve2'
-```
+  --auth-id 'backupUser@pbs!pve'
+````
 
 ## Datastores
 
