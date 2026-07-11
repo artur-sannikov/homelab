@@ -147,6 +147,7 @@ Verify new snapshots after completion
 
 ```
 proxmox-backup-manager datastore update pve-datastore --verify-new true
+proxmox-backup-manager datastore update PBS-HETZNER-HEL1 --verify-new true
 ```
 
 ### Remote Proxmox Backup Server
