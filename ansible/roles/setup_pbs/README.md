@@ -81,18 +81,28 @@ proxmox-backup-manager acl update /datastore/pve-etc DatastoreBackup \
   --auth-id 'backupUser@pbs!pve2-etc'
 ```
 
-Now create API key for each PVE node for the `backupUser` user.
+Now create API key for PVE nodes for the `backupUser` user.
 
-````shell
+```shell
 # PBS storage is shared across the nodes
 proxmox-backup-manager user generate-token backupUser@pbs pve
+```
 
 ```shell
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreBackup \
   --auth-id 'backupUser@pbs!pve'
 proxmox-backup-manager acl update /datastore/pve-datastore DatastoreReader \
   --auth-id 'backupUser@pbs!pve'
-````
+```
+
+Create a read-only API key to access S3 Hetzner bucket from PVE.
+
+```shell
+proxmox-backup-manager user generate-token backupUser@pbs hetzner
+
+proxmox-backup-manager acl update /datastore/PBS-HETZNER-HEL1 DatastoreReader \
+  --auth-id 'backupUser@pbs!hetzner'
+```
 
 ## Datastores
 

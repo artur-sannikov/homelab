@@ -20,3 +20,20 @@ resource "proxmox_storage_pbs" "pbs-limited" {
 
   content = ["backup"]
 }
+
+resource "proxmox_storage_pbs" "pbs-hetzner-hel1" {
+  id        = "pbs-hetzner-hel1"
+  nodes     = ["pve1", "pve2"]
+  server    = data.infisical_secrets.pbs_credentials.secrets["PBS_URL"].value
+  datastore = "PBS-HETZNER-HEL1"
+
+  username = "backupUser@pbs!hetzner"
+
+  ### Use ephemeral resources once this is merged: ###
+  ### https://github.com/bpg/terraform-provider-proxmox/pull/2960 ###
+
+  password       = data.infisical_secrets.pbs_credentials.secrets["PBS_API_TOKEN_HETZNER1"].value
+  encryption_key = data.infisical_secrets.pbs_credentials.secrets["PBS_ENCRYPTION_KEY"].value
+
+  content = ["backup"]
+}
