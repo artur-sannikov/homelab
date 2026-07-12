@@ -180,7 +180,7 @@ resource "proxmox_virtual_environment_vm" "services" {
   }
 
   clone {
-    vm_id = "9001" # fedora-44-template
+    vm_id = proxmox_virtual_environment_vm.templates["fedora-44-pve2"].vm_id
   }
 
 
