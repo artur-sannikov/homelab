@@ -1,3 +1,4 @@
+---
 - name: Install Podman and dependencies
   tags: always
   ansible.builtin.dnf:
@@ -56,3 +57,28 @@
     owner: "{{ podman_user }}"
     group: "{{ podman_group }}"
     mode: "0755"
+
+- name: Create filesystem for persistent data
+  # NOTE: it will skip the task if the filesystem already exists
+  # Be very careful to not having to restore from backup
+  community.general.filesystem:
+    fstype: "ext4"
+    dev: "/dev/sdb" # scsi2 in Proxmox
+
+- name: Create mount point
+  ansible.builtin.file:
+    path: "/srv/podman"
+    state: directory
+    mode: "0750"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_group }}"
+
+- name: Mount disk and persist in fstab
+  ansible.posix.mount:
+    path: "/srv/podman"
+    # I hard-code it because it's inherent to the filesystem
+    # There can be a better solution I guess
+    src: "UUID=c08a75d2-83e9-4acf-a908-12864889fa58"
+    fstype: "ext4"
+    opts: defaults,nofail
+    state: mounted

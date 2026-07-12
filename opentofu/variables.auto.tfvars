@@ -1,5 +1,6 @@
 codeberg_runner_mac_address = "BC:24:11:A5:63:A5"
 tailscale_subnet_router_mac_address = "BC:24:11:0F:5D:BA"
+services_mac_address = "9A:21:31:EA:B5:83"
 
 ssh_public_keys = [
   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAEwYURB5edsicjUmwHAkO4LD2USq3wilCMLcUtHob86 artur@desktop",
