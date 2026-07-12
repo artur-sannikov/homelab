@@ -1,0 +1,24 @@
+---
+### Podman ###
+podman_user: podman
+podman_group: podman
+podman_appdata_dir: /srv/podman/appdata
+quadlet_dir: /home/podman/.config/containers/systemd
+
+### Paperless-ngx ###
+paperless_ngx_env_template_file: paperless-ngx.env.j2
+
+### Librechat ###
+librechat_env_template_file: librechat.env.j2
+librechat_yaml_template_file: librechat.yaml.j2
+
+### Authentik ###
+authentik_postgres_env_template_file: authentik-postgres.env.j2
+authentik_env_template_file: authentik.env.j2
+
+### Stirling-PDF ###
+stirling_pdf_env_template_file: stirling-pdf.env.j2
+
+### SearXNG ###
+searxng_env_template_file: searxng.env.j2
+searxng_settings_yml_template_file: searxng_settings.yml.j2

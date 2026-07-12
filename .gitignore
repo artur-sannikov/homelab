@@ -12,8 +12,6 @@ ansible/roles/deploy_monitoring/files/homepage.env
 ansible/roles/deploy_monitoring/files/settings.yaml
 ansible/roles/deploy_monitoring/files/services.yaml
 ansible/roles/deploy_monitoring/files/speedtest-tracker.env
-ansible/roles/deploy_services/vars/main.yml
-ansible/roles/deploy_services/vars/main.yaml
 ansible/roles/deploy_infisical/vars/main.yaml
 ansible/ansible_collections/
 
