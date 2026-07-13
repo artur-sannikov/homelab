@@ -95,9 +95,9 @@
             buildInputs = enabledPackages ++ [
               pkgs.ansible-lint
               pkgs.infisicalsdk
-              pkgs.python313
-              pkgs.python313Packages.ansible
-              pkgs.python313Packages.ansible-core
+              pkgs.python314
+              pkgs.python314Packages.ansible
+              pkgs.python314Packages.ansible-core
               pkgs.rbw
               pkgs.renovate
             ];
