@@ -65,6 +65,18 @@
     fstype: "ext4"
     dev: "/dev/sdb" # scsi2 in Proxmox
 
+- name: Read filesystem UUID
+  ansible.builtin.command:
+    argv:
+      - blkid
+      - -s
+      - UUID
+      - -o
+      - value
+      - /dev/sdb
+  register: __podman_disk_uuid
+  changed_when: false
+
 - name: Create mount point
   ansible.builtin.file:
     path: "/srv/podman"
@@ -76,9 +88,7 @@
 - name: Mount disk and persist in fstab
   ansible.posix.mount:
     path: "/srv/podman"
-    # I hard-code it because it's inherent to the filesystem
-    # There can be a better solution I guess
-    src: "UUID=c08a75d2-83e9-4acf-a908-12864889fa58"
+    src: "UUID={{ __podman_disk_uuid.stdout | trim }}"
     fstype: "ext4"
     opts: defaults,nofail
     state: mounted

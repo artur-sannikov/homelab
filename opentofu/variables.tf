@@ -13,6 +13,11 @@ variable "services_mac_address" {
   type        = string
 }
 
+variable "monitoring_mac_address" {
+  description = "MAC address of the monitoring VM"
+  type        = string
+}
+
 variable "ssh_public_keys" {
   description = "SSH keys to add into the VM via cloud-init"
   type        = list(string)
