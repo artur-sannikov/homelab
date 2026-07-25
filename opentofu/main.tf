@@ -1,144 +1,127 @@
-resource "proxmox_virtual_environment_vm" "codeberg-runner" {
-  name      = "codeberg-runner"
-  node_name = "pve2"
-  vm_id     = 113
+locals {
+  description = "Managed by OpenTofu"
 
-  template = false
-  started  = true
-  on_boot  = true
+  # Default variables for compute VMs
+  compute_defaults = {
+    machine       = "q35"
+    bios          = "ovmf"
+    scsi_hardware = "virtio-scsi-single"
 
-  machine       = "q35"
-  bios          = "ovmf"
-  description   = "Managed by OpenTofu"
-  tags          = ["cattle", "cloudinit", "debian-13", "opentofu"]
-  scsi_hardware = "virtio-scsi-single"
+    boot_disk = {
+      datastore_id = "local-zfs"
+      interface    = "scsi0"
+      iothread     = true
+      ssd          = true
+    }
 
-  reboot = true
-
-  # Required for bios = "ovmf"
-  efi_disk {
-    datastore_id = "local-zfs"
-  }
-
-  clone {
-    vm_id = proxmox_virtual_environment_vm.templates["debian-13-pve2"].vm_id
-  }
-
-  # Boot disk
-  disk {
-    datastore_id = "local-zfs"
-    interface    = "scsi0"
-    iothread     = true
-    ssd          = true
-    size         = 40
-  }
-
-  memory {
-    dedicated = 4096
-    floating  = 4096
-  }
-
-  cpu {
-    cores = 2
-    type  = "host"
-  }
-
-  network_device {
-    bridge      = "vmbr0"
-    vlan_id     = 50
-    mac_address = var.codeberg_runner_mac_address
-  }
-
-  initialization {
-    datastore_id = "local-zfs"
-    ip_config {
-      ipv4 {
-        address = "dhcp"
-      }
+    network = {
+      bridge = "vmbr0"
+      dhcp   = true
     }
   }
 
-  agent {
-    enabled = true
-  }
-}
-
-resource "proxmox_virtual_environment_vm" "tailscale-subnet-router" {
-  name      = "tailscale-subnet-router"
-  node_name = "pve1"
-  vm_id     = 109
-
-  template = false
-  started  = true
-  on_boot  = true
-
-  machine       = "q35"
-  bios          = "ovmf"
-  description   = "Managed by OpenTofu"
-  tags          = ["cattle", "cloudinit", "debian-13", "opentofu"]
-  scsi_hardware = "virtio-scsi-single"
-
-  reboot = true
-
-  # Required for bios = "ovmf"
-  efi_disk {
-    datastore_id = "local-zfs"
-  }
-
-  clone {
-    vm_id = proxmox_virtual_environment_vm.templates["debian-13-pve1"].vm_id
-  }
-
-  # Boot disk
-  disk {
-    datastore_id = "local-zfs"
-    interface    = "scsi0"
-    iothread     = true
-    ssd          = true
-    size         = 8
-  }
-
-  memory {
-    dedicated = 1024
-    floating  = 1024
-  }
-
-  cpu {
-    cores = 1
-    type  = "host"
-  }
-
-  network_device {
-    bridge      = "vmbr0"
-    vlan_id     = 40
-    mac_address = var.tailscale_subnet_router_mac_address
-  }
-
-  initialization {
-    datastore_id = "local-zfs"
-    ip_config {
-      ipv4 {
-        address = "dhcp"
-      }
+  # Stateful data disks
+  data_vms = {
+    services = {
+      name      = "services-data-vm"
+      node_name = "pve2"
+      vm_id     = 118
+      pool_id   = "production"
+      tags      = ["datastore", "production"]
+      size      = 8
+    }
+    monitoring = {
+      name      = "monitoring-data-vm"
+      node_name = "pve2"
+      vm_id     = 119
+      pool_id   = "production"
+      tags      = ["datastore", "production"]
+      size      = 8
     }
   }
 
-  agent {
-    enabled = true
+  compute = {
+    codeberg_runner = merge(local.compute_defaults, {
+      name         = "codeberg-runner",
+      node_name    = "pve2"
+      vm_id        = 113
+      template_key = "debian-13-pve2"
+
+      os_tag      = "debian-13"
+      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 40 })
+      memory_mb   = 4096
+      cpu_cores   = 2
+      vlan_id     = 50
+      mac_address = var.codeberg_runner_mac_address
+      reboot      = true
+      data_vm_key = null # Does not have a data disk
+    })
+
+    tailscale_subnet_router = merge(local.compute_defaults, {
+      name         = "tailscale-subnet-router",
+      node_name    = "pve1"
+      vm_id        = 109
+      template_key = "debian-13-pve1"
+
+      os_tag      = "debian-13"
+      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 8 })
+      memory_mb   = 1024
+      cpu_cores   = 1
+      vlan_id     = 40
+      mac_address = var.tailscale_subnet_router_mac_address
+      reboot      = true
+      data_vm_key = null # Does not have a data disk
+    })
+
+    services = merge(local.compute_defaults, {
+      name         = "services"
+      node_name    = "pve2"
+      vm_id        = 8000
+      template_key = "fedora-44-pve2"
+
+      os_tag      = "fedora"
+      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 16 })
+      memory_mb   = 8192
+      cpu_cores   = 4
+      vlan_id     = 20
+      mac_address = var.services_mac_address
+      reboot      = null
+      data_vm_key = "services"
+    })
+
+    monitoring = merge(local.compute_defaults, {
+      name         = "monitoring"
+      node_name    = "pve2"
+      vm_id        = 8001
+      template_key = "fedora-44-pve2"
+
+      os_tag      = "fedora"
+      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 16 })
+      memory_mb   = 2048
+      cpu_cores   = 2
+      vlan_id     = 20
+      mac_address = var.monitoring_mac_address
+      reboot      = null
+      data_vm_key = "monitoring"
+    })
   }
 }
 
-resource "proxmox_virtual_environment_vm" "services_data_vm" {
-  name      = "services-data-vm"
-  node_name = "pve2"
-  vm_id     = 118
-  pool_id   = "production"
+### Stateful data VMs ###
+resource "proxmox_virtual_environment_vm" "data" {
+  for_each = local.data_vms
+
+  description = local.description
+
+  name      = each.value.name
+  node_name = each.value.node_name
+  vm_id     = each.value.vm_id
+  pool_id   = each.value.pool_id
 
   started = false
   on_boot = false
 
-  description   = "Managed by OpenTofu"
-  tags          = ["datastore", "production"]
+  tags          = each.value.tags
   scsi_hardware = "virtio-scsi-single"
 
   protection = true
@@ -149,179 +132,94 @@ resource "proxmox_virtual_environment_vm" "services_data_vm" {
     file_format  = "raw"
     ssd          = true
     iothread     = true
-    discard      = "on" # Enable thin provisioning to save space
-    size         = 8
+    discard      = "on"
+    size         = each.value.size
   }
 
-  # This is the stateful data disk
+  ### DO NOT DISABLE ###
   lifecycle {
     prevent_destroy = true
   }
+  ######################
 }
 
-resource "proxmox_virtual_environment_vm" "services" {
-  name      = "services"
-  node_name = "pve2"
-  vm_id     = 8000
+### Compute VMs ###
+resource "proxmox_virtual_environment_vm" "compute" {
+  for_each = local.compute
+
+  description = local.description
+
+  name      = each.value.name
+  node_name = each.value.node_name
+  vm_id     = each.value.vm_id
 
   template = false
   started  = true
   on_boot  = true
 
-  machine       = "q35"
-  bios          = "ovmf"
-  description   = "Managed by OpenTofu"
-  tags          = ["cattle", "cloudinit", "fedora", "opentofu"]
-  scsi_hardware = "virtio-scsi-single"
+  machine       = each.value.machine
+  bios          = each.value.bios
+  scsi_hardware = each.value.scsi_hardware
 
-  # Required for bios = "ovmf"
+  tags = [
+    "cattle",
+    "cloudinit",
+    each.value.os_tag,
+    "opentofu"
+  ]
+
+  reboot = each.value.reboot
+
   efi_disk {
     datastore_id = "local-zfs"
   }
 
   clone {
-    vm_id = proxmox_virtual_environment_vm.templates["fedora-44-pve2"].vm_id
-  }
-
-
-  # Boot disk
-  disk {
-    datastore_id = "local-zfs"
-    interface    = "scsi0"
-    iothread     = true
-    ssd          = true
-    size         = 16
+    vm_id = proxmox_virtual_environment_vm.templates[each.value.template_key].vm_id
   }
 
   disk {
-    datastore_id      = proxmox_virtual_environment_vm.services_data_vm.disk[0].datastore_id
-    path_in_datastore = proxmox_virtual_environment_vm.services_data_vm.disk[0].path_in_datastore
-    file_format       = proxmox_virtual_environment_vm.services_data_vm.disk[0].file_format
-    size              = proxmox_virtual_environment_vm.services_data_vm.disk[0].size
-    interface         = proxmox_virtual_environment_vm.services_data_vm.disk[0].interface
+    interface    = each.value.boot_disk.interface
+    datastore_id = each.value.boot_disk.datastore_id
+    iothread     = each.value.boot_disk.iothread
+    ssd          = each.value.boot_disk.ssd
+    size         = each.value.boot_disk.size
   }
 
-  memory {
-    dedicated = 8192
-    floating  = 8192
-  }
+  # Add data disk only for compute nodes that require it
+  dynamic "disk" {
+    for_each = each.value.data_vm_key == null ? {} : {
+      data = proxmox_virtual_environment_vm.data[each.value.data_vm_key].disk[0]
+    }
+    iterator = attached_disk
 
-  cpu {
-    cores = 4
-    type  = "host"
-  }
-
-  network_device {
-    bridge      = "vmbr0"
-    vlan_id     = 20
-    mac_address = var.services_mac_address
-  }
-
-  initialization {
-    datastore_id = "local-zfs"
-    ip_config {
-      ipv4 {
-        address = "dhcp"
-      }
+    content {
+      interface    = attached_disk.value.interface
+      datastore_id = attached_disk.value.datastore_id
+      file_format  = attached_disk.value.file_format
+      size         = attached_disk.value.size
     }
   }
 
-  agent {
-    enabled = true
-  }
-}
-
-resource "proxmox_virtual_environment_vm" "monitoring_data_vm" {
-  name      = "monitoring-data-vm"
-  node_name = "pve2"
-  vm_id     = 119
-  pool_id   = "production"
-
-  started = false
-  on_boot = false
-
-  description   = "Managed by OpenTofu"
-  tags          = ["datastore", "production"]
-  scsi_hardware = "virtio-scsi-single"
-
-  protection = true
-
-  disk {
-    datastore_id = "local-zfs"
-    interface    = "scsi2"
-    file_format  = "raw"
-    ssd          = true
-    iothread     = true
-    discard      = "on" # Enable thin provisioning to save space
-    size         = 8
-  }
-
-  # This is the stateful data disk
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
-resource "proxmox_virtual_environment_vm" "monitoring" {
-  name      = "monitoring"
-  node_name = "pve2"
-  vm_id     = 8001
-
-  template = false
-  started  = true
-  on_boot  = true
-
-  machine       = "q35"
-  bios          = "ovmf"
-  description   = "Managed by OpenTofu"
-  tags          = ["cattle", "cloudinit", "fedora", "opentofu"]
-  scsi_hardware = "virtio-scsi-single"
-
-  # Required for bios = "ovmf"
-  efi_disk {
-    datastore_id = "local-zfs"
-  }
-
-  clone {
-    vm_id = proxmox_virtual_environment_vm.templates["fedora-44-pve2"].vm_id
-  }
-
-
-  # Boot disk
-  disk {
-    datastore_id = "local-zfs"
-    interface    = "scsi0"
-    iothread     = true
-    ssd          = true
-    size         = 16
-  }
-
-  disk {
-    datastore_id      = proxmox_virtual_environment_vm.monitoring_data_vm.disk[0].datastore_id
-    path_in_datastore = proxmox_virtual_environment_vm.monitoring_data_vm.disk[0].path_in_datastore
-    file_format       = proxmox_virtual_environment_vm.monitoring_data_vm.disk[0].file_format
-    size              = proxmox_virtual_environment_vm.monitoring_data_vm.disk[0].size
-    interface         = proxmox_virtual_environment_vm.monitoring_data_vm.disk[0].interface
-  }
-
   memory {
-    dedicated = 2048
-    floating  = 2048
+    dedicated = each.value.memory_mb
+    floating  = each.value.memory_mb
   }
 
   cpu {
-    cores = 2
+    cores = each.value.cpu_cores
     type  = "host"
   }
 
   network_device {
-    bridge      = "vmbr0"
-    vlan_id     = 20
-    mac_address = var.monitoring_mac_address
+    bridge      = each.value.network.bridge
+    vlan_id     = each.value.vlan_id
+    mac_address = each.value.mac_address
   }
 
   initialization {
     datastore_id = "local-zfs"
+
     ip_config {
       ipv4 {
         address = "dhcp"
