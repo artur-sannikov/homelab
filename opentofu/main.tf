@@ -12,6 +12,7 @@ locals {
       interface    = "scsi0"
       iothread     = true
       ssd          = true
+      aio          = "native"
     }
 
     network = {
@@ -133,6 +134,7 @@ resource "proxmox_virtual_environment_vm" "data" {
     ssd          = true
     iothread     = true
     discard      = "on"
+    aio          = "native"
     size         = each.value.size
   }
 
@@ -198,6 +200,10 @@ resource "proxmox_virtual_environment_vm" "compute" {
       datastore_id = attached_disk.value.datastore_id
       file_format  = attached_disk.value.file_format
       size         = attached_disk.value.size
+      aio          = "native"
+      ssd          = true
+      iothread     = true
+      discard      = "on"
     }
   }
 
