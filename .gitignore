@@ -1,6 +1,4 @@
 ansible/secrets.yaml
-ansible/inventory
-ansible/inventory.yaml
 ansible/ansible.cfg
 ansible/.ansible/
 ansible/host_vars/
