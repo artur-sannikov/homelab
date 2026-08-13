@@ -177,7 +177,7 @@
 - name: Create MCP-NixOS Quadlet
   containers.podman.podman_container:
     name: librechat-mcp-nixos
-    image: ghcr.io/utensils/mcp-nixos:2.4.3@sha256:5a48510c4e99549fe563e7ec0af83ccd94db15da1b50f6ce8f51b6a70cf4087c
+    image: ghcr.io/utensils/mcp-nixos:3.0.1@sha256:9d0164c0239aa3b7d15754073fa53f0ad1f434f4c287653f64b5f2c8fe99d0af
     state: quadlet
     quadlet_filename: librechat-mcp-nixos
     quadlet_file_mode: "0644"
