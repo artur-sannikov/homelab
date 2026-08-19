@@ -60,7 +60,7 @@
 - name: Create Grafana quadlet
   containers.podman.podman_container:
     name: grafana
-    image: docker.io/grafana/grafana:13.0@sha256:035dfe16f7a3a109b54f2ac032232b07d069aa732156480555b2391fc0a32813
+    image: docker.io/grafana/grafana:13.0@sha256:e78917cdd3336d0d679d345b2e6d0f60a0fe85ed7ac3882b68f089fdb6ff2ace
     state: quadlet
     quadlet_filename: grafana
     quadlet_file_mode: "0644"
