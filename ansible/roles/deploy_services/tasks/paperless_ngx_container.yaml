@@ -89,10 +89,10 @@
     infra_name: "paperless-ngx-pod"
     ports:
       - "8001:8000"
-- name: Create paperless-ngx-redis Quadlet
+- name: Create paperless-ngx-valkey Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-redis
-    image: docker.io/redis:8.10.1@sha256:691577adaf11927f4bb8871d40a5dd69a5c300d4453b742e8f6383c3e6e8d2e1
+    image: docker.io/valkey/valkey:9.1.1-alpine@sha256:de31910896150d5e754a07d57d227cfdde4e258ddd0d1aa4607f2d2f95843715
     state: quadlet
     quadlet_filename: paperless-ngx-redis
     quadlet_file_mode: "0644"
@@ -100,14 +100,6 @@
     pod: paperless-ngx.pod
     volumes:
       - "{{ podman_appdata_dir }}/paperless-ngx/redis:/data:Z"
-    env_file:
-      - paperless-ngx-redis.env
-    health_cmd: "redis-cli ping | grep PONG"
-    health_startup_interval: 30s
-    health_startup_retries: 5
-    healthcheck_start_period: 20s
-    healthcheck_timeout: 10s
-    healthcheck_failure_action: "kill"
     quadlet_options:
       - "NoNewPrivileges=true"
       - |
