@@ -88,7 +88,7 @@
 - name: Create authentik-server Quadlet
   containers.podman.podman_container:
     name: authentik-server
-    image: ghcr.io/goauthentik/server:2026.8.0@sha256:7421753cfea67e89a6d295a1f0173ccea3866b33768c88dad90453b151cdcfd5
+    image: ghcr.io/goauthentik/server@sha256:21000cebe8e51eca0620034096586d675cedec8925ac750f7f8966d86eeb0da0
     state: quadlet
     quadlet_filename: authentik-server
     quadlet_file_mode: "0644"
@@ -109,7 +109,7 @@
 - name: Create authentik-worker Quadlet
   containers.podman.podman_container:
     name: authentik-worker
-    image: ghcr.io/goauthentik/server:2026.8.0@sha256:7421753cfea67e89a6d295a1f0173ccea3866b33768c88dad90453b151cdcfd5
+    image: ghcr.io/goauthentik/server@sha256:21000cebe8e51eca0620034096586d675cedec8925ac750f7f8966d86eeb0da0
     state: quadlet
     quadlet_filename: authentik-worker
     quadlet_file_mode: "0644"
