@@ -134,7 +134,7 @@
 - name: Create LibreChat-mongodb Quadlet
   containers.podman.podman_container:
     name: librechat-mongodb
-    image: docker.io/library/mongo:8.0.29@sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a
+    image: docker.io/library/mongo:8.0.20@sha256:098862b1339f031900ca66cf8fef799e616d6324fa41b9a263f2ec899552c1ef
     state: quadlet
     quadlet_filename: librechat-mongodb
     quadlet_file_mode: "0644"
