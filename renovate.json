@@ -51,7 +51,6 @@
     // },
     {
       "matchPackageNames": ["docker.io/mongo"],
-      "matchUpdateTypes": ["minor", "major"],
       "enabled": false
     },
     {
