@@ -56,7 +56,6 @@
     group: "{{ podman_group }}"
     mode: "0600"
   loop:
-    - paperless-ngx-redis.env
     - paperless-ngx-postgres.env
 - name: Create Paperless-ngx database password
   containers.podman.podman_secret:
