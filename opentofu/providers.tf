@@ -6,7 +6,7 @@ ephemeral "infisical_secret" "proxmox_config" {
 }
 
 terraform {
-  required_version = "~> 1.15.0"
+  required_version = "~> 1.16.0"
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
