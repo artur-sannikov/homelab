@@ -68,9 +68,7 @@ might be helpful.
 2. Define host variables in `host_vars/caddyDMZ.yaml`. The comments in the
    example file should be helpful.
 3. Set up your [Caddyfile](https://caddyserver.com/docs/caddyfile) in
-   `roles/deploy_caddy/files`. See the provided example for ideas. I am using
-   [Authentik](https://goauthentik.io/) for some of the apps that do not provide
-   built-in authentication.
+   `roles/deploy_caddy/files`. See the provided example for ideas.
 4. Set up `caddy_override.conf` in `roles/deploy_caddy/files`. It only
    contains the Cloudflare API token. Keep it **safe**!
 

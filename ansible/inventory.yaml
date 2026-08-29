@@ -1,0 +1,75 @@
+---
+all:
+  hosts:
+    tailscale_subnet_router: {}
+  children:
+    fedora:
+      hosts:
+        services: {}
+        monitoring: {}
+        infisical: {}
+        pulse: {}
+    ubuntu:
+      hosts:
+        caddyDMZ: {}
+        pi:
+          ansible_become_password: >-
+            {{ lookup('ansible.builtin.pipe', 'rbw get raspberry-pi-password') }}
+        tailscale_gluetun: {}
+        nuc13:
+          ansible_user: "artur"
+          ansible_become_password: >-
+            {{ lookup('ansible.builtin.pipe', 'rbw get nuc13-user-password') }}
+    debian:
+      hosts:
+        pihole: {}
+        codeberg-runner: {}
+        # github-runner: {}
+        mediaserver: {}
+        uptime_kuma:
+          ansible_become_password: >-
+            {{ lookup('ansible.builtin.pipe', 'rbw get proxmox-servers-password') }}
+          ansible_user: artur
+        pve1:
+          ansible_user: root
+        pve2:
+          ansible_user: root
+        pbs:
+          ansible_user: root
+    services_srv:
+      hosts:
+        services: {}
+    caddyDMZ_srv:
+      hosts:
+        caddyDMZ: {}
+    monitoring_srv:
+      hosts:
+        monitoring: {}
+    infisical_srv:
+      hosts:
+        infisical: {}
+    codeberg_runner_srv:
+      hosts:
+        codeberg-runner: {}
+    pulse_srv:
+      hosts:
+        pulse: {}
+    podman:
+      hosts:
+        infisical: {}
+        services: {}
+        monitoring: {}
+        pulse: {}
+        # unifi_controller_srv:
+        #  hosts:
+        #    unifi_controller
+    debian_lxc:
+      hosts:
+        uptime_kuma: {}
+  vars:
+    podman_appdata_dir: /home/podman/appdata
+    podman_group: podman
+    podman_user: podman
+    quadlet_dir: /home/podman/.config/containers/systemd
+    ssh_users: artur
+    sshd_template_file: sshd_config_fedora.j2

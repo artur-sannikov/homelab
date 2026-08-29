@@ -155,7 +155,7 @@
 - name: Create LibreChat-meilisearch Quadlet
   containers.podman.podman_container:
     name: librechat-meilisearch
-    image: docker.io/getmeili/meilisearch:v1.50.0@sha256:9694a59df43ee3f54b3fda9c5de381a3ee9852678e3e31cadf37d6bddea7fc1b
+    image: docker.io/getmeili/meilisearch:v1.53.1@sha256:8d6643d86d71fad6ad3cba92cde7ccfce9e4d6c384bda67598eb553571c32431
     state: quadlet
     quadlet_filename: librechat-meilisearch
     quadlet_file_mode: "0644"
@@ -177,7 +177,7 @@
 - name: Create MCP-NixOS Quadlet
   containers.podman.podman_container:
     name: librechat-mcp-nixos
-    image: ghcr.io/utensils/mcp-nixos:2.4.3@sha256:5a48510c4e99549fe563e7ec0af83ccd94db15da1b50f6ce8f51b6a70cf4087c
+    image: ghcr.io/utensils/mcp-nixos:3.0.1@sha256:9d0164c0239aa3b7d15754073fa53f0ad1f434f4c287653f64b5f2c8fe99d0af
     state: quadlet
     quadlet_filename: librechat-mcp-nixos
     quadlet_file_mode: "0644"

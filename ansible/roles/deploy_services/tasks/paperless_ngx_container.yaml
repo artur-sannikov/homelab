@@ -56,7 +56,6 @@
     group: "{{ podman_group }}"
     mode: "0600"
   loop:
-    - paperless-ngx-redis.env
     - paperless-ngx-postgres.env
 - name: Create Paperless-ngx database password
   containers.podman.podman_secret:
@@ -89,10 +88,10 @@
     infra_name: "paperless-ngx-pod"
     ports:
       - "8001:8000"
-- name: Create paperless-ngx-redis Quadlet
+- name: Create paperless-ngx-valkey Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-redis
-    image: docker.io/redis:8.8.0@sha256:2838d5524559494f6f1cd66e97e76b200d64a633a8614200620755ed395daf32
+    image: docker.io/valkey/valkey:9.1.1-alpine@sha256:de31910896150d5e754a07d57d227cfdde4e258ddd0d1aa4607f2d2f95843715
     state: quadlet
     quadlet_filename: paperless-ngx-redis
     quadlet_file_mode: "0644"
@@ -100,14 +99,6 @@
     pod: paperless-ngx.pod
     volumes:
       - "{{ podman_appdata_dir }}/paperless-ngx/redis:/data:Z"
-    env_file:
-      - paperless-ngx-redis.env
-    health_cmd: "redis-cli ping | grep PONG"
-    health_startup_interval: 30s
-    health_startup_retries: 5
-    healthcheck_start_period: 20s
-    healthcheck_timeout: 10s
-    healthcheck_failure_action: "kill"
     quadlet_options:
       - "NoNewPrivileges=true"
       - |
@@ -120,7 +111,7 @@
 - name: Create paperless-ngx-postgres Quadlet
   containers.podman.podman_container:
     name: paperless-ngx-postgres
-    image: docker.io/postgres:18.4@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
+    image: docker.io/postgres:18.6@sha256:06cad38a5d9f5d24b4d83d86def30795d5e4b757fedbf5281172b576dedcd941
     state: quadlet
     quadlet_filename: paperless-ngx-postgres
     quadlet_file_mode: "0644"
@@ -150,7 +141,7 @@
 - name: Create paperless-ngx Quadlet
   containers.podman.podman_container:
     name: paperless-ngx
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.20.15@sha256:6c86cad803970ea782683a8e80e7403444c5bf3cf70de63b4d3c8e87500db92f
+    image: ghcr.io/paperless-ngx/paperless-ngx:3.0.5@sha256:65a4cabf0169ea7fbd90ab7bb28ba3f8b5909613635acda1a03ad606f34b456b
     state: quadlet
     quadlet_filename: paperless-ngx
     quadlet_file_mode: "0644"

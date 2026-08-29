@@ -1,6 +1,4 @@
 ansible/secrets.yaml
-ansible/inventory
-ansible/inventory.yaml
 ansible/ansible.cfg
 ansible/.ansible/
 ansible/host_vars/
@@ -35,3 +33,6 @@ geerlingguy*/
 .pre-commit-config.yaml
 
 .vscode/
+
+# Generated qcow2 image for NixOS
+.generated
