@@ -44,14 +44,14 @@
       "matchUpdateTypes": ["major"],
       "enabled": false
     },
+    // {
+    //   "matchPackageNames": ["docker.io/getmeili/meilisearch"],
+    //   "matchUpdateTypes": ["major"],
+    //   "enabled": false
+    // },
     {
-      "matchPackageNames": ["docker.io/getmeili/meilisearch"],
-      "matchUpdateTypes": ["major"],
+      "matchPackageNames": ["docker.io/mongo"],
       "enabled": false
-    },
-    {
-      "matchPackageNames": ["docker.io/library/mongo"],
-      "allowedVersions": "/^{{major}}\\.{{minor}}\\./"
     },
     {
       "matchUpdateTypes": ["patch", "digest"],
