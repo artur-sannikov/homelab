@@ -55,7 +55,7 @@
 - name: Create infisical-redis quadlet
   containers.podman.podman_container:
     name: infisical-redis
-    image: docker.io/redis:8.10.1@sha256:98823d25c2233966b0075d949c5c4c87375204f4eff513a072b6b369ab46193c
+    image: docker.io/redis:8.10.1@sha256:298e5b3bc566bade82f46ad5511777a4a07a294097ce16ada2f6a42be5239df5
     state: quadlet
     quadlet_filename: infisical-redis
     quadlet_file_mode: "0644"
@@ -81,7 +81,7 @@
 - name: Create infisical-backend quadlet
   containers.podman.podman_container:
     name: infisical-backend
-    image: docker.io/infisical/infisical:v0.162.24@sha256:f9d8c13d3e0ecb3f4392631fb41b8a483518318c4c91442ab72ced4e98210b2d
+    image: docker.io/infisical/infisical:v0.165.6@sha256:02082bf13163697869cbb4fc3fc630a87ff78bfb627492282d9bd5aae97858ef
     state: quadlet
     quadlet_filename: infisical-backend
     quadlet_file_mode: "0644"

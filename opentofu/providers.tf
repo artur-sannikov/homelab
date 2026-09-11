@@ -6,15 +6,15 @@ ephemeral "infisical_secret" "proxmox_config" {
 }
 
 terraform {
-  required_version = "~> 1.15.0"
+  required_version = "~> 1.16.0"
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.111.1"
+      version = "0.112.0"
     }
     infisical = {
       source  = "infisical/infisical"
-      version = "0.19.25"
+      version = "0.19.30"
     }
   }
 }

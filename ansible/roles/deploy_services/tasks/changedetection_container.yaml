@@ -29,7 +29,7 @@
 - name: Create chromium-playwright Quadlet
   containers.podman.podman_container:
     name: chromium-playwright
-    image: ghcr.io/browserless/chromium:v2.56.0@sha256:6f3149efabf5e04a44385974448c85264398db416bc63f884564316d0fcadc3e
+    image: ghcr.io/browserless/chromium:v2.56.3@sha256:4a12700b8140396806958bc5622dbf1abb3c4a1025aadaabe8f03c570aa43c79
     state: quadlet
     quadlet_filename: chromium-playwright
     quadlet_file_mode: "0644"
@@ -49,7 +49,7 @@
 - name: Create changedetection Quadlet
   containers.podman.podman_container:
     name: changedetection
-    image: ghcr.io/dgtlmoon/changedetection.io:0.55.7@sha256:736331d2787f94d3201b64aa641e090f67e28577ba505bd7ba5d7c1841e1e0ca
+    image: ghcr.io/dgtlmoon/changedetection.io:0.60.3@sha256:ecacd9fd0c664a786b77daadbbbf51373519b29178a32df3ddbc5c594bc067ed
     state: quadlet
     quadlet_filename: changedetection
     quadlet_file_mode: "0644"
