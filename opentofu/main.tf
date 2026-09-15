@@ -81,7 +81,7 @@ locals {
       template_key = "fedora-44-pve2"
 
       os_tag      = "fedora"
-      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 16 })
+      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 32 })
       memory_mb   = 8192
       cpu_cores   = 4
       vlan_id     = 20
@@ -97,7 +97,7 @@ locals {
       template_key = "fedora-44-pve2"
 
       os_tag      = "fedora"
-      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 16 })
+      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 32 })
       memory_mb   = 2048
       cpu_cores   = 2
       vlan_id     = 20

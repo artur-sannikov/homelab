@@ -19,9 +19,9 @@ locals {
     "ubuntu-26-04" = {
       machine            = "pc"
       tags               = ["cattle", "cloudinit", "ubuntu-26-04", "opentofu", "template"]
-      image_url          = "https://cloud-images.ubuntu.com/resolute/20260627/resolute-server-cloudimg-amd64.img"
+      image_url          = "https://cloud-images.ubuntu.com/resolute/20260823/resolute-server-cloudimg-amd64.img"
       image_filename     = "resolute-server-cloudimg-amd64.img"
-      checksum           = "3ee4f67f322abb2d1d1f0fffc957f7411404ad6635dd35b026c8ff05ac6e534c"
+      checksum           = "8196be9d7958059cb56c6c75c80fdf6cee8a8885bc149ea791d7db1c7ef93035"
       checksum_algorithm = "sha256"
       decompression      = null
       overwrite          = true
@@ -34,9 +34,9 @@ locals {
     "ubuntu-24-04" = {
       machine            = "q35"
       tags               = ["cattle", "cloudinit", "ubuntu-24-04", "opentofu", "template"]
-      image_url          = "https://cloud-images.ubuntu.com/noble/20260615/noble-server-cloudimg-amd64.img"
+      image_url          = "https://cloud-images.ubuntu.com/noble/20260911/noble-server-cloudimg-amd64.img"
       image_filename     = "noble-server-cloudimg-amd64.img"
-      checksum           = "5fa5b05e5ec239858c4531485d6023b0896448c2df7c63b34f8dae6ea6051a44"
+      checksum           = "612b2c0cc1bc413a6cb8c38fd611794caf0f2b436c50013d8b3794db12ad7354"
       checksum_algorithm = "sha256"
       decompression      = null
       overwrite          = true
