@@ -8,11 +8,11 @@ locals {
     scsi_hardware = "virtio-scsi-single"
 
     boot_disk = {
-      datastore_id = "local-zfs"
-      interface    = "scsi0"
-      iothread     = true
-      ssd          = true
-      aio          = "native"
+      interface = "scsi0"
+      discard   = "on"
+      iothread  = true
+      ssd       = true
+      aio       = "native"
     }
 
     network = {
@@ -22,88 +22,126 @@ locals {
   }
 
   # Stateful data disks
-  data_vms = {
+  data_vm_definitions = {
     services = {
       name      = "services-data-vm"
-      node_name = "pve2"
-      vm_id     = 118
+      placement = "pve2"
+      node_name = var.site.placements["pve2"].node_name
       pool_id   = "production"
       tags      = ["datastore", "production"]
       size      = 8
     }
     monitoring = {
       name      = "monitoring-data-vm"
-      node_name = "pve2"
-      vm_id     = 119
+      placement = "pve2"
+      node_name = var.site.placements["pve2"].node_name
       pool_id   = "production"
       tags      = ["datastore", "production"]
       size      = 8
     }
   }
 
-  compute = {
+  data_vms = {
+    for key, vm in local.data_vm_definitions : key => merge(vm, {
+      node_name = var.site.placements[
+        vm.placement
+      ].node_name
+
+      datastore_id = var.site.placements[
+        vm.placement
+      ].datastore_id
+
+      pool_id = var.site.pool_id
+    })
+  }
+  compute_definitions = {
     codeberg_runner = merge(local.compute_defaults, {
       name         = "codeberg-runner",
-      node_name    = "pve2"
-      vm_id        = 113
+      placement    = "pve2"
+      node_name    = var.site.placements["pve2"].node_name
       template_key = "debian-13-pve2"
 
-      os_tag      = "debian-13"
-      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 40 })
-      memory_mb   = 4096
-      cpu_cores   = 2
-      vlan_id     = 50
-      mac_address = var.codeberg_runner_mac_address
-      reboot      = true
-      data_vm_key = null # Does not have a data disk
+      os_tag       = "debian-13"
+      boot_disk    = merge(local.compute_defaults.boot_disk, { size = 40 })
+      memory_mb    = 4096
+      cpu_cores    = 2
+      network_name = "runners"
+      mac_address  = var.codeberg_runner_mac_address
+      reboot       = true
+      data_vm_key  = null # Does not have a data disk
     })
 
     tailscale_subnet_router = merge(local.compute_defaults, {
       name         = "tailscale-subnet-router",
-      node_name    = "pve1"
-      vm_id        = 109
+      placement    = "pve1"
+      node_name    = var.site.placements["pve1"].node_name
       template_key = "debian-13-pve1"
 
-      os_tag      = "debian-13"
-      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 8 })
-      memory_mb   = 1024
-      cpu_cores   = 1
-      vlan_id     = 40
-      mac_address = var.tailscale_subnet_router_mac_address
-      reboot      = true
-      data_vm_key = null # Does not have a data disk
+      os_tag       = "debian-13"
+      boot_disk    = merge(local.compute_defaults.boot_disk, { size = 8 })
+      memory_mb    = 1024
+      cpu_cores    = 1
+      network_name = "infrastructure"
+      mac_address  = var.tailscale_subnet_router_mac_address
+      reboot       = true
+      data_vm_key  = null # Does not have a data disk
     })
 
     services = merge(local.compute_defaults, {
       name         = "services"
-      node_name    = "pve2"
-      vm_id        = 8000
+      placement    = "pve2"
+      node_name    = var.site.placements["pve2"].node_name
       template_key = "fedora-44-pve2"
 
-      os_tag      = "fedora"
-      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 32 })
-      memory_mb   = 8192
-      cpu_cores   = 4
-      vlan_id     = 20
-      mac_address = var.services_mac_address
-      reboot      = null
-      data_vm_key = "services"
+      os_tag       = "fedora"
+      boot_disk    = merge(local.compute_defaults.boot_disk, { size = 32 })
+      memory_mb    = 8192
+      cpu_cores    = 4
+      network_name = "services"
+      mac_address  = var.services_mac_address
+      reboot       = null
+      data_vm_key  = "services"
     })
 
     monitoring = merge(local.compute_defaults, {
       name         = "monitoring"
-      node_name    = "pve2"
-      vm_id        = 8001
+      placement    = "pve2"
+      node_name    = var.site.placements["pve2"].node_name
       template_key = "fedora-44-pve2"
 
-      os_tag      = "fedora"
-      boot_disk   = merge(local.compute_defaults.boot_disk, { size = 32 })
-      memory_mb   = 2048
-      cpu_cores   = 2
-      vlan_id     = 20
-      mac_address = var.monitoring_mac_address
-      reboot      = null
-      data_vm_key = "monitoring"
+      os_tag       = "fedora"
+      boot_disk    = merge(local.compute_defaults.boot_disk, { size = 32 })
+      memory_mb    = 2048
+      cpu_cores    = 2
+      network_name = "services"
+      mac_address  = var.monitoring_mac_address
+      reboot       = null
+      data_vm_key  = "monitoring"
+    })
+  }
+
+  compute = {
+    for key, vm in local.compute_definitions : key => merge(vm, {
+      node_name = var.site.placements[
+        vm.placement
+      ].node_name
+
+      datastore_id = var.site.placements[
+        vm.placement
+      ].datastore_id
+
+      bridge = var.site.placements[
+        vm.placement
+      ].bridge
+
+      boot_disk = merge(vm.boot_disk, {
+        datastore_id = var.site.placements[
+          vm.placement
+        ].datastore_id
+      })
+      vlan_id = var.site.networks[
+        vm.network_name
+      ].vlan_id
     })
   }
 }
@@ -116,7 +154,7 @@ resource "proxmox_virtual_environment_vm" "data" {
 
   name      = each.value.name
   node_name = each.value.node_name
-  vm_id     = each.value.vm_id
+  vm_id     = lookup(var.site.vm_ids, "data/${each.key}", null)
   pool_id   = each.value.pool_id
 
   started = false
@@ -128,7 +166,7 @@ resource "proxmox_virtual_environment_vm" "data" {
   protection = true
 
   disk {
-    datastore_id = "local-zfs"
+    datastore_id = each.value.datastore_id
     interface    = "scsi2"
     file_format  = "raw"
     ssd          = true
@@ -153,7 +191,7 @@ resource "proxmox_virtual_environment_vm" "compute" {
 
   name      = each.value.name
   node_name = each.value.node_name
-  vm_id     = each.value.vm_id
+  vm_id     = lookup(var.site.vm_ids, "compute/${each.key}", null)
 
   template = false
   started  = true
@@ -173,7 +211,7 @@ resource "proxmox_virtual_environment_vm" "compute" {
   reboot = each.value.reboot
 
   efi_disk {
-    datastore_id = "local-zfs"
+    datastore_id = each.value.datastore_id
   }
 
   clone {
@@ -218,13 +256,13 @@ resource "proxmox_virtual_environment_vm" "compute" {
   }
 
   network_device {
-    bridge      = each.value.network.bridge
+    bridge      = each.value.bridge
     vlan_id     = each.value.vlan_id
     mac_address = each.value.mac_address
   }
 
   initialization {
-    datastore_id = "local-zfs"
+    datastore_id = each.value.datastore_id
 
     ip_config {
       ipv4 {
