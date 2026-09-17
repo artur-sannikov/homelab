@@ -15,7 +15,7 @@ all:
         pi:
           ansible_become_password: >-
             {{ lookup('ansible.builtin.pipe', 'rbw get raspberry-pi-password') }}
-        tailscale_gluetun: {}
+        # tailscale_gluetun: {}
         nuc13:
           ansible_user: "artur"
           ansible_become_password: >-
