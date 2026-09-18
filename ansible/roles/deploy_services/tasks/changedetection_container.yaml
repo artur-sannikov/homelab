@@ -49,7 +49,7 @@
 - name: Create changedetection Quadlet
   containers.podman.podman_container:
     name: changedetection
-    image: ghcr.io/dgtlmoon/changedetection.io:0.60.6@sha256:eb4a9f718801004e006ffef0ce35171f42ec8d45c9b5d20da572bc5febe107ff
+    image: ghcr.io/dgtlmoon/changedetection.io:0.60.7@sha256:096dae27b5d677b89f0e810fff95a70403271aa3ff3b6437952d2db9be7e74c5
     state: quadlet
     quadlet_filename: changedetection
     quadlet_file_mode: "0644"
