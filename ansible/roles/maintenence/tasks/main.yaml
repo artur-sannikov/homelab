@@ -5,17 +5,17 @@
     state: latest
     upgrade: full
     autoremove: true
-  when: ansible_facts["ansible_distribution"] == "Debian" or ansible_facts["ansible_distribution"] == "Zorin OS"
+  when: ansible_facts["distribution"] == "Debian" or ansible_facts["distribution"] == "Zorin OS"
 
 - name: Update Flatpaks
   ansible.builtin.command: flatpak update --noninteractive
   register: flatpak_update_output
   changed_when: "'app/' in flatpak_update_output.stdout"
-  when: ansible_facts["ansible_distribution"] == "Zorin OS"
+  when: ansible_facts["distribution"] == "Zorin OS"
 
 - name: Reboot if required
   when:
-    - ansible_facts["ansible_distribution"] == "Debian" or ansible_facts["ansible_distribution"] == "Zorin OS"
+    - ansible_facts["distribution"] == "Debian" or ansible_facts["distribution"] == "Zorin OS"
   block:
     - name: Check if reboot required
       ansible.builtin.stat:
@@ -32,12 +32,12 @@
     name: "*"
     state: latest
 
-  when: ansible_facts["ansible_distribution"] == "Fedora"
+  when: ansible_facts["distribution"] == "Fedora"
 
 - name: Remove packages that are not longer needed
   ansible.builtin.dnf5:
     autoremove: true
-  when: ansible_facts["ansible_distribution"] == "Fedora"
+  when: ansible_facts["distribution"] == "Fedora"
 
 - name: Prune unused podman images, containers, pods, networks and volumes
   containers.podman.podman_prune:
