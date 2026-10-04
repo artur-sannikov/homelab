@@ -58,37 +58,41 @@
     group: "{{ podman_group }}"
     mode: "0755"
 
-- name: Create filesystem for persistent data
-  # NOTE: it will skip the task if the filesystem already exists
-  # Be very careful to not having to restore from backup
-  community.general.filesystem:
-    fstype: "ext4"
-    dev: "/dev/sdb" # scsi2 in Proxmox
+- name: Create mount point and mount external disk
+  # Infisical is an exception because it's critical
+  when: inventory_hostname not in ['infisical']
+  block:
+    - name: Create filesystem for persistent data
+      # NOTE: it will skip the task if the filesystem already exists
+      # Be very careful to not having to restore from backup
+      community.general.filesystem:
+        fstype: "ext4"
+        dev: "/dev/sdb" # scsi2 in Proxmox
 
-- name: Read filesystem UUID
-  ansible.builtin.command:
-    argv:
-      - blkid
-      - -s
-      - UUID
-      - -o
-      - value
-      - /dev/sdb
-  register: __podman_disk_uuid
-  changed_when: false
+    - name: Read filesystem UUID
+      ansible.builtin.command:
+        argv:
+          - blkid
+          - -s
+          - UUID
+          - -o
+          - value
+          - /dev/sdb
+      register: __podman_disk_uuid
+      changed_when: false
 
-- name: Create mount point
-  ansible.builtin.file:
-    path: "/srv/podman"
-    state: directory
-    mode: "0750"
-    owner: "{{ podman_user }}"
-    group: "{{ podman_group }}"
+    - name: Create mount point
+      ansible.builtin.file:
+        path: "/srv/podman"
+        state: directory
+        mode: "0750"
+        owner: "{{ podman_user }}"
+        group: "{{ podman_group }}"
 
-- name: Mount disk and persist in fstab
-  ansible.posix.mount:
-    path: "/srv/podman"
-    src: "UUID={{ __podman_disk_uuid.stdout | trim }}"
-    fstype: "ext4"
-    opts: defaults,nofail
-    state: mounted
+    - name: Mount disk and persist in fstab
+      ansible.posix.mount:
+        path: "/srv/podman"
+        src: "UUID={{ __podman_disk_uuid.stdout | trim }}"
+        fstype: "ext4"
+        opts: defaults,nofail
+        state: mounted
