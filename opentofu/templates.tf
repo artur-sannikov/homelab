@@ -11,10 +11,10 @@ locals {
       decompression      = "zst"
       overwrite          = false
       snippet_family     = "fedora"
-      nodes = {
-        pve1 = { vm_id = 9000 }
-        pve2 = { vm_id = 9001 }
-      }
+      placements = [
+        "pve1",
+        "pve2",
+      ]
     }
     "ubuntu-26-04" = {
       machine            = "pc"
@@ -26,10 +26,10 @@ locals {
       decompression      = null
       overwrite          = true
       snippet_family     = "debian"
-      nodes = {
-        pve1 = { vm_id = 9002 }
-        pve2 = { vm_id = 9003 }
-      }
+      placements = [
+        "pve1",
+        "pve2",
+      ]
     }
     "ubuntu-24-04" = {
       machine            = "q35"
@@ -41,10 +41,10 @@ locals {
       decompression      = null
       overwrite          = true
       snippet_family     = "debian"
-      nodes = {
-        pve1 = { vm_id = 9004 }
-        pve2 = { vm_id = 9005 }
-      }
+      placements = [
+        "pve1",
+        "pve2",
+      ]
     }
 
     "debian-13" = {
@@ -57,10 +57,10 @@ locals {
       decompression      = null
       overwrite          = true
       snippet_family     = "debian"
-      nodes = {
-        pve1 = { vm_id = 9006 }
-        pve2 = { vm_id = 9007 }
-      }
+      placements = [
+        "pve1",
+        "pve2",
+      ]
     }
   }
 
@@ -97,11 +97,14 @@ locals {
   # Flatten the configuration into a list of individual instances per node
   template_instances = flatten([
     for os, config in local.os_templates : [
-      for node_name, node_data in config.nodes : {
-        instance_key       = "${os}-${node_name}"
-        os                 = os
-        node_name          = node_name
-        vm_id              = node_data.vm_id
+      # for node_name, node_data in config.nodes : {
+      for placement in config.placements : {
+        instance_key = "${os}-${placement}"
+        os           = os
+        placement    = placement
+        node_name = var.site.placements[
+          placement
+        ].node_name
         name               = "${os}-template"
         machine            = config.machine
         tags               = config.tags
@@ -121,15 +124,25 @@ locals {
     for inst in local.template_instances : inst.instance_key => inst
   }
   snippet_instances = {
-    for k, v in {
-      for inst in local.template_instances :
-      "${inst.snippet_family}-${inst.node_name}" => {
-        snippet_family = inst.snippet_family
-        node_name      = inst.node_name
-      }...
-      # Produces duplicates ubuntu-pve1 and ubuntu-pve2
-      # The solution below extracts only the first duplicated key
-    } : k => v[0]
+    "fedora-pve1" = {
+      snippet_family = "fedora"
+      placement      = "pve1"
+    }
+
+    "fedora-pve2" = {
+      snippet_family = "fedora"
+      placement      = "pve2"
+    }
+
+    "debian-pve1" = {
+      snippet_family = "debian"
+      placement      = "pve1"
+    }
+
+    "debian-pve2" = {
+      snippet_family = "debian"
+      placement      = "pve2"
+    }
   }
 }
 
@@ -137,8 +150,12 @@ resource "proxmox_download_file" "template_images" {
   for_each = local.os_templates
 
   content_type = "iso"
-  datastore_id = "truenas-iso"
-  node_name    = "pve1"
+
+  datastore_id = var.site.artifact_store.datastore_id
+
+  node_name = var.site.placements[
+    var.site.artifact_store.placement
+  ].node_name
 
   file_name               = each.value.image_filename
   decompression_algorithm = each.value.decompression
@@ -149,14 +166,26 @@ resource "proxmox_download_file" "template_images" {
 }
 
 resource "proxmox_virtual_environment_file" "snippets" {
-  for_each     = local.snippet_instances
+  for_each = local.snippet_instances
+
   content_type = "snippets"
-  datastore_id = "local"
-  node_name    = each.value.node_name
+
+  node_name = var.site.placements[
+    each.value.placement
+  ].node_name
+
+  datastore_id = var.site.placements[
+    each.value.placement
+  ].snippet_datastore_id
 
   source_raw {
-    file_name = local.snippet_definitions[each.value.snippet_family].file_name
-    data      = local.snippet_definitions[each.value.snippet_family].data
+    file_name = local.snippet_definitions[
+      each.value.snippet_family
+    ].file_name
+
+    data = local.snippet_definitions[
+      each.value.snippet_family
+    ].data
   }
 }
 
@@ -164,7 +193,8 @@ resource "proxmox_virtual_environment_vm" "templates" {
   for_each  = local.template_instances_map
   name      = each.value.name
   node_name = each.value.node_name
-  vm_id     = each.value.vm_id
+  # vm_id     = each.value.vm_id
+  vm_id = var.site.vm_ids["template/${each.key}"]
 
   template = true
   started  = false
@@ -180,7 +210,10 @@ resource "proxmox_virtual_environment_vm" "templates" {
   }
 
   efi_disk {
-    datastore_id = "local-zfs"
+    datastore_id = var.site.placements[
+      each.value.placement
+      # each.value.node_name
+    ].datastore_id
   }
 
   memory {
@@ -188,18 +221,26 @@ resource "proxmox_virtual_environment_vm" "templates" {
   }
 
   disk {
-    datastore_id = "local-zfs"
-    file_id      = proxmox_download_file.template_images[each.value.os].id
-    interface    = "scsi0"
-    ssd          = true
-    discard      = "on"
-    backup       = false
+    datastore_id = var.site.placements[
+      # each.value.node_name
+      each.value.placement
+    ].datastore_id
+
+    file_id   = proxmox_download_file.template_images[each.value.os].id
+    interface = "scsi0"
+    ssd       = true
+    discard   = "on"
+    backup    = false
   }
 
   boot_order = ["scsi0"]
 
   network_device {
-    bridge = "vmbr0"
+    bridge = var.site.placements[
+
+      each.value.placement
+      # each.value.node_name
+    ].bridge
   }
 
   agent {
@@ -207,15 +248,22 @@ resource "proxmox_virtual_environment_vm" "templates" {
   }
 
   initialization {
-    datastore_id = "local-zfs"
-    interface    = "scsi1"
+    datastore_id = var.site.placements[
+
+      each.value.placement
+      # each.value.node_name
+    ].datastore_id
+    interface = "scsi1"
 
     ip_config {
       ipv4 {
         address = "dhcp"
       }
     }
-    vendor_data_file_id = proxmox_virtual_environment_file.snippets["${each.value.snippet_family}-${each.value.node_name}"].id
+
+    vendor_data_file_id = proxmox_virtual_environment_file.snippets[
+      "${each.value.snippet_family}-${each.value.placement}"
+    ].id
 
     user_account {
       username = "artur"
