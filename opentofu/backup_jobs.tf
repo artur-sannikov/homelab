@@ -19,6 +19,7 @@ resource "proxmox_backup_job" "production" {
   id                        = each.value.id
   schedule                  = each.value.schedule
   mode                      = each.value.mode
+  notification_mode         = "notification-system"
   storage                   = proxmox_storage_pbs.pbs-limited.id
   pbs_change_detection_mode = "metadata"                                          # Faster in theory
   pool                      = proxmox_virtual_environment_pool.production.pool_id # Only backup VMs in this resource pool
