@@ -48,6 +48,7 @@
                 enable = true;
                 name = "gitleaks";
                 entry = "${pkgs.gitleaks}/bin/gitleaks protect --staged";
+                args = [ ];
               };
 
               detect-private-key = {
