@@ -61,7 +61,7 @@
       "ignoreTests": true
     },
     {
-      "matchPackageNames": ["docker.io/mongo"],
+      "matchPackageNames": ["docker.io/library/mongo"],
       "enabled": false
     }
   ]
