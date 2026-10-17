@@ -60,7 +60,8 @@
 
 - name: Create mount point and mount external disk
   # Infisical is an exception because it's critical
-  when: inventory_hostname not in ['infisical']
+  # NOTE: pulse will later be moved
+  when: inventory_hostname not in ['infisical', 'pulse']
   block:
     - name: Create filesystem for persistent data
       # NOTE: it will skip the task if the filesystem already exists
