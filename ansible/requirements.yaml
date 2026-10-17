@@ -6,6 +6,8 @@ collections:
     version: 1.2.1
   - name: infisical.vault
     version: 1.2.3
+  - name: ansible.posix
+    version: 2.2.2
 
 roles:
   - name: geerlingguy.docker
