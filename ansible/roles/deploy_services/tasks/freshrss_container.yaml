@@ -16,7 +16,7 @@
 - name: Create FreshRSS Quadlet
   containers.podman.podman_container:
     name: freshrss
-    image: docker.io/freshrss/freshrss:1.30.3@sha256:fe45c15dc79573231629588e194f142adffae6bdeae6036401011c63ba644c94
+    image: docker.io/freshrss/freshrss:1.30.4@sha256:af44385229541bee24aa9148d0ff8f3b40e095373c63a2c0f74e09a27d3c59df
     state: quadlet
     quadlet_filename: freshrss
     quadlet_file_mode: "0644"
